@@ -234,6 +234,22 @@ class TheOracleOfDelphi extends Table
     }    
     */
 
+    function stTurnEnd() {
+
+    }
+
+    function stConsultOracle() {
+
+    }
+
+    function stOracleChooseGod() {
+
+    }
+
+    function stFightMonster() {
+        
+    }
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie
 ////////////

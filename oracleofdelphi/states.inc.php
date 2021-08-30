@@ -49,6 +49,24 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
+// define contants for state ids
+if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, since it is included multiple times
+    define("STATE_TYPE_ACTIVEPLAYER", "activeplayer");
+    define("STATE_TYPE_MULTIPLEACTIVEPLAYER", "multipleactiveplayer");
+    define("STATE_TYPE_GAME", "game");
+
+    define("STATE_PLAYER_TURN", 2);
+    define("STATE_TURN_END", 3);
+    define("STATE_CONSULT_ORACLE", 4);
+    define("STATE_ORACLE_CHOOSE_GOD", 5);
+    define("STATE_FIGHT_MONSTER", 6);
+    define("STATE_CONTINUE_FIGHT", 7);
+    define("STATE_SHRINE_REWARD", 8);
+    define("STATE_STATUE_REWARD", 9);
+    define("STATE_MONSTER_REWARD", 10);
+    define("STATE_END_GAME", 99);
+ }
+
  
 $machinestates = array(
 
@@ -58,46 +76,127 @@ $machinestates = array(
         "description" => "",
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
+        "transitions" => array( "" => STATE_PLAYER_TURN )
     ),
     
     // Note: ID=2 => your first state
 
-    2 => array(
+    STATE_PLAYER_TURN => [
     		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
-    
-/*
-    Examples:
-    
-    2 => array(
-        "name" => "nextPlayer",
-        "description" => '',
-        "type" => "game",
-        "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
+    		"description" => clienttranslate('${actplayer} must take an action or end their turn'),
+    		"descriptionmyturn" => clienttranslate('${you} must take an action or end your turn'),
+    		"type" => STATE_TYPE_ACTIVEPLAYER,
+    		"possibleactions" => [
+                "undo",
+                "recolor",
+                "godAction",
+                "drawOracle",
+                "takeFavors",
+                "lookAtIslands",
+                "moveShip",
+                "fightMonster",
+                "explore",
+                "buildShrine",
+                "loadOffering",
+                "makeOffering",
+                "loadStatue",
+                "raiseStatue",
+                "discardInjury",
+                "advanceGod",
+                "endTurn",
+                "noInjuryReward",
+                "recovery"
+            ],
+    		"transitions" => [
+                "buildShrine" => STATE_SHRINE_REWARD,
+                "raiseStatue" => STATE_STATUE_REWARD,
+                "fightMonster" => STATE_FIGHT_MONSTER,
+                "endFightRound" => STATE_CONTINUE_FIGHT,
+                "endNormalTurn" => STATE_CONSULT_ORACLE,
+                "endRecovery" => STATE_TURN_END
+            ]
+    ],
 
-*/    
-   
+    STATE_TURN_END => [
+        "name" => "turnEnd",
+        "description" => "",
+        "descriptionmyturn" => "",
+        "type" => STATE_TYPE_GAME,
+        "action" => "stTurnEnd",
+        "transitions" => ["gameEnd" => STATE_END_GAME, "nextTurn" => STATE_PLAYER_TURN]
+    ],
+
+    STATE_CONSULT_ORACLE => [
+        "name" => "consultOracle",
+        "description" => "",
+        "descriptionmyturn" => "",
+        "type" => STATE_TYPE_GAME,
+        "action" => "stConsultOracle",
+        "transitions" => ["otherPlayersChoice" => STATE_ORACLE_CHOOSE_GOD, "noChoice" => STATE_TURN_END]
+    ],
+
+    STATE_ORACLE_CHOOSE_GOD => [
+        "name" => "oracleChooseGod",
+        "description" => "other players must choose which God to advance",
+        "descriptionmyturn" => '${you} must choose which God to advance',
+        "type" => STATE_TYPE_MULTIPLEACTIVEPLAYER,
+        "possibleactions" => ["chooseGod"],
+        "action" => "stOracleChooseGod",
+        "transitions" => ["allChosen" => STATE_TURN_END]
+    ],
+
+    STATE_FIGHT_MONSTER => [
+        "name" => "fightMonster",
+        "description" => "",
+        "descriptionmyturn" => "",
+        "type" => STATE_TYPE_GAME,
+        "action" => "stFightMonster",
+        "transitions" => ["win" => STATE_MONSTER_REWARD, "lose" => STATE_CONTINUE_FIGHT]
+    ],
+
+    STATE_CONTINUE_FIGHT => [
+        "name" => "continueFight",
+        "description" => '${actplayer} must decide whether to continue the fight',
+        "descriptionmyturn" => '${you} must decide whether to continue the fight',
+        "type" => STATE_TYPE_ACTIVEPLAYER,
+        "possibleactions" => ["continueOrNot"],
+        "transitions" => [
+            "end" => STATE_PLAYER_TURN,
+            "continueAndWin" => STATE_MONSTER_REWARD,
+            "continueAndLose" => STATE_CONTINUE_FIGHT
+        ]
+    ],
+
+    STATE_SHRINE_REWARD => [
+        "name" => "shrineReward",
+        "description" => '${actplayer} must choose which God to advance',
+        "descriptionmyturn" => '${you} must choose which God to advance',
+        "type" => STATE_TYPE_ACTIVEPLAYER,
+        "possibleactions" => ["chooseGodShrineReward"],
+        "transitions" => ["" => STATE_PLAYER_TURN]
+    ],
+
+    STATE_STATUE_REWARD => [
+        "name" => "statueReward",
+        "description" => '${actplayer} must choose a Companion Card',
+        "descriptionmyturn" => '${you} must choose a Companion Card',
+        "type" => STATE_TYPE_ACTIVEPLAYER,
+        "possibleactions" => ["chooseCompanion"],
+        "transitions" => ["" => STATE_PLAYER_TURN]
+    ],
+
+    STATE_MONSTER_REWARD => [
+        "name" => "monsterReward",
+        "description" => '${actplayer} must choose an Equipment Card',
+        "descriptionmyturn" => '${you} must choose an Equipment Card',
+        "type" => STATE_TYPE_ACTIVEPLAYER,
+        "possibleactions" => ["chooseEquipment"],
+        "transitions" => ["" => STATE_PLAYER_TURN]
+    ],
+
     // Final state.
     // Please do not modify (and do not overload action/args methods).
-    99 => array(
+    STATE_END_GAME => array(
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
