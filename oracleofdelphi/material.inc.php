@@ -19,38 +19,54 @@
  *
  */
 
- // constants used in this file, and elsewhere, for colours and map location types.
- // Also a few other consts which seemed appropriate.
- if (!defined("MAP_COLOR_PINK")) {
-   define("MAP_COLOR_PINK", "pink");
-   define("MAP_COLOR_BLUE", "blue");
-   define("MAP_COLOR_YELLOW", "yellow");
-   define("MAP_COLOR_GREEN", "green");
-   define("MAP_COLOR_RED", "red");
-   define("MAP_COLOR_BLACK", "black");
+  // constants used in this file, and elsewhere, for colours and map location types.
+  // Also a few other consts which seemed appropriate.
+  if (!defined("MAP_COLOR_PINK")) {
+    define("MAP_COLOR_PINK", "pink");
+    define("MAP_COLOR_BLUE", "blue");
+    define("MAP_COLOR_YELLOW", "yellow");
+    define("MAP_COLOR_GREEN", "green");
+    define("MAP_COLOR_RED", "red");
+    define("MAP_COLOR_BLACK", "black");
 
-   define("MAP_TYPE_WATER", "water");
-   define("MAP_TYPE_ZEUS", "zeus");
-   define("MAP_TYPE_ISLAND", "island");
-   define("MAP_TYPE_TEMPLE", "temple");
-   define("MAP_TYPE_MONSTER", "monster");
-   define("MAP_TYPE_LAND", "land");
-   define("MAP_TYPE_OFFERING", "offering");
-   define("MAP_TYPE_CITY", "city");
-   define("MAP_TYPE_STATUE_RED_BLUE_PINK", "statue_red_blue_pink");
-   define("MAP_TYPE_STATUE_GREEN_YELLOW_PINK", "statue_green_yellow_pink");
-   define("MAP_TYPE_STATUE_BLACK_BLUE_YELLOW", "statue_black_blue_yellow");
-   define("MAP_TYPE_STATUE_RED_PINK_BLACK", "statue_red_pink_black");
-   define("MAP_TYPE_STATUE_GREEN_BLUE_BLACK", "statue_green_blue_black");
-   define("MAP_TYPE_STATUE_RED_GREEN_YELLOW", "statue_red_green_yellow");
+    define("MAP_TYPE_WATER", "water");
+    define("MAP_TYPE_ZEUS", "zeus");
+    define("MAP_TYPE_ISLAND", "island");
+    define("MAP_TYPE_TEMPLE", "temple");
+    define("MAP_TYPE_MONSTER", "monster");
+    define("MAP_TYPE_LAND", "land");
+    define("MAP_TYPE_OFFERING", "offering");
+    define("MAP_TYPE_CITY", "city");
+    define("MAP_TYPE_STATUE_RED_BLUE_PINK", "statue_red_blue_pink");
+    define("MAP_TYPE_STATUE_GREEN_YELLOW_PINK", "statue_green_yellow_pink");
+    define("MAP_TYPE_STATUE_BLACK_BLUE_YELLOW", "statue_black_blue_yellow");
+    define("MAP_TYPE_STATUE_RED_PINK_BLACK", "statue_red_pink_black");
+    define("MAP_TYPE_STATUE_GREEN_BLUE_BLACK", "statue_green_blue_black");
+    define("MAP_TYPE_STATUE_RED_GREEN_YELLOW", "statue_red_green_yellow");
 
-   define("COMPANION_TYPE_HERO", "hero");
-   define("COMPANION_TYPE_DEMIGOD", "demigod");
-   define("COMPANION_TYPE_CREATURE", "creature");
-   define("COMPANION_HERO_TOOLTIP", clienttranslate("When acquiring a Hero, increase your Shield's strength by 2. From now on, you may discard any Injury Cards of the Hero's color."));
-   define("COMPANION_DEMIGOD_TOOLTIP", clienttranslate("When acquiring a Demigod, draw 1 Oracle card. You may use Oracle Dice in the Demigod's color as if it was a color of your choice."));
-   define("COMPANION_CREATURE_TOOLTIP", clienttranslate("When Moving your Ship with an Oracle Die of the Creature's color, your Ship's range is increased by 3. You may end your movement on a water space of any color."));
- }
+    define("COMPANION_TYPE_HERO", "hero");
+    define("COMPANION_TYPE_DEMIGOD", "demigod");
+    define("COMPANION_TYPE_CREATURE", "creature");
+    define("COMPANION_HERO_TOOLTIP", clienttranslate("When acquiring a Hero, increase your Shield's strength by 2. From now on, you may discard any Injury Cards of the Hero's color."));
+    define("COMPANION_DEMIGOD_TOOLTIP", clienttranslate("When acquiring a Demigod, draw 1 Oracle card. You may use Oracle Dice in the Demigod's color as if it was a color of your choice."));
+    define("COMPANION_CREATURE_TOOLTIP", clienttranslate("When Moving your Ship with an Oracle Die of the Creature's color, your Ship's range is increased by 3. You may end your movement on a water space of any color."));
+
+    define("ZEUS_TILE_SHRINE", "zeus_shrine");
+    define("ZEUS_TILE_STATUE", "zeus_statue");
+    define("ZEUS_TILE_OFFERING", "zeus_offering");
+    define("ZEUS_TILE_MONSTER", "zeus_monster");
+
+    define("GREEK_LETTER_SIGMA", "sigma");
+    define("GREEK_LETTER_PHI", "phi");
+    define("GREEK_LETTER_PSI", "psi");
+    define("GREEK_LETTER_OMEGA", "omega");
+
+    define("PLAYER_COLOR_RED", "red");
+    define("PLAYER_COLOR_YELLOW", "yellow");
+    define("PLAYER_COLOR_GREEN", "green");
+    define("PLAYER_COLOR_BLUE", "blue");
+    define("TASK_COLOR_WILD", "wild");
+  }
 
  /*
   * Static information about the 12 map tiles and 6 city tiles in the game. Used to construct the map
@@ -1107,5 +1123,632 @@ $this->shipTiles = [
   8 => [
     "tooltip" => "You can also \"recolor\" Oracle Dice in counterclockwise direction. Additionally, your storage capacity is increased by 2",
     "storage" => 4
+  ]
+];
+
+$this->zeusTiles = [
+  1 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PHI
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PHI
+      ]
+    ]
+  ],
+  2 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PSI
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PSI
+      ]
+    ]
+  ],
+  3 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_OMEGA
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_OMEGA
+      ]
+    ]
+  ],
+  4 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  5 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  6 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  7 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  8 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  9 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_YELLOW
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_YELLOW
+      ]
+    ]
+  ],
+  10 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_BLUE
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLUE
+      ]
+    ]
+  ],
+  11 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_PINK
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_PINK
+      ]
+    ]
+  ],
+  12 => [
+    "player" => PLAYER_COLOR_RED,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_GREEN
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLACK
+      ]
+    ]
+  ],
+  13 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_SIGMA
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_SIGMA
+      ]
+    ]
+  ],
+  14 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PSI
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PSI
+      ]
+    ]
+  ],
+  15 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_OMEGA
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_OMEGA
+      ]
+    ]
+  ],
+  16 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  17 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  18 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  19 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  20 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  21 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_YELLOW
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_YELLOW
+      ]
+    ]
+  ],
+  22 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_BLUE
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLUE
+      ]
+    ]
+  ],
+  23 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_PINK
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_PINK
+      ]
+    ]
+  ],
+  24 => [
+    "player" => PLAYER_COLOR_YELLOW,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_GREEN
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLACK
+      ]
+    ]
+  ],
+  25 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_SIGMA
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_SIGMA
+      ]
+    ]
+  ],
+  26 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PHI
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PHI
+      ]
+    ]
+  ],
+  27 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PSI
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PSI
+      ]
+    ]
+  ],
+  28 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  29 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  30 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  31 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  32 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  33 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_YELLOW
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_YELLOW
+      ]
+    ]
+  ],
+  34 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_BLUE
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLUE
+      ]
+    ]
+  ],
+  35 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_PINK
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_PINK
+      ]
+    ]
+  ],
+  36 => [
+    "player" => PLAYER_COLOR_GREEN,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_GREEN
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLACK
+      ]
+    ]
+  ],
+  37 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_SIGMA
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_SIGMA
+      ]
+    ]
+  ],
+  38 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PHI
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_PHI
+      ]
+    ]
+  ],
+  39 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_OMEGA
+      ],
+      [
+        "type" => ZEUS_TILE_SHRINE,
+        "letter" => GREEK_LETTER_OMEGA
+      ]
+    ]
+  ],
+  40 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  41 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  42 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_STATUE,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  43 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  44 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => TASK_COLOR_WILD
+      ]
+    ]
+  ],
+  45 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_YELLOW
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_YELLOW
+      ]
+    ]
+  ],
+  46 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_BLUE
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLUE
+      ]
+    ]
+  ],
+  47 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_PINK
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_PINK
+      ]
+    ]
+  ],
+  48 => [
+    "player" => PLAYER_COLOR_BLUE,
+    "tile" => [
+      [
+        "type" => ZEUS_TILE_OFFERING,
+        "color" => MAP_COLOR_GREEN
+      ],
+      [
+        "type" => ZEUS_TILE_MONSTER,
+        "color" => MAP_COLOR_BLACK
+      ]
+    ]
   ]
 ];

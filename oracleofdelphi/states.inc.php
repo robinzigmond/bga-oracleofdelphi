@@ -82,39 +82,39 @@ $machinestates = array(
     // Note: ID=2 => your first state
 
     STATE_PLAYER_TURN => [
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must take an action or end their turn'),
-    		"descriptionmyturn" => clienttranslate('${you} must take an action or end your turn'),
-    		"type" => STATE_TYPE_ACTIVEPLAYER,
-    		"possibleactions" => [
-                "undo",
-                "recolor",
-                "godAction",
-                "drawOracle",
-                "takeFavors",
-                "lookAtIslands",
-                "moveShip",
-                "fightMonster",
-                "explore",
-                "buildShrine",
-                "loadOffering",
-                "makeOffering",
-                "loadStatue",
-                "raiseStatue",
-                "discardInjury",
-                "advanceGod",
-                "endTurn",
-                "noInjuryReward",
-                "recovery"
-            ],
-    		"transitions" => [
-                "buildShrine" => STATE_SHRINE_REWARD,
-                "raiseStatue" => STATE_STATUE_REWARD,
-                "fightMonster" => STATE_FIGHT_MONSTER,
-                "endFightRound" => STATE_CONTINUE_FIGHT,
-                "endNormalTurn" => STATE_CONSULT_ORACLE,
-                "endRecovery" => STATE_TURN_END
-            ]
+        "name" => "playerTurn",
+        "description" => clienttranslate('${actplayer} must take an action or end their turn'),
+        "descriptionmyturn" => clienttranslate('${you} must take an action or end your turn'),
+        "type" => STATE_TYPE_ACTIVEPLAYER,
+        "possibleactions" => [
+            "undo",
+            "recolor",
+            "godAction",
+            "drawOracle",
+            "takeFavors",
+            "lookAtIslands",
+            "moveShip",
+            "fightMonster",
+            "explore",
+            "buildShrine",
+            "loadOffering",
+            "makeOffering",
+            "loadStatue",
+            "raiseStatue",
+            "discardInjury",
+            "advanceGod",
+            "endTurn",
+            "noInjuryReward",
+            "recovery"
+        ],
+        "transitions" => [
+            "buildShrine" => STATE_SHRINE_REWARD,
+            "raiseStatue" => STATE_STATUE_REWARD,
+            "fightMonster" => STATE_FIGHT_MONSTER,
+            "endFightRound" => STATE_CONTINUE_FIGHT,
+            "endNormalTurn" => STATE_CONSULT_ORACLE,
+            "endRecovery" => STATE_TURN_END
+        ]
     ],
 
     STATE_TURN_END => [
