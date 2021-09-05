@@ -19,6 +19,30 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
+if (!defined("CARD_TYPE_INJURY")) {
+    define("CARD_TYPE_INJURY", "injury");
+    define("CARD_TYPE_ORACLE", "oracle");
+    define("CARD_TYPE_COMPANION", "companion");
+    define("CARD_TYPE_EQUIPMENT", "equipment");
+
+    define("CARD_LOCATION_PLAYER", "player");
+    define("CARD_LOCATION_INJURY_DECK", "injury_deck");
+    define("CARD_LOCATION_INJURY_DISCARD", "injury_discard");
+    define("CARD_LOCATION_ORACLE_DECK", "oracle_deck");
+    define("CARD_LOCATION_ORACLE_DISCARD", "oracle_discard");
+    define("CARD_LOCATION_EQUIPMENT_DECK", "equipment_deck");
+    define("CARD_LOCATION_EQUIPMENT_DISCARD", "equipment_discard");
+    define("CARD_LOCATION_EQUIPMENT_DISPLAY", "equipment_display");
+    define("CARD_LOCATION_COMPANION_DECK", "companion_deck");
+
+    define("GOD_POSEIDON", "poseidon");
+    define("GOD_ARTEMIS", "artemis");
+    define("GOD_ARES", "ares");
+    define("GOD_APOLLON", "apollon");
+    define("GOD_APHRODITE", "aphrodite");
+    define("GOD_HERMES", "hermes");
+}
+
 
 class TheOracleOfDelphi extends Table
 {
@@ -31,6 +55,27 @@ class TheOracleOfDelphi extends Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
+
+        // keep useful "globals" here.
+        // Array of all 6 game color strings (defined in material file):
+        $this->allColors = [
+            MAP_COLOR_RED,
+            MAP_COLOR_YELLOW,
+            MAP_COLOR_GREEN,
+            MAP_COLOR_BLUE,
+            MAP_COLOR_BLACK,
+            MAP_COLOR_PINK
+        ];
+
+        // correspondence of colors with gods
+        $this->godColors = [
+            MAP_COLOR_RED => GOD_APHRODITE,
+            MAP_COLOR_YELLOW => GOD_APOLLON,
+            MAP_COLOR_GREEN => GOD_ARTEMIS,
+            MAP_COLOR_BLUE => GOD_POSEIDON,
+            MAP_COLOR_BLACK => GOD_ARES,
+            MAP_COLOR_PINK => GOD_HERMES
+        ];
         
         self::initGameStateLabels( array( 
             //    "my_first_global_variable" => 10,
@@ -65,12 +110,13 @@ class TheOracleOfDelphi extends Table
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, favors) VALUES ";
         $values = array();
         foreach( $players as $player_id => $player )
         {
             $color = array_shift( $default_colors );
-            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
+            $favors = (int)$player["player_table_order"] + 2;
+            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."','".$favors."')";
         }
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
@@ -78,6 +124,9 @@ class TheOracleOfDelphi extends Table
         self::reloadPlayersBasicInfos();
         
         /************ Start the game initialization *****/
+        // the "first step" of the God tracks varies depending on the playercount. Although it's a very
+        // simple calculation we save it here as an instance property for ease of access.
+        $this->godFirstStep = 5 - count($players);
 
         // Init global values with their initial values
         //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
@@ -87,8 +136,147 @@ class TheOracleOfDelphi extends Table
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
-       
+        // running through game setup in the rulebook.
+        // Step 1 - "setup variable game board" (ie the map)
+        // TODO!
+
+        // Step 2 - "setup general supply"
+        // mostly various decks of cards (Oracle/Injury/Companion/Equipment). We will store all these
+        // in a single "deck" component - initialised below from the material file and other "static"
+        // information.
+        $this->allCards = self::getNew("module.common.deck");
+        $this->allCards->init("card");
+        // first create all in single "deck" location (even though this won't be used in the game!)
+        $allCards = [];
+        // injury and oracle cards: 7 (resp 5) of each of the 6 colours
+        $index = 0;
+        foreach ($this->allColors as $color) {
+            $allCards[] = [
+                "type" => CARD_TYPE_INJURY,
+                "type_arg" => $index,
+                "nbr" => 7
+            ];
+            $allCards[] = [
+                "type" => CARD_TYPE_ORACLE,
+                "type_arg" => $index,
+                "nbr" => 5
+            ];
+            $index++;
+        }
+        // companion and equipment cards, defined in material file (although the only information we are using
+        // here is the number of cards of each type!)
+        foreach($this->equipmentCards as $cardId => $card) {
+            $allCards[] = [
+                "type" => CARD_TYPE_EQUIPMENT,
+                "type_arg" => $cardId,
+                "nbr" => 1
+            ];
+        }
+        foreach($this->companionCards as $cardId => $card) {
+            $allCards[] = [
+                "type" => CARD_TYPE_COMPANION,
+                "type_arg" => $cardId,
+                "nbr" => 1
+            ];
+        }
+        $this->allCards->createCards($allCards);
+
+        // then find the cards of each apppropriate "type" and move to the appropriate locations
+        $cardsWithIds = $this->allCards->getCardsInLocation("deck"); // that's where they'll be at this stage
+        $oracleCardIds = [];
+        $injuryCardIds = [];
+        $equipmentCardIds = [];
+        $companionCardIds = [];
+        foreach($cardsWithIds as $id => $card) {
+            switch ($card["type"]) {
+                case CARD_TYPE_ORACLE:
+                    $oracleCardIds[] = $id;
+                    break;
+                case CARD_TYPE_INJURY:
+                    $injuryCardIds[] = $id;
+                    break;
+                case CARD_TYPE_EQUIPMENT:
+                    $equipmentCardIds[] = $id;
+                    break;
+                case CARD_TYPE_COMPANION:
+                    $companionCardIds[] = $id;
+                    break;
+            }
+        }
+        $this->allCards->moveCards($oracleCardIds, CARD_LOCATION_ORACLE_DECK);
+        $this->allCards->moveCards($injuryCardIds, CARD_LOCATION_INJURY_DECK);
+        $this->allCards->moveCards($equipmentCardIds, CARD_LOCATION_EQUIPMENT_DECK);
+        $this->allCards->moveCards($companionCardIds, CARD_LOCATION_COMPANION_DECK);
+
+        // also set up "autoreshuffle" for oracle, injury and equipment cards
+        $this->allCards->autoreshuffle_custom = [
+            CARD_LOCATION_ORACLE_DECK => CARD_LOCATION_ORACLE_DISCARD,
+            CARD_LOCATION_INJURY_DECK => CARD_LOCATION_INJURY_DISCARD,
+            CARD_LOCATION_EQUIPMENT_DECK => CARD_LOCATION_EQUIPMENT_DISCARD
+        ];
+        $this->allCards->autoreshuffle = true;
+
+        // Then shuffle each of the Oracle/Injury/Equipment decks (not Companions)
+        foreach ([
+            CARD_LOCATION_ORACLE_DECK,
+            CARD_LOCATION_INJURY_DECK,
+            CARD_LOCATION_EQUIPMENT_DECK
+        ] as $location) {
+            $this->allCards->shuffle($location);
+        }
+        // deal 6 equipment cards to the display.
+        $this->allCards->pickCardsForLocation(6, CARD_LOCATION_EQUIPMENT_DECK, CARD_LOCATION_EQUIPMENT_DISPLAY);
+
+        // Step 3 - "setup individual play area"
+        // favor tokens - starting player gets 3, then everyone else gets 1 more in turn order
+        // (done above, in player loop!)
+
+        // NOTE: ship tiles and Zeus tiles are part of this step in the rules, but are dealt with below
+
+        // roll all player dice
+        $sql = "INSERT INTO player_dice (player_id, color, used) VALUES ";
+        $diceValues = [];
+        foreach($players as $player_id => $player) {
+            for ($i = 0; $i < 3; $i++) {
+                $dieRoll = bga_rand(0, 5);
+                $color = $this->allColors[$dieRoll];
+                $diceValues[] = "($player_id, '$color', 0)";
+            }
+        }
+        $sql .= implode(", ", $diceValues);
+        self::DbQuery($sql);
+
+        // each player draws 1 injury card
+        foreach($players as $player_id => $player) {
+            $drawnInjury = $this->allCards->pickCard(CARD_LOCATION_INJURY_DECK, $player_id);
+            // each player puts their Gods on the lowest row of the God track - except the God of the colour
+            // of the Injury card drawn, which advances once.
+            // Note that the God positions default to 0 when the player rows are created, so we
+            // just have to advance that 1 God for each player.
+            $cardColor = $this->allColors[$drawnInjury["type_arg"]];
+            $godToAdvance = $this->godColors[$cardColor];
+            // actual position to advance to depends on number of players!
+            $updateSql = "UPDATE player SET $godToAdvance={$this->godFirstStep} WHERE player_id=$player_id";
+            self::DbQuery($updateSql);
+        }
+
+        // shield gets set to 0 - done automatically because 0 is the default column value
+
+        // the player's ship starts on the space with Zeus
+        // TODO - needs map!
+
+        // Add all other token types (all TODO):
+        // - zeus tiles
+        // of the 4 "variable" Zeus tiles, randomly choose 2 to be offerings and 2 to be monsters. Each
+        // player gets the same. (Later introduce "first game" variant to only use 8 due to random discards)
+        // - monster (appropriate locations on map)
+        // - shrine (all start in player supply)
+        // - statue (start in cities, so based on map)
+        // - offering (randomly determined based on map)
+        // - ship (ship tiles)
+        //   Just deal randomly for now - later introduce option for draft, or "first game"
+        //   option to randomly distribute 4 particular ones
+        // - island (random but based on map)
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
