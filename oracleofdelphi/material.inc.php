@@ -89,14 +89,15 @@
   * database table. This means that, after deciding a layout and transforming co-ordinates, the values
   * can be directly inserted into the database.
   *
-  * Finally, there is a "can_rotate" key for each TILE (not hex!) which identifies the 3 circular tiles
-  * - ie those which, for the standard "compact" layout, can be freely rotated without changing the shape
-  * of the map.
+  * Finally, there is a "rotation_amounts" key for each TILE (not hex!) which is only used for the
+  * standard "compact" layout, and indicates the amounts by which each tile in a set can be rotated
+  * to make that map. In addition there is an "all" key which, if set (true), says that each of the
+  * rotation amounts must be used once in the set of tiles of that shape.
   */
 
 $this->mapTiles = [
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 1, 2, 3, 4, 5, 6],
     "hexes" => [
       [
         "x_coord" => 0,
@@ -143,7 +144,7 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 1, 2, 3, 4, 5, 6],
     "hexes" => [
       [
         "x_coord" => -1,
@@ -184,7 +185,7 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 1, 2, 3, 4, 5, 6],
     "hexes" => [
       [
         "x_coord" => -1,
@@ -225,7 +226,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [0, 2, 4],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -296,7 +298,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [0, 2, 4],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -367,7 +370,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [0, 2, 4],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -438,7 +442,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [1, 3, 5],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -497,7 +502,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [1, 3, 5],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -556,7 +562,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [1, 3, 5],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -615,7 +622,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [2, 3, 4],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -662,7 +670,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [2, 3, 4],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -709,7 +718,8 @@ $this->mapTiles = [
     ]
   ],
   [
-    "can_rotate" => false,
+    "rotation_amounts" => [2, 3, 4],
+    "all" => true,
     "hexes" => [
       [
         "x_coord" => 0,
@@ -759,7 +769,7 @@ $this->mapTiles = [
 
 $this->cityTiles = [
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 2, 4],
     "hexes" => [
       [
         "x_coord" => 0,
@@ -782,7 +792,7 @@ $this->cityTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 2, 4],
     "hexes" => [
       [
         "x_coord" => 0,
@@ -805,7 +815,7 @@ $this->cityTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 2, 4],
     "hexes" => [
       [
         "x_coord" => 0,
@@ -828,7 +838,7 @@ $this->cityTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 2, 4],
     "hexes" => [
       [
         "x_coord" => 0,
@@ -851,7 +861,7 @@ $this->cityTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 2, 4],
     "hexes" => [
       [
         "x_coord" => 0,
@@ -874,7 +884,7 @@ $this->cityTiles = [
     ]
   ],
   [
-    "can_rotate" => true,
+    "rotation_amounts" => [0, 2, 4],
     "hexes" => [
       [
         "x_coord" => 0,

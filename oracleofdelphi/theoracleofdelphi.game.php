@@ -18,6 +18,7 @@
 
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
+require_once('modules/delphi_mapgenerator.php');
 
 if (!defined("CARD_TYPE_INJURY")) {
     define("CARD_TYPE_INJURY", "injury");
@@ -138,7 +139,11 @@ class TheOracleOfDelphi extends Table
 
         // running through game setup in the rulebook.
         // Step 1 - "setup variable game board" (ie the map)
-        // TODO!
+        // delegate work to separate class, as it's not needed again
+        $mapGenerator = new delphi_mapgenerator($this->mapTiles, $this->cityTiles);
+        // generate compact map for now, later add game option for "full random" generation
+        $mapSql = $mapGenerator->generateSqlForCompact();
+        self::DbQuery($mapSql);
 
         // Step 2 - "setup general supply"
         // mostly various decks of cards (Oracle/Injury/Companion/Equipment). We will store all these
