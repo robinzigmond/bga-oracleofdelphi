@@ -122,4 +122,73 @@ class delphi_maputils {
         $totalWater = $this->countWater();
         return $totalWater === count($connectedArea);
     }
+
+    // simply returns a list - in no particular order - of all locations on the "edge" of the map.
+    // Note that this simply tests whether hexes are lacking all 6 neighbours - therefore it counts
+    // shallows as well. These will be weeded out later when finding connected areas!
+    private function getEdgeAndShallows() {
+        $map = $this->tileMap;
+        $edge = [];
+
+        foreach($map as $x => $yMap) {
+            foreach($yMap as $y => $info) {
+                $neighbours = $this->getNeighbours($x, $y);
+                if (count($neighbours) < 6) {
+                    $edge[] = [$x, $y];
+                }
+            }
+        }
+
+        return $edge;
+    }
+
+    // refines the result of the getEdgeAndShallows method by returning just the edge (not shallows)
+    //TODO: revisit this, it's just looking at physical connection of the map pieces, but it's possible for
+    //the edge to itself be connected to shallows, in which case this will  give the wrong result!
+    //Need to revise by getting locations of the "actual edge" - ie the hexes which are NOT part of the map,
+    //but just adjacent to it.
+    private function connectedEdge() {
+        $edgeAndShallows = $this->getEdgeAndShallows();
+        $connectedSets = [];
+        foreach ($edgeAndShallows as $edgeHex) {
+            $neighbours = $this->getNeighbours($x, $y);
+            $found = false;
+            foreach ($neighbours as $neighbour) {
+                foreach ($connectedSets as $soFar) {
+                    if (in_array($neighbour, $soFar)) {
+                        $soFar[] = $edgeHex;
+                        $found = true;
+                        break;
+                    }
+                }
+                if ($found) {
+                    break;
+                }
+            }
+            if (!$found) {
+                $connectedSets[] = [$edgeHex];
+            }
+        }
+
+        // the "real edge" will be the one of these connected sets which is longest
+        $realEdge = [];
+        foreach ($connectedSets as $connected) {
+            if (count($connected) > count($realEdge)) {
+                $realEdge = $connected;
+            }
+        }
+        return $realEdge;
+    }
+
+    //TODO: continue building up to below function. Next we need to get the edge in the correct order.
+    //Might be better to do it as part of the above method to avoid having to loop over edges repeatedly?
+
+    // returns a list of all triples of hex coordinates that can be used as a city location. This means
+    // (note, not strictly defined in the rules, but seems to be the "spirit" of what is intended) that
+    // 2 of the 3 hexes have to touch the edge of the map, and (of course) none of the 3 overlap the map
+    //TODO: also need some sort of "distance indication" so that we can make the city tiles equidistant around
+    //the edge
+    public function getCityAttachments() {
+        //TODO
+    }
 }

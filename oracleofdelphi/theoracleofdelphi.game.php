@@ -139,11 +139,7 @@ class TheOracleOfDelphi extends Table
 
         // running through game setup in the rulebook.
         // Step 1 - "setup variable game board" (ie the map)
-        // delegate work to separate class, as it's not needed again
-        $mapGenerator = new delphi_mapgenerator($this->mapTiles, $this->cityTiles);
-        // generate compact map for now, later add game option for "full random" generation
-        $mapSql = $mapGenerator->generateSqlForCompact();
-        self::DbQuery($mapSql);
+        $map = $this->setupMap();
 
         // Step 2 - "setup general supply"
         // mostly various decks of cards (Oracle/Injury/Companion/Equipment). We will store all these
@@ -287,6 +283,16 @@ class TheOracleOfDelphi extends Table
         $this->activeNextPlayer();
 
         /************ End of the game initialization *****/
+    }
+
+    private function setupMap() {
+        // delegate work to separate class, as it's not needed again
+        $mapGenerator = new delphi_mapgenerator($this->mapTiles, $this->cityTiles);
+        // generate compact map for now, later add game option for "full random" generation
+        $map = $mapGenerator->generateCompact();
+        $mapSql = $mapGenerator->generateSql($map);
+        self::DbQuery($mapSql);
+        return $map;
     }
 
     /*

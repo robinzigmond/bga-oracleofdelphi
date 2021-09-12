@@ -120,7 +120,7 @@ class delphi_mapgenerator {
     // $hexes array taken by rotate as an argument, but a much bigger one consisting of every map tile)
     // NOTE: this does NOT check that the final arrangement is legal, in the sense of all water tiles
     // forming a connected area. That is checked in other methods!
-    private function generateCompact() {
+    private function generateCompactRandom() {
         $result = [];
 
         $tileSets = array_chunk($this->mapTiles, 3);
@@ -156,37 +156,53 @@ class delphi_mapgenerator {
             }
         }
 
-        // check all water areas are connected, using maputils class
-        //need to debug isLegal and everything that goes into it - it gave me a map with disconnected
-        //water hexes, even though I saw it DOES return false for at least some maps!
-        if ($this->isLegal($result)) {
-            return $result;
-        }
-
-        return $this->generateCompact();
+        return $result;
     }
 
+    // check all water areas are connected, using maputils class
     private function isLegal($tiles) {
         $mapUtils = new delphi_maputils($tiles);
         return $mapUtils->isWaterConnected();
     }
 
-    //TODO: add city tiles - same procedure for both "types" of map, and should be equidistant around edge
-    //(measure circumference and equally space around there from arbitrary starting point)
+    public function generateCompact() {
+        $ok = false;
+
+        //need to debug isLegal and everything that goes into it - it gave me a map with disconnected
+        //water hexes, even though I saw it DOES return false for at least some maps!
+        while (!$ok) {
+            $map = $this->generateCompactRandom();
+            $ok = $this->isLegal($map);
+        }
+        // save as instance variable
+        $this->map = new delphi_maputils($map);
+        return $map;
+    }
+
+    private function getCityAttachments() {
+        $map = $this->map;
+        return $map->getCityAttachments();
+    }
 
     //TODO: repeat connected check after all city tiles added. If wrong, save map arrangement and replace
     //city tiles.
 
-    public function generateSqlForCompact() {
-        // TODO: will need to change to generate the full layout, including city tiles, and doing water
-        // connectedness checks. This is only to insert tiles into the database for testing.
-        $tiles = $this->generateCompact();
-
+    public function generateSql($tiles) {
         $sql = "INSERT INTO map_hex (x_coord, y_coord, type, color) VALUES ";
         $values = [];
         foreach($tiles as $tile) {
             [ "x_coord" => $x, "y_coord" => $y, "type" =>$type, "color" => $color ] = $tile;
-            $values[] = "($x, $y, '$type', '$color')";
+            if ($type == null) {
+                $type = "null";
+            } else {
+                $type = "'$type'";
+            }
+            if ($color == null) {
+                $color = "null";
+            } else {
+                $color = "'$color'";
+            }
+            $values[] = "($x, $y, $type, $color)";
         }
         $sql .= implode(", ", $values);
         return $sql;
