@@ -70,6 +70,50 @@ class delphi_mapgenerator {
                     "x" => 1,
                     "y" => 4
                 ]
+            ],
+            "cities" => [
+                [
+                    "translation" => [
+                        "x" => -4,
+                        "y" => 5
+                    ],
+                    "rotation" => 0
+                ],
+                [
+                    "translation" => [
+                        "x" => 3,
+                        "y" => 4
+                    ],
+                    "rotation" => 1
+                ],
+                [
+                    "translation" => [
+                        "x" => 8,
+                        "y" => -2
+                    ],
+                    "rotation" => 2
+                ],
+                [
+                    "translation" => [
+                        "x" => 7,
+                        "y" => -7
+                    ],
+                    "rotation" => 2
+                ],
+                [
+                    "translation" => [
+                        "x" => -2,
+                        "y" => -7
+                    ],
+                    "rotation" => 4
+                ],
+                [
+                    "translation" => [
+                        "x" => -4,
+                        "y" => -1
+                    ],
+                    "rotation" => 4
+                ],
             ]
         ];
     }
@@ -168,8 +212,6 @@ class delphi_mapgenerator {
     public function generateCompact() {
         $ok = false;
 
-        //need to debug isLegal and everything that goes into it - it gave me a map with disconnected
-        //water hexes, even though I saw it DOES return false for at least some maps!
         while (!$ok) {
             $map = $this->generateCompactRandom();
             $ok = $this->isLegal($map);
@@ -179,13 +221,35 @@ class delphi_mapgenerator {
         return $map;
     }
 
-    private function getCityAttachments() {
-        $map = $this->map;
-        return $map->getCityAttachments();
+    private function addCompactCitiesRandom($map) {
+        $cities = $this->compactConfig["cities"];
+        shuffle($cities);
+        foreach($this->cityTiles as $cityTile) {
+            $cityConfig = array_shift($cities);
+            ["translation" => $translation, "rotation" => $rotation] = $cityConfig;
+            ["x" => $translationX, "y" => $translationY] = $translation;
+            $rotatedTile = $this->rotate($cityTile["hexes"], $rotation);
+            $rotatedAndTranslated = $this->translate($rotatedTile, $translationX, $translationY);
+            $map = array_merge($map, $rotatedAndTranslated);
+        }
+
+        return $map;
     }
 
-    //TODO: repeat connected check after all city tiles added. If wrong, save map arrangement and replace
-    //city tiles.
+    public function generateCompactWithCities() {
+        $ok = false;
+
+        // need to regenerate whole map if connectedness fails - as if there are non-water hexes in the
+        // wrong places then no arrangement of cities can suffice. (In fact with this layout, if one
+        // arrangement of cities fails then they all will, and conversely if one works then any will.)
+        while (!$ok) {
+            $map = $this->generateCompact();
+            $withCities = $this->addCompactCitiesRandom($map);
+            $ok = $this->isLegal($withCities);
+        }
+
+        return $withCities;
+    }
 
     public function generateSql($tiles) {
         $sql = "INSERT INTO map_hex (x_coord, y_coord, type, color) VALUES ";

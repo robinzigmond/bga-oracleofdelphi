@@ -289,7 +289,7 @@ class TheOracleOfDelphi extends Table
         // delegate work to separate class, as it's not needed again
         $mapGenerator = new delphi_mapgenerator($this->mapTiles, $this->cityTiles);
         // generate compact map for now, later add game option for "full random" generation
-        $map = $mapGenerator->generateCompact();
+        $map = $mapGenerator->generateCompactWithCities();
         $mapSql = $mapGenerator->generateSql($map);
         self::DbQuery($mapSql);
         return $map;
