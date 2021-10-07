@@ -19,6 +19,7 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once('modules/delphi_mapgenerator.php');
+require_once('modules/delphi_maputils.php');
 
 if (!defined("CARD_TYPE_INJURY")) {
     define("CARD_TYPE_INJURY", "injury");
@@ -139,7 +140,19 @@ class TheOracleOfDelphi extends Table
 
         // running through game setup in the rulebook.
         // Step 1 - "setup variable game board" (ie the map)
-        $map = $this->setupMap();
+        $this->map = $this->setupMap();
+
+        // temples - randomly place the 6 colors of temples on each of the corresponding map spaces.
+        // Note that templs are not in the "tokens" table as they never move after being placed - we
+        // simply update the color field in the map_hex table
+        $templeIds = self::getObjectListFromDb("SELECT id FROM map_hex WHERE type='" . MAP_TYPE_TEMPLE . "'", true);
+        $colors = $this->allColors;
+        shuffle($colors);
+        foreach($templeIds as $id) {
+            $color = array_shift($colors);
+            $templeColorUpdateSql = "UPDATE map_hex SET color = '$color' WHERE id=$id";
+            self::DbQuery($templeColorUpdateSql);
+        }
 
         // Step 2 - "setup general supply"
         // mostly various decks of cards (Oracle/Injury/Companion/Equipment). We will store all these
@@ -264,20 +277,57 @@ class TheOracleOfDelphi extends Table
         // shield gets set to 0 - done automatically because 0 is the default column value
 
         // the player's ship starts on the space with Zeus
-        // TODO - needs map!
+        // TODO
 
-        // Add all other token types (all TODO):
+        // Add all other token types:
+        $tokensToAdd = [];
         // - zeus tiles
         // of the 4 "variable" Zeus tiles, randomly choose 2 to be offerings and 2 to be monsters. Each
         // player gets the same. (Later introduce "first game" variant to only use 8 due to random discards)
-        // - monster (appropriate locations on map)
         // - shrine (all start in player supply)
         // - statue (start in cities, so based on map)
-        // - offering (randomly determined based on map)
+
+        // - offering (distribute evenly among the 6 offering spaces, from a pool of 1 per player
+        // of each of the 6 colors, and without 2 of the same color on any one island)
+        $offeringCubes = $this->getSetupOfferingCubes(count($players));
+        $offeringSpaces = $this->map->findLocationsOfType(MAP_TYPE_OFFERING);
+        foreach($offeringSpaces as $offeringSpace) {
+            ["x" => $x, "y" => $y] = $offeringSpace;
+            $cubeSet = array_shift($offeringCubes);
+            foreach($cubeSet as $cubeColor ) {
+                $tokensToAdd[] = "('" . MAP_TYPE_OFFERING . "', '$cubeColor', $x, $y, null, 0)";
+            }
+        }
+
+        $bothMonsterSets = $this->getMonsterSets(count($players));
+        $isFirstSet = true;
+        foreach($bothMonsterSets as $monsterSet) {
+            $locationType = $isFirstSet ? MAP_TYPE_MONSTER : MAP_TYPE_LAND;
+            $monsterSpaces = $this->map->findLocationsOfType($locationType);
+            foreach($monsterSpaces as $monsterSpace) {
+                ["x" => $x, "y" => $y] = $monsterSpace;
+                $currentSet = array_shift($monsterSet);
+                foreach($currentSet as $monsterColor ) {
+                    $tokensToAdd[] = "('" . MAP_TYPE_MONSTER . "', '$monsterColor', $x, $y, null, 0)";
+                }
+            }
+            $isFirstSet = false;
+        }
+
+        // - monsters: 2 on each "monster" type map tile, which must be of different colors on each tile.
+        // Then distribute the rest evenly among the 6 "land" tiles, again with no repeat colors.
+        // Again the pool is 6 (1 of each color) per player in the game.
+        // (Note: "the rest" is 1 of each color per player-in-the-game-minus-1 - ie in a 2p game
+        // there is always 1 of each color on these tiles, but 2 of each color in a 3p game and
+        // 3 of each color in a 4p one.)
+
         // - ship (ship tiles)
         //   Just deal randomly for now - later introduce option for draft, or "first game"
         //   option to randomly distribute 4 particular ones
         // - island (random but based on map)
+        $tokenSql = "INSERT INTO token (type, color, location_x, location_y, player_id, status) VALUES ";
+        $tokenSql .= implode(", ", $tokensToAdd);
+        self::DbQuery($tokenSql);
 
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
@@ -292,7 +342,96 @@ class TheOracleOfDelphi extends Table
         $map = $mapGenerator->generateCompactWithCities();
         $mapSql = $mapGenerator->generateSql($map);
         self::DbQuery($mapSql);
-        return $map;
+        return new delphi_maputils($map);
+    }
+
+    // utility function which takes a "pool" of items of different colors, in the form
+    // of an associative array (eg ["red" => 2, "yellow" => 3, etc]), and a number of sets to
+    // divide into, and makes a set of equal-size groups that uses the entire pool and with no
+    // repetition of colour in any one set.
+    // NOTE: this assumes that $numSets divides exactly the total number in the pool, and that
+    // this is always possible (eg. that there aren't more of any one color in the pool than there
+    // are sets to fill) - these will always be the case when this is used
+    private function makeNonRepeatingSets($pool, $numSets) {
+        $needRestart = true;
+        $emptySets = array_fill(0, $numSets, []);
+        $total = 0;
+        foreach ($pool as $color => $num) {
+            $total += $num;
+        }
+        $target = $total / $numSets;
+
+        while ($needRestart) {
+            $needRestart = false;
+            $sets = $emptySets;
+            foreach ($pool as $color => $num) {
+                for ($j = 0; $j < $num; $j++) {
+                    // get indices of all cube sets which don't have that color so far,
+                    // and which aren't yet full
+                    $possibleIndices = [];
+                    $k = 0;
+                    foreach($sets as $set) {
+                        if (!in_array($color, $set) && count($set) < $target) {
+                            $possibleIndices[] = $k;
+                        }
+                        $k++;
+                    }
+                    // if none are possible, something has gone wrong and we need to start again
+                    if (count($possibleIndices) === 0) {
+                        $needRestart = true;
+                        break;
+                    }
+                    // otherwise, assign one randomly and keep going
+                    shuffle($possibleIndices);
+                    $sets[$possibleIndices[0]][] = $color;
+                }
+                if ($needRestart) {
+                    break;
+                }
+            }
+            // if we get here without needing a restart, we're done
+        }
+        return $sets;
+    }
+
+    private function getSetupOfferingCubes($numPlayers) {
+        // takes a pool of cubes, consisting of one of each color per player,
+        // and divides them evenly into 6 sets such that there are no repeat colors
+        // in each set
+        $pool = array_fill_keys($this->allColors, $numPlayers);
+        return $this->makeNonRepeatingSets($pool, 6);
+    }
+
+    private function getMonsterSets($numPlayers) {
+        // places all monsters, according to the rules described in setupNewGame. Returns an array
+        // of 2 arrays, one for the "monster tiles" the other for the "land" tiles.
+
+        // First need to randomly generate a subset of 6 monsters.
+        $allMonsters = array_fill_keys($this->allColors, $numPlayers);
+        $monstersArray = [];
+        foreach($allMonsters as $color => $num) {
+            for($i = 0; $i < $num; $i++) {
+                $monstersArray[] = $color;
+            }
+        }
+        shuffle($monstersArray);
+        $firstSixArray = array_slice($monstersArray, 0, 6);
+        $chosenMonsters = [];
+        foreach($firstSixArray as $monsterColor) {
+            if (!array_key_exists($monsterColor, $chosenMonsters)) {
+                $chosenMonsters[$monsterColor] = 0;
+            }
+            $chosenMonsters[$monsterColor] += 1;
+        }
+        $firstSet = $this->makeNonRepeatingSets($chosenMonsters, 3);
+
+        $remainder = $allMonsters;
+        foreach($chosenMonsters as $color => $alreadyPlaced) {
+            $remainder[$color] -= $alreadyPlaced;
+        }
+        $secondSet = $this->makeNonRepeatingSets($remainder, 6);
+
+        return [$firstSet, $secondSet];
     }
 
     /*

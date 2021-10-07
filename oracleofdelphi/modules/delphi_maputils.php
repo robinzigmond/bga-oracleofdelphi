@@ -355,4 +355,18 @@ class delphi_maputils {
         }
         return $ok;
     }
+
+    // utility to find all locations on the map of a particular type
+    public function findLocationsOfType($type) {
+        $map = $this->tileMap;
+        $result = [];
+        foreach($map as $x => $yMap) {
+            foreach($yMap as $y => $hexInfo) {
+                if ($hexInfo["type"] === $type) {
+                    $result[] = ["x" => $x, "y" => $y, "color" => $hexInfo["color"]];
+                }
+            }
+        }
+        return $result;
+    }
 }

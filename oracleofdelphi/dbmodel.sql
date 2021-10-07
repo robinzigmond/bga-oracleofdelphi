@@ -63,7 +63,8 @@ CREATE TABLE IF NOT EXISTS `token` (
     `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `type` ENUM('zeus', 'monster', 'shrine', 'statue', 'offering', 'ship', 'island') NOT NULL,
     `color` ENUM('pink', 'blue', 'yellow', 'green', 'red', 'black') NULL DEFAULT NULL,
-    `location_id` INT(10) NULL DEFAULT NULL,
+    `location_x` INT(10) NULL DEFAULT NULL,
+    `location_y` INT(10) NULL DEFAULT NULL,
     `player_id` INT(10) UNSIGNED NULL DEFAULT NULL,
     `status` INT(4) UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY (`id`)
