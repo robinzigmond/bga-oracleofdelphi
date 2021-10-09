@@ -61,10 +61,10 @@
     define("GREEK_LETTER_PSI", "psi");
     define("GREEK_LETTER_OMEGA", "omega");
 
-    define("PLAYER_COLOR_RED", "red");
-    define("PLAYER_COLOR_YELLOW", "yellow");
-    define("PLAYER_COLOR_GREEN", "green");
-    define("PLAYER_COLOR_BLUE", "blue");
+    define("PLAYER_COLOR_RED", "ff0000");
+    define("PLAYER_COLOR_YELLOW", "ffa500");
+    define("PLAYER_COLOR_GREEN", "008000");
+    define("PLAYER_COLOR_BLUE", "0000ff");
     define("TASK_COLOR_WILD", "wild");
   }
 
@@ -1104,35 +1104,66 @@ $this->companionCards = [
 $this->shipTiles = [
   1 => [
     "tooltip" => clienttranslate("At the start of the game, move your Shield 2 steps to the right."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => true
   ],
   2 => [
     "tooltip" => clienttranslate("Advance all your Gods on the God Track to the row showing the number of players participating in the game. After using a Special Action of a God, return it to that row instead of the lowest row."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => true
   ],
   3 => [
     "tooltip" => clienttranslate("Return a Zeus Tile of your choice to the box. You do not receive its reward. Youo require 11 completed tasks to win the game instead of 12."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => false
   ],
   4 => [
     "tooltip" => clienttranslate("Your cost for \"recoloring\" Oracle Dice is reduced by 1."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => false
   ],
   5 => [
     "tooltip" => clienttranslate("Your Ship's range is increased by 2."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => true
   ],
   6 => [
     "tooltip" => clienttranslate("Whenever you take 1 or more Favor Tokens, take 1 more. This also applies to the starting Favor Tokens."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => false
   ],
   7 => [
     "tooltip" => clienttranslate("At the start of the game, take 1 Equipment Card from the display and draw 1 Oracle Card."),
-    "storage" => 2
+    "storage" => 2,
+    "firstGame" => false
   ],
   8 => [
     "tooltip" => "You can also \"recolor\" Oracle Dice in counterclockwise direction. Additionally, your storage capacity is increased by 2",
-    "storage" => 4
+    "storage" => 4,
+    "firstGame" => true
+  ]
+];
+
+$this->islandTileLetters = [
+  PLAYER_COLOR_RED => [
+    GREEK_LETTER_PHI,
+    GREEK_LETTER_PSI,
+    GREEK_LETTER_OMEGA
+  ],
+  PLAYER_COLOR_YELLOW => [
+    GREEK_LETTER_SIGMA,
+    GREEK_LETTER_PSI,
+    GREEK_LETTER_OMEGA
+  ],
+  PLAYER_COLOR_GREEN => [
+    GREEK_LETTER_SIGMA,
+    GREEK_LETTER_PHI,
+    GREEK_LETTER_PSI
+  ],
+  PLAYER_COLOR_BLUE => [
+    GREEK_LETTER_SIGMA,
+    GREEK_LETTER_PHI,
+    GREEK_LETTER_OMEGA
   ]
 ];
 
@@ -1142,11 +1173,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PHI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_RED][0]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PHI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_RED][0]
       ]
     ]
   ],
@@ -1155,11 +1186,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PSI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_RED][1]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PSI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_RED][1]
       ]
     ]
   ],
@@ -1168,11 +1199,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_OMEGA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_RED][2]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_OMEGA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_RED][2]
       ]
     ]
   ],
@@ -1298,11 +1329,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_SIGMA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_YELLOW][0]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_SIGMA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_YELLOW][0]
       ]
     ]
   ],
@@ -1311,11 +1342,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PSI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_YELLOW][1]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PSI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_YELLOW][1]
       ]
     ]
   ],
@@ -1324,11 +1355,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_OMEGA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_YELLOW][2]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_OMEGA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_YELLOW][2]
       ]
     ]
   ],
@@ -1454,11 +1485,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_SIGMA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_GREEN][0]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_SIGMA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_GREEN][0]
       ]
     ]
   ],
@@ -1467,11 +1498,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PHI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_GREEN][1]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PHI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_GREEN][1]
       ]
     ]
   ],
@@ -1480,11 +1511,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PSI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_GREEN][2]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PSI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_GREEN][2]
       ]
     ]
   ],
@@ -1610,11 +1641,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_SIGMA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_BLUE][0]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_SIGMA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_BLUE][0]
       ]
     ]
   ],
@@ -1623,11 +1654,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PHI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_BLUE][1]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_PHI
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_BLUE][1]
       ]
     ]
   ],
@@ -1636,11 +1667,11 @@ $this->zeusTiles = [
     "tile" => [
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_OMEGA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_BLUE][2]
       ],
       [
         "type" => ZEUS_TILE_SHRINE,
-        "letter" => GREEK_LETTER_OMEGA
+        "letter" => $this->islandTileLetters[PLAYER_COLOR_BLUE][2]
       ]
     ]
   ],

@@ -43,8 +43,9 @@ if (!defined("CARD_TYPE_INJURY")) {
     define("GOD_APOLLON", "apollon");
     define("GOD_APHRODITE", "aphrodite");
     define("GOD_HERMES", "hermes");
-}
 
+    define("TOKEN_STATUE", "statue");
+}
 
 class TheOracleOfDelphi extends Table
 {
@@ -78,7 +79,15 @@ class TheOracleOfDelphi extends Table
             MAP_COLOR_BLACK => GOD_ARES,
             MAP_COLOR_PINK => GOD_HERMES
         ];
-        
+
+        // statuses of island tiles, based on greek letters
+        $this->greekLetterStatus = [
+            GREEK_LETTER_SIGMA => 0,
+            GREEK_LETTER_PHI => 1,
+            GREEK_LETTER_PSI => 2,
+            GREEK_LETTER_OMEGA => 3
+        ];
+
         self::initGameStateLabels( array( 
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
@@ -261,6 +270,9 @@ class TheOracleOfDelphi extends Table
         self::DbQuery($sql);
 
         // each player draws 1 injury card
+        // the player's ship starts on the space with Zeus - also do here
+        $zeusSpace = $this->map->findLocationsOfType(MAP_TYPE_ZEUS)[0];
+        ["x" => $zeusX, "y" => $zeusY] = $zeusSpace;
         foreach($players as $player_id => $player) {
             $drawnInjury = $this->allCards->pickCard(CARD_LOCATION_INJURY_DECK, $player_id);
             // each player puts their Gods on the lowest row of the God track - except the God of the colour
@@ -270,22 +282,55 @@ class TheOracleOfDelphi extends Table
             $cardColor = $this->allColors[$drawnInjury["type_arg"]];
             $godToAdvance = $this->godColors[$cardColor];
             // actual position to advance to depends on number of players!
-            $updateSql = "UPDATE player SET $godToAdvance={$this->godFirstStep} WHERE player_id=$player_id";
+            $updateSql = "UPDATE player
+                          SET $godToAdvance={$this->godFirstStep},
+                          ship_location_x=$zeusX,
+                          ship_location_y=$zeusY
+                          WHERE player_id=$player_id";
+
             self::DbQuery($updateSql);
         }
 
         // shield gets set to 0 - done automatically because 0 is the default column value
 
-        // the player's ship starts on the space with Zeus
-        // TODO
-
-        // Add all other token types:
+        // Add all token types:
         $tokensToAdd = [];
+
         // - zeus tiles
         // of the 4 "variable" Zeus tiles, randomly choose 2 to be offerings and 2 to be monsters. Each
-        // player gets the same. (Later introduce "first game" variant to only use 8 due to random discards)
-        // - shrine (all start in player supply)
+        // player gets the same. (Later introduce "first game" variant to only use 8 due to random discards).
+        // Status column is coded as follows: tile id (1 - 48), plus 100 if "second side" used.
+        // Another 100 will be added if the tile has been completed by the player.
+        // (later, for variant with fewer tiles, status 0 will be used for not in game)
+        $variableIndices = [0, 0, 1, 1];
+        shuffle($variableIndices);
+        $zeusTileSides = array_merge(array_fill(0, 8, 0), $variableIndices);
+        $idsByColor = [];
+        foreach(self::loadPlayersBasicInfos() as $player_id => $player) {
+            $idsByColor[$player["player_color"]] = $player_id;
+        }
+        foreach($this->zeusTiles as $id => ["player" => $playerColor, "tile" => $sides]) {
+            $side = $zeusTileSides[($id - 1) % 12];
+            $tileStatus = $id + ($side > 0 ? 100 : 0);
+            $playerId = $idsByColor[$playerColor];
+            $tokensToAdd[] = "('zeus', '$playerColor', null, null, $playerId, $tileStatus)";
+        }
+
+        // - shrines (all start in player supply)
+        foreach($players as $player_id => $player) {
+            for($i = 0; $i < 3; $i++) {
+                $tokensToAdd[] = "('shrine', null, null, null, $player_id, 0)";
+            }
+        }
+
         // - statue (start in cities, so based on map)
+        $cityTiles = $this->map->findLocationsOfType(MAP_TYPE_CITY);
+        foreach($cityTiles as $city) {
+            ["x" => $x, "y" => $y, "color" => $color] = $city;
+            for ($i = 0; $i < 3; $i++) {
+                $tokensToAdd[] = "('" .  TOKEN_STATUE . "', '$color', $x, $y, null, 0)";
+            }
+        }
 
         // - offering (distribute evenly among the 6 offering spaces, from a pool of 1 per player
         // of each of the 6 colors, and without 2 of the same color on any one island)
@@ -299,6 +344,9 @@ class TheOracleOfDelphi extends Table
             }
         }
 
+        // - monsters: 2 on each "monster" type map tile, which must be of different colors on each tile.
+        // Then distribute the rest evenly among the 6 "land" tiles, again with no repeat colors.
+        // Again the pool is 6 (1 of each color) per player in the game.
         $bothMonsterSets = $this->getMonsterSets(count($players));
         $isFirstSet = true;
         foreach($bothMonsterSets as $monsterSet) {
@@ -314,17 +362,36 @@ class TheOracleOfDelphi extends Table
             $isFirstSet = false;
         }
 
-        // - monsters: 2 on each "monster" type map tile, which must be of different colors on each tile.
-        // Then distribute the rest evenly among the 6 "land" tiles, again with no repeat colors.
-        // Again the pool is 6 (1 of each color) per player in the game.
-        // (Note: "the rest" is 1 of each color per player-in-the-game-minus-1 - ie in a 2p game
-        // there is always 1 of each color on these tiles, but 2 of each color in a 3p game and
-        // 3 of each color in a 4p one.)
+        // - ship (ship tiles). Status for tile ID (1 - 8)
+        //TODO: alter for other variants for handing out. If using draft will add new statuses to
+        //handle this
+        $shipTileIds = array_keys($this->shipTiles);
+        shuffle($shipTileIds);
+        foreach($players as $player_id => $player) {
+            $id = array_shift($shipTileIds);
+            $tokensToAdd[] = "('ship', null, null, null, $player_id, $id)";
+        }
 
-        // - ship (ship tiles)
-        //   Just deal randomly for now - later introduce option for draft, or "first game"
-        //   option to randomly distribute 4 particular ones
-        // - island (random but based on map)
+        // - island tiles. Shuffle all 12 and put face-down on the 12 corresponding island spaces.
+        // Note: status of tile is 0-3 when facedown and (later) 4-7 when faceup, with precise
+        // value depending on greek letter (turning faceup always adds 4 to value).
+        // Also the color/greek-letter combos come from the zeus tiles array.
+        $islandTiles = [];
+        foreach($this->islandTileLetters as $color => $letters) {
+            foreach($letters as $letter) {
+                $islandTiles[] = ["color" => $color, "status" => $this->greekLetterStatus[$letter]];
+            }
+        }
+        shuffle($islandTiles);
+        $islandSpaces = $this->map->findLocationsOfType(MAP_TYPE_ISLAND);
+        foreach($islandSpaces as $islandSpace) {
+            ["x" => $x, "y" => $y] = $islandSpace;
+            $islandTile = array_shift($islandTiles);
+            ["color" => $color, "status" => $status] = $islandTile;
+            $tokensToAdd[] = "('" . MAP_TYPE_ISLAND . "', '$color', $x, $y, null, '$status')";
+        }
+
+        // now insert all tokens into the database
         $tokenSql = "INSERT INTO token (type, color, location_x, location_y, player_id, status) VALUES ";
         $tokenSql .= implode(", ", $tokensToAdd);
         self::DbQuery($tokenSql);
