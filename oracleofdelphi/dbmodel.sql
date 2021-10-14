@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `map_hex` (
         'statue_red_green_yellow'
     ) NOT NULL,
     `color` ENUM('pink', 'blue', 'yellow', 'green', 'red', 'black') NULL DEFAULT NULL,
+    `orientation` TINYINT(1) NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
 

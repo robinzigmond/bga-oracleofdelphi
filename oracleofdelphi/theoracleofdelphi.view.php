@@ -37,46 +37,37 @@
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count( $players );
 
-        /*********** Place your code below:  ************/
+        $tiles = $this->game->getObjectListFromDb(
+          "SELECT x_coord, y_coord, type, color, orientation FROM map_hex"
+        );
+        $TILE_WIDTH = 75; //TODO: will later have to be made dynamic. Unfortunately tied to value of CSS variable.
+        $TILE_HEIGHT = $TILE_WIDTH * 171 / 149;
+        $MAP_HEIGHT = $TILE_WIDTH * 14;
 
+        $this->page->begin_block("theoracleofdelphi_theoracleofdelphi", "maptile");
 
-        /*
-        
-        // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
+        foreach($tiles as $tile) {
+          [
+            "x_coord" => $x,
+            "y_coord" => $y,
+            "color" => $color,
+            "type" => $type,
+            "orientation" => $orientation
+          ] = $tile;
 
-        // Display a specific number / string
-        $this->tpl['MY_VARIABLE_ELEMENT'] = $number_to_display;
-
-        // Display a string to be translated in all languages: 
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::_("A string to be translated");
-
-        // Display some HTML content of your own:
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
-        
-        */
-        
-        /*
-        
-        // Example: display a specific HTML block for each player in this game.
-        // (note: the block is defined in your .tpl file like this:
-        //      <!-- BEGIN myblock --> 
-        //          ... my HTML code ...
-        //      <!-- END myblock --> 
-        
-
-        $this->page->begin_block( "theoracleofdelphi_theoracleofdelphi", "myblock" );
-        foreach( $players as $player )
-        {
-            $this->page->insert_block( "myblock", array( 
-                                                    "PLAYER_NAME" => $player['player_name'],
-                                                    "SOME_VARIABLE" => $some_value
-                                                    ...
-                                                     ) );
+          $this->page->insert_block("maptile", [
+            "X" => $x,
+            "Y" => $y,
+            "TYPE" => $type,
+            "COLOR_CLASS" => isset($color) ? " ood_maphex_color_$color" : "",
+            "ROTATION_CLASS" => isset($orientation) ? " ood_maphex_cityrotation_$orientation" : "",
+            //TODO: determine these dynamically based on map, at the moment just set up to look OK
+            //with standard "compact" map layout
+            "LEFT" => ($MAP_HEIGHT * 0.4) + ($x + $y / 2) * $TILE_WIDTH,
+            // multiplier of 0.75 to make sure the hexes correctly interlock vertically
+            "BOTTOM" => ($MAP_HEIGHT / 2) + $y * $TILE_HEIGHT * 0.75
+          ]);
         }
-        
-        */
-
-
 
         /*********** Do not change anything below this line  ************/
   	}

@@ -230,6 +230,14 @@ class delphi_mapgenerator {
             ["x" => $translationX, "y" => $translationY] = $translation;
             $rotatedTile = $this->rotate($cityTile["hexes"], $rotation);
             $rotatedAndTranslated = $this->translate($rotatedTile, $translationX, $translationY);
+            // add rotation info to array, which we will store in the db, this is needed for city tiles
+            // to know which orientation to display them in (which matters for cities since they are not
+            // rotationally symmetric!)
+            foreach($rotatedAndTranslated as &$tile) {
+                if ($tile["type"] === MAP_TYPE_CITY) {
+                    $tile["rotation"] = $rotation;
+                }
+            }
             $map = array_merge($map, $rotatedAndTranslated);
         }
 
@@ -252,10 +260,15 @@ class delphi_mapgenerator {
     }
 
     public function generateSql($tiles) {
-        $sql = "INSERT INTO map_hex (x_coord, y_coord, type, color) VALUES ";
+        $sql = "INSERT INTO map_hex (x_coord, y_coord, type, color, orientation) VALUES ";
         $values = [];
         foreach($tiles as $tile) {
-            [ "x_coord" => $x, "y_coord" => $y, "type" =>$type, "color" => $color ] = $tile;
+            [
+                "x_coord" => $x,
+                "y_coord" => $y,
+                "type" =>$type,
+                "color" => $color
+            ] = $tile;
             if ($type == null) {
                 $type = "null";
             } else {
@@ -266,7 +279,12 @@ class delphi_mapgenerator {
             } else {
                 $color = "'$color'";
             }
-            $values[] = "($x, $y, $type, $color)";
+            if (array_key_exists("rotation", $tile)) {
+                $rotation = $tile["rotation"];
+            } else {
+                $rotation = "null";
+            }
+            $values[] = "($x, $y, $type, $color, $rotation)";
         }
         $sql .= implode(", ", $values);
         return $sql;

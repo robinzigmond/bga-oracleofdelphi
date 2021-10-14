@@ -67,6 +67,168 @@
     }
 */
 
+:root {
+    /* TODO: adjust these dimensions as needed! */
+    --tile-width: 75px;
+}
 
+#ood_map {
+    position: relative;
+    /* TODO: adjust dimensions (perhaps eventually dynamic based on random map generated!) */
+    width: 100%;
+    height: calc(var(--tile-width) * 14);
+}
 
+.ood_maphex {
+    position: absolute;
+    width: var(--tile-width);
+    height: calc(var(--tile-width) * 171 / 149);
+    background-image: url('img/maptiles.png');
+    background-size: 728.86% 565.5%;
+}
 
+.ood_maphex_zeus {
+    background-image: none;
+}
+
+.ood_maphex_cityrotation_0 {
+    transform: rotate(-30deg);
+}
+
+.ood_maphex_cityrotation_1 {
+    transform: rotate(30deg);
+}
+
+.ood_maphex_cityrotation_2 {
+    transform: rotate(90deg);
+}
+
+.ood_maphex_cityrotation_3 {
+    transform: rotate(150deg);
+}
+
+.ood_maphex_cityrotation_4 {
+    transform: rotate(210deg);
+}
+
+.ood_maphex_cityrotation_5 {
+    transform: rotate(270deg);
+}
+
+.ood_maphex_city {
+    width: calc(var(--tile-width) * 173 / 149);
+    height: calc(var(--tile-width) * 177 / 149);
+    background-size: 627.75% 546.33%;
+}
+
+.ood_maphex_city.ood_maphex_color_black {
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -10 / 149);
+}
+
+.ood_maphex_city.ood_maphex_color_blue {
+    background-position: calc(var(--tile-width) * -203 / 149) calc(var(--tile-width) * -10 / 149);
+}
+
+.ood_maphex_city.ood_maphex_color_green {
+    background-position: calc(var(--tile-width) * -396 / 149) calc(var(--tile-width) * -10 / 149);
+}
+
+.ood_maphex_city.ood_maphex_color_pink {
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -207 / 149);
+}
+
+.ood_maphex_city.ood_maphex_color_red {
+    background-position: calc(var(--tile-width) * -203 / 149) calc(var(--tile-width) * -207 / 149);
+}
+
+.ood_maphex_city.ood_maphex_color_yellow {
+    background-position: calc(var(--tile-width) * -396 / 149) calc(var(--tile-width) * -207 / 149);
+}
+
+.ood_maphex_island.ood_maphex_color_black {
+    background-position: calc(var(--tile-width) * -589 / 149) calc(var(--tile-width) * -10 / 149);
+}
+
+.ood_maphex_island.ood_maphex_color_blue {
+    background-position: calc(var(--tile-width) * -589 / 149) calc(var(--tile-width) * -201 / 149);
+}
+
+.ood_maphex_island.ood_maphex_color_green {
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -404 / 149);
+}
+
+.ood_maphex_island.ood_maphex_color_pink {
+    background-position: calc(var(--tile-width) * -179 / 149) calc(var(--tile-width) * -404 / 149);
+}
+
+.ood_maphex_island.ood_maphex_color_red {
+    background-position: calc(var(--tile-width) * -348 / 149) calc(var(--tile-width) * -404 / 149);
+}
+
+.ood_maphex_island.ood_maphex_color_yellow {
+    background-position: calc(var(--tile-width) * -517 / 149) calc(var(--tile-width) * -404 / 149);
+}
+
+.ood_maphex_land {
+    background-position: calc(var(--tile-width) * -758 / 149) calc(var(--tile-width) * -10 / 149);
+}
+
+.ood_maphex_monster {
+    background-position: calc(var(--tile-width) * -758 / 149) calc(var(--tile-width) * -201 / 149);
+}
+
+.ood_maphex_offering {
+    background-position: calc(var(--tile-width) * -758 / 149) calc(var(--tile-width) * -392 / 149);
+}
+
+.ood_maphex_statue_black_blue_yellow {
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -595 / 149);
+}
+
+.ood_maphex_statue_green_blue_black {
+    background-position: calc(var(--tile-width) * -179 / 149) calc(var(--tile-width) * -595 / 149);
+}
+
+.ood_maphex_statue_green_yellow_pink {
+    background-position: calc(var(--tile-width) * -348 / 149) calc(var(--tile-width) * -595 / 149);
+}
+
+.ood_maphex_statue_red_blue_pink {
+    background-position: calc(var(--tile-width) * -517 / 149) calc(var(--tile-width) * -595 / 149);
+}
+
+.ood_maphex_statue_red_green_yellow {
+    background-position: calc(var(--tile-width) * -686 / 149) calc(var(--tile-width) * -595 / 149);
+}
+
+.ood_maphex_statue_red_pink_black {
+    background-position: calc(var(--tile-width) * -927 / 149) calc(var(--tile-width) * -10 / 149);
+}
+
+.ood_maphex_temple {
+    background-position: calc(var(--tile-width) * -927 / 149) calc(var(--tile-width) * -201 / 149);
+}
+
+.ood_maphex_water.ood_maphex_color_black {
+    background-position: calc(var(--tile-width) * -927 / 149) calc(var(--tile-width) * -392 / 149);
+}
+
+.ood_maphex_water.ood_maphex_color_blue {
+    background-position: calc(var(--tile-width) * -927 / 149) calc(var(--tile-width) * -583 / 149);
+}
+
+.ood_maphex_water.ood_maphex_color_green {
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -786 / 149);
+}
+
+.ood_maphex_water.ood_maphex_color_pink {
+    background-position: calc(var(--tile-width) * -179 / 149) calc(var(--tile-width) * -786 / 149);
+}
+
+.ood_maphex_water.ood_maphex_color_red {
+    background-position: calc(var(--tile-width) * -348 / 149) calc(var(--tile-width) * -786 / 149);
+}
+
+.ood_maphex_water.ood_maphex_color_yellow {
+    background-position: calc(var(--tile-width) * -517 / 149) calc(var(--tile-width) * -786 / 149);
+}
