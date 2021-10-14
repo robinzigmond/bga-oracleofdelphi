@@ -13,7 +13,7 @@
 <!-- map -->
 <div id="ood_map">
     <!-- BEGIN maptile -->
-    <div class="ood_maphex ood_maphex_{TYPE}{COLOR_CLASS}{ROTATION_CLASS}" id="ood_maphex_{X}_{Y}" style="left: {LEFT}px; bottom: {BOTTOM}px">
+    <div class="ood_maphex ood_maphex_{TYPE}{COLOR_CLASS}{ROTATION_CLASS}" id="ood_maphex_{X}_{Y}" style="left: {LEFTPERCENT}%; bottom: {BOTTOMPERCENT}%">
     </div>
     <!-- END maptile -->
 </div>

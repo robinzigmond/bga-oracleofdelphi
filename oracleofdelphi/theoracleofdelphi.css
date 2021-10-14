@@ -75,8 +75,10 @@
 #ood_map {
     position: relative;
     /* TODO: adjust dimensions (perhaps eventually dynamic based on random map generated!) */
-    width: 100%;
+    width: calc(var(--tile-width) * 14);
     height: calc(var(--tile-width) * 14);
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .ood_maphex {
@@ -85,6 +87,7 @@
     height: calc(var(--tile-width) * 171 / 149);
     background-image: url('img/maptiles.png');
     background-size: 728.86% 565.5%;
+    transform: translate(-50%, -50%);
 }
 
 .ood_maphex_zeus {
@@ -92,27 +95,27 @@
 }
 
 .ood_maphex_cityrotation_0 {
-    transform: rotate(-30deg);
+    transform: translate(-50%, -50%) rotate(-30deg);
 }
 
 .ood_maphex_cityrotation_1 {
-    transform: rotate(30deg);
+    transform: translate(-50%, -50%) rotate(30deg);
 }
 
 .ood_maphex_cityrotation_2 {
-    transform: rotate(90deg);
+    transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .ood_maphex_cityrotation_3 {
-    transform: rotate(150deg);
+    transform: translate(-50%, -50%) rotate(150deg);
 }
 
 .ood_maphex_cityrotation_4 {
-    transform: rotate(210deg);
+    transform: translate(-50%, -50%) rotate(210deg);
 }
 
 .ood_maphex_cityrotation_5 {
-    transform: rotate(270deg);
+    transform: translate(-50%, -50%) rotate(270deg);
 }
 
 .ood_maphex_city {

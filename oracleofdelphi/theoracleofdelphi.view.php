@@ -40,9 +40,8 @@
         $tiles = $this->game->getObjectListFromDb(
           "SELECT x_coord, y_coord, type, color, orientation FROM map_hex"
         );
-        $TILE_WIDTH = 75; //TODO: will later have to be made dynamic. Unfortunately tied to value of CSS variable.
-        $TILE_HEIGHT = $TILE_WIDTH * 171 / 149;
-        $MAP_HEIGHT = $TILE_WIDTH * 14;
+        $MAP_WIDTH_IN_TILES = 14; //TODO: make dynamic when random maps used
+        $MAP_HEIGHT_IN_TILES = 14; //TODO: as above
 
         $this->page->begin_block("theoracleofdelphi_theoracleofdelphi", "maptile");
 
@@ -61,11 +60,9 @@
             "TYPE" => $type,
             "COLOR_CLASS" => isset($color) ? " ood_maphex_color_$color" : "",
             "ROTATION_CLASS" => isset($orientation) ? " ood_maphex_cityrotation_$orientation" : "",
-            //TODO: determine these dynamically based on map, at the moment just set up to look OK
-            //with standard "compact" map layout
-            "LEFT" => ($MAP_HEIGHT * 0.4) + ($x + $y / 2) * $TILE_WIDTH,
-            // multiplier of 0.75 to make sure the hexes correctly interlock vertically
-            "BOTTOM" => ($MAP_HEIGHT / 2) + $y * $TILE_HEIGHT * 0.75
+            //TODO: (0,0) being 45% of the way from the left (approx!) is just a feature of the "compact" map
+            "LEFTPERCENT" => 45 + 100 * ($x + $y / 2) / $MAP_WIDTH_IN_TILES,
+            "BOTTOMPERCENT" => 50 + 86 * $y / $MAP_HEIGHT_IN_TILES
           ]);
         }
 
