@@ -920,15 +920,15 @@ $this->equipmentCards = [
     "tooltip" => clienttranslate("You may Fight a Monster, Explore an Island and Build a Shrine from a distance of 1 water space from the respective Island Tiles.")
   ],
   4 => [
-    "tooltip" => clienttranslate("You may use an Oracle Die of the depicted color as an action to ."),
+    "tooltip" => clienttranslate("You may use an Oracle Die of the depicted color as an action to take 1 Favor Token, draw 1 Oracle Card, and advance the God of the respective color by 1 step."),
     "color" => MAP_COLOR_BLUE
   ],
   5 => [
-    "tooltip" => clienttranslate("You may use an Oracle Die of the depicted color as an action to ."),
+    "tooltip" => clienttranslate("You may use an Oracle Die of the depicted color as an action to take 1 Favor Token, draw 1 Oracle Card, and advance the God of the respective color by 1 step."),
     "color" => MAP_COLOR_GREEN
   ],
   6 => [
-    "tooltip" => clienttranslate("You may use an Oracle Die of the depicted color as an action to ."),
+    "tooltip" => clienttranslate("You may use an Oracle Die of the depicted color as an action to take 1 Favor Token, draw 1 Oracle Card, and advance the God of the respective color by 1 step."),
     "color" => MAP_COLOR_PINK
   ],
   7 => [
@@ -1113,7 +1113,7 @@ $this->shipTiles = [
     "firstGame" => true
   ],
   3 => [
-    "tooltip" => clienttranslate("Return a Zeus Tile of your choice to the box. You do not receive its reward. Youo require 11 completed tasks to win the game instead of 12."),
+    "tooltip" => clienttranslate("Return a Zeus Tile of your choice to the box. You do not receive its reward. You require 11 completed tasks to win the game instead of 12."),
     "storage" => 2,
     "firstGame" => false
   ],
@@ -1307,7 +1307,7 @@ $this->zeusTiles = [
       ],
       [
         "type" => ZEUS_TILE_MONSTER,
-        "color" => MAP_COLOR_PINK
+        "color" => MAP_COLOR_RED
       ]
     ]
   ],
@@ -1463,7 +1463,7 @@ $this->zeusTiles = [
       ],
       [
         "type" => ZEUS_TILE_MONSTER,
-        "color" => MAP_COLOR_PINK
+        "color" => MAP_COLOR_RED
       ]
     ]
   ],
@@ -1619,7 +1619,7 @@ $this->zeusTiles = [
       ],
       [
         "type" => ZEUS_TILE_MONSTER,
-        "color" => MAP_COLOR_PINK
+        "color" => MAP_COLOR_RED
       ]
     ]
   ],
@@ -1775,7 +1775,7 @@ $this->zeusTiles = [
       ],
       [
         "type" => ZEUS_TILE_MONSTER,
-        "color" => MAP_COLOR_PINK
+        "color" => MAP_COLOR_RED
       ]
     ]
   ],
