@@ -15,6 +15,10 @@
  *
  */
 
+// constants sent from backend
+const OFFERING = "offering";
+const MONSTER = "monster";
+
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
@@ -54,8 +58,6 @@ define([
             */
 
             setup: function (gamedatas) {
-                console.log("Starting game setup");
-
                 // adjust map tile size to fit screen
                 document.documentElement.style.setProperty("--tile-width", `${this.tileWidth}px`)
 
@@ -66,8 +68,61 @@ define([
                     // TODO: Setting up players boards if needed
                 }
 
-                // TODO: Set up your game interface here, according to "gamedatas"
+                // place Zeus in appropriate spot of the map. (Never changes so not part of gamedatas.)
+                const zeusHex = document.querySelector(".ood_maphex_zeus");
+                const zeusFigure = document.createElement("div");
+                zeusFigure.classList.add("ood_zeus_figure", "ood_hex_center");
+                zeusHex.appendChild(zeusFigure);
 
+                // place all tokens of all types on the map
+                const { tokensOnMap } = gamedatas;
+                // keep track of counts of each "type" of token in each location
+                const counts = {};
+                const addToCounts = (x, y, type) => {
+                    if (counts[x]) {
+                        if (counts[x][y]) {
+                            if (counts[x][y][type]) {
+                                counts[x][y][type]++;
+                            } else {
+                                counts[x][y][type] = 1;
+                            }
+                        } else {
+                            counts[x][y] = { [type]: 1 };
+                        }
+                    } else {
+                        counts[x] = { [y]: { [type]: 1 } };
+                    }
+                };
+                const getCount = (x, y, type) => {
+                    let result = 0;
+                    if (counts[x] && counts[x][y] && counts[x][y][type]) {
+                        result = counts[x][y][type];
+                    }
+                    return result;
+                };
+                const getTotal = (x, y, type_) => {
+                    return tokensOnMap.filter(({ location_x, location_y, type }) => (
+                        location_x === x
+                        && location_y === y
+                        && type === type_
+                    )).length;
+                }
+
+                for (const { location_x, location_y, type, color, player_id, status } of tokensOnMap) {
+                    const position = getCount(location_x, location_y, type);
+                    const total = getTotal(location_x, location_y, type);
+                    switch (type) {
+                        case OFFERING:
+                            this.placeOffering(location_x, location_y, color, position, total);
+                            break;
+                        case MONSTER:
+                            this.placeMonster(location_x, location_y, color, position, total);
+                            break;
+                        default:
+                            break;
+                    }
+                    addToCounts(location_x, location_y, type);
+                }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
@@ -161,6 +216,40 @@ define([
             
             */
 
+            // utilities for placing tokens on the map
+            placeOffering: function (x, y, color, position, total) {
+                const hex = document.getElementById(`ood_maphex_${x}_${y}`);
+                const tokenDiv = document.createElement("div");
+                tokenDiv.classList.add(
+                    "ood_wooden_piece",
+                    "ood_offering",
+                    `ood_offering_${color}`
+                );
+                // subtract pi/6 from the angle to compensate for the tile rotation
+                const angle = 2 * Math.PI * position / total - Math.PI / 6;
+                const top = 50 + Math.sin(angle) * 30;
+                const left = 50 + Math.cos(angle) * 30;
+                tokenDiv.style.top = `${top}%`;
+                tokenDiv.style.left = `${left}%`;
+                hex.appendChild(tokenDiv);
+            },
+
+            placeMonster: function (x, y, color, position, total) {
+                const hex = document.getElementById(`ood_maphex_${x}_${y}`);
+                const tokenDiv = document.createElement("div");
+                tokenDiv.classList.add(
+                    "ood_wooden_piece",
+                    "ood_monster",
+                    `ood_monster_${color}`
+                );
+                const midPoint = (total + 1) / 2;
+                const offset = 1 + position - midPoint;
+                const top = (total === 1) ? 50 : 50 + 20 * (offset / (total - 1));
+                const left = top;
+                tokenDiv.style.top = `${top}%`;
+                tokenDiv.style.left = `${left}%`;
+                hex.appendChild(tokenDiv);
+            },
 
             ///////////////////////////////////////////////////
             //// Player's action

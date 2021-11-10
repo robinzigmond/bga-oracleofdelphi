@@ -70,6 +70,9 @@
 :root {
     /* TODO: adjust these dimensions as needed! */
     --tile-width: 75px;
+    --zeus-figure-ratio: 0.8;
+    --offering-cube-ratio: 1.4;
+    --monster-tile-ratio: 0.6;
 }
 
 #ood_map {
@@ -92,6 +95,7 @@
 
 .ood_maphex_zeus {
     background-image: none;
+    z-index: 2; /* ensures Zeus figure is seen in front of other neighbouring hexes */
 }
 
 .ood_maphex_cityrotation_0 {
@@ -298,10 +302,10 @@
 
 .ood_zeus_figure {
     background-image: url('img/misc_tokens.png');
-    width: calc(var(--tile-width) * 116 / 149);
-    height: calc(var(--tile-width) * 176 / 149);
+    width: calc(var(--tile-width) * var(--zeus-figure-ratio) * 116 / 149);
+    height: calc(var(--tile-width) * var(--zeus-figure-ratio) * 176 / 149);
     background-size: 260.34% 166.48%;
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -10 / 149);
+    background-position: calc(var(--tile-width) * var(--zeus-figure-ratio) * -10 / 149) calc(var(--tile-width) * var(--zeus-figure-ratio) * -10 / 149);
 }
 
 .ood_favor {
@@ -614,33 +618,33 @@
 
 .ood_offering {
     /* TODO: may need size adjustment - especially when in ship hold rather than map */
-    width: calc(var(--tile-width) * 26 / 149);
-    height: calc(var(--tile-width) * 27 / 149);
+    width: calc(var(--tile-width) * var(--offering-cube-ratio) * 26 / 149);
+    height: calc(var(--tile-width) * var(--offering-cube-ratio) * 27 / 149);
     background-size: 2107.69% 1840.74%;
 }
 
 .ood_offering_green {
-    background-position: calc(var(--tile-width) * -586 / 149) calc(var(--tile-width) * -385 / 149);
+    background-position: calc(var(--tile-width) * var(--offering-cube-ratio) * -169 / 149) calc(var(--tile-width) * var(--offering-cube-ratio) * -432 / 149);
 }
 
 .ood_offering_red {
-    background-position: calc(var(--tile-width) * -421 / 149) calc(var(--tile-width) * -312 / 149);
+    background-position: calc(var(--tile-width) * var(--offering-cube-ratio) * -215 / 149) calc(var(--tile-width) * var(--offering-cube-ratio) * -432 / 149);
 }
 
 .ood_offering_pink {
-    background-position: calc(var(--tile-width) * -457 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * var(--offering-cube-ratio) * -457 / 149) calc(var(--tile-width) * var(--offering-cube-ratio) * -369 / 149);
 }
 
 .ood_offering_blue {
-    background-position: calc(var(--tile-width) * -123 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * var(--offering-cube-ratio) * -506 / 149) calc(var(--tile-width) * var(--offering-cube-ratio) * -385 / 149);
 }
 
 .ood_offering_yellow {
-    background-position: calc(var(--tile-width) * -169 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * var(--offering-cube-ratio) * -421 / 149) calc(var(--tile-width) * var(--offering-cube-ratio) * -312 / 149);
 }
 
 .ood_offering_black {
-    background-position: calc(var(--tile-width) * -586 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * var(--offering-cube-ratio) * -123 / 149) calc(var(--tile-width) * var(--offering-cube-ratio) * -432 / 149);
 }
 
 .ood_temple {
@@ -651,58 +655,58 @@
 }
 
 .ood_temple_green {
-    background-position: calc(var(--tile-width) * -152 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * -62 / 149) calc(var(--tile-width) * -432 / 149);
 }
 
 .ood_temple_black {
-    background-position: calc(var(--tile-width) * -213 / 149) calc(var(--tile-width) * -369 / 149);
-}
-
-.ood_temple_blue {
-    background-position: calc(var(--tile-width) * -274 / 149) calc(var(--tile-width) * -369 / 149);
-}
-
-.ood_temple_pink {
     background-position: calc(var(--tile-width) * -335 / 149) calc(var(--tile-width) * -369 / 149);
 }
 
+.ood_temple_blue {
+    background-position: calc(var(--tile-width) * -213 / 149) calc(var(--tile-width) * -369 / 149);
+}
+
+.ood_temple_pink {
+    background-position: calc(var(--tile-width) * -274 / 149) calc(var(--tile-width) * -369 / 149);
+}
+
 .ood_temple_red {
-    background-position: calc(var(--tile-width) * -396 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * -152 / 149) calc(var(--tile-width) * -369 / 149);
 }
 
 .ood_temple_yellow {
-    background-position: calc(var(--tile-width) * -62 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * -396 / 149) calc(var(--tile-width) * -369 / 149);
 }
 
 .ood_monster {
     /* TODO: may need size adjustment */
-    width: calc(var(--tile-width) * 117 / 149);
-    height: calc(var(--tile-width) * 117 / 149);
+    width: calc(var(--tile-width) * var(--monster-tile-ratio) * 117 / 149);
+    height: calc(var(--tile-width) * var(--monster-tile-ratio) * 117 / 149);
     background-size: 468.38% 424.79%;
 }
 
 .ood_monster_blue {
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -10 / 149);
+    background-position: calc(var(--tile-width) * var(--monster-tile-ratio) * -147 / 149) calc(var(--tile-width) * var(--monster-tile-ratio) * -10 / 149);
 }
 
 .ood_monster_green {
-    background-position: calc(var(--tile-width) * -147 / 149) calc(var(--tile-width) * -10 / 149);
+    background-position: calc(var(--tile-width) * var(--monster-tile-ratio) * -147 / 149) calc(var(--tile-width) * var(--monster-tile-ratio) * -147 / 149);
 }
 
 .ood_monster_black {
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -147 / 149);
+    background-position: calc(var(--tile-width) * var(--monster-tile-ratio) * -284 / 149) calc(var(--tile-width) * var(--monster-tile-ratio) * -147 / 149);
 }
 
 .ood_monster_yellow {
-    background-position: calc(var(--tile-width) * -147 / 149) calc(var(--tile-width) * -147 / 149);
+    background-position: calc(var(--tile-width) * var(--monster-tile-ratio) * -284 / 149) calc(var(--tile-width) * var(--monster-tile-ratio) * -10 / 149);
 }
 
 .ood_monster_pink {
-    background-position: calc(var(--tile-width) * -284 / 149) calc(var(--tile-width) * -10 / 149);
+    background-position: calc(var(--tile-width) * var(--monster-tile-ratio) * -10 / 149) calc(var(--tile-width) * var(--monster-tile-ratio) * -10 / 149);
 }
 
 .ood_monster_red {
-    background-position: calc(var(--tile-width) * -284 / 149) calc(var(--tile-width) * -147 / 149);
+    background-position: calc(var(--tile-width) * var(--monster-tile-ratio) * -10 / 149) calc(var(--tile-width) * var(--monster-tile-ratio) * -147 / 149);
 }
 
 .ood_statue {
@@ -713,19 +717,19 @@
 }
 
 .ood_statue_red {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -10 / 149);
+    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -235 / 149);
 }
 
 .ood_statue_green {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -85 / 149);
-}
-
-.ood_statue_pink {
     background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -160 / 149);
 }
 
+.ood_statue_pink {
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -432 / 149);
+}
+
 .ood_statue_black {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -235 / 149);
+    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -10 / 149);
 }
 
 .ood_statue_yellow {
@@ -733,7 +737,7 @@
 }
 
 .ood_statue_blue {
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -85 / 149);
 }
 
 .ood_god {
@@ -744,15 +748,15 @@
 }
 
 .ood_god_ares {
-    background-position: -10px -284px;
-}
-
-.ood_god_apollon {
     background-position: -95px -284px;
 }
 
+.ood_god_apollon {
+    background-position: -10px -284px;
+}
+
 .ood_god_artemis {
-    background-position: -180px -284px;
+    background-position: -421px -10px;
 }
 
 .ood_god_aphrodite {
@@ -760,11 +764,11 @@
 }
 
 .ood_god_hermes {
-    background-position: -421px -10px;
+    background-position: -421px -95px;
 }
 
 .ood_god_poseidon {
-    background-position: -421px -95px;
+    background-position: -180px -284px;
 }
 
 .ood_shrine {
@@ -787,11 +791,11 @@
 }
 
 .ood_ship_green {
-    background-position: calc(var(--tile-width) * -350 / 149) calc(var(--tile-width) * -284 / 149);
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -369 / 149);
 }
 
 .ood_ship_blue {
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * -350 / 149) calc(var(--tile-width) * -284 / 149);
 }
 
 .ood_ship_yellow {
@@ -1189,4 +1193,25 @@
 
 .ood_playerboard_green {
     background-position: -1127px -694px;
+}
+
+.ood_hex_center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.ood_maphex .ood_wooden_piece {
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+.ood_maphex .ood_offering {
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(-30deg);
+}
+
+.ood_maphex .ood_monster {
+    border: 1px solid white;
 }

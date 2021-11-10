@@ -310,10 +310,13 @@ class TheOracleOfDelphi extends Table
             $idsByColor[$player["player_color"]] = $player_id;
         }
         foreach($this->zeusTiles as $id => ["player" => $playerColor, "tile" => $sides]) {
-            $side = $zeusTileSides[($id - 1) % 12];
-            $tileStatus = $id + ($side > 0 ? 100 : 0);
-            $playerId = $idsByColor[$playerColor];
-            $tokensToAdd[] = "('zeus', '$playerColor', null, null, $playerId, $tileStatus)";
+            // leave out any Zeus tiles belonging to player colors not in the game
+            if (array_key_exists($playerColor, $idsByColor)) {
+                $side = $zeusTileSides[($id - 1) % 12];
+                $tileStatus = $id + ($side > 0 ? 100 : 0);
+                $playerId = $idsByColor[$playerColor];
+                $tokensToAdd[] = "('zeus', '$playerColor', null, null, $playerId, $tileStatus)";
+            }
         }
 
         // - shrines (all start in player supply)
@@ -521,7 +524,12 @@ class TheOracleOfDelphi extends Table
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        // Gather all information about current game situation (visible by player $current_player_id).
+        // tokens on map
+        $result["tokensOnMap"] = self::getObjectListFromDb(
+            "SELECT location_x, location_y, type, color, player_id, status FROM token
+             WHERE location_x IS NOT NULL"
+        );
   
         return $result;
     }
