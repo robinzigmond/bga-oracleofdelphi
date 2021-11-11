@@ -73,6 +73,8 @@
     --zeus-figure-ratio: 0.8;
     --offering-cube-ratio: 1.4;
     --monster-tile-ratio: 0.6;
+    --temple-figure-ratio: 1.4;
+    --statue-figure-ratio: 1.4;
 }
 
 #ood_map {
@@ -261,7 +263,7 @@
 }
 
 .ood_island_yellow_omega {
-    background-position: calc(var(--tile-width) * -143 / 149) calc(var(--tile-width) * -138 / 149);
+    background-position: calc(var(--tile-width) * -154 / 149) calc(var(--tile-width) * -138 / 149);
 }
 
 .ood_island_blue_sigma {
@@ -297,7 +299,7 @@
 }
 
 .ood_island_blue_phi {
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -349 / 149);
+    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -394 / 149);
 }
 
 .ood_zeus_figure {
@@ -649,33 +651,33 @@
 
 .ood_temple {
     /* TODO: may need size adjustment */
-    width: calc(var(--tile-width) * 41 / 149);
-    height: calc(var(--tile-width) * 42 / 149);
+    width: calc(var(--tile-width) * var(--temple-figure-ratio) * 41 / 149);
+    height: calc(var(--tile-width) * var(--temple-figure-ratio) * 42 / 149);
     background-size: 1336.59% 1183.33%;
 }
 
 .ood_temple_green {
-    background-position: calc(var(--tile-width) * -62 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * var(--temple-figure-ratio) * -62 / 149) calc(var(--tile-width) * var(--temple-figure-ratio) * -432 / 149);
 }
 
 .ood_temple_black {
-    background-position: calc(var(--tile-width) * -335 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * var(--temple-figure-ratio) * -335 / 149) calc(var(--tile-width) * var(--temple-figure-ratio) * -369 / 149);
 }
 
 .ood_temple_blue {
-    background-position: calc(var(--tile-width) * -213 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * var(--temple-figure-ratio) * -213 / 149) calc(var(--tile-width) * var(--temple-figure-ratio) * -369 / 149);
 }
 
 .ood_temple_pink {
-    background-position: calc(var(--tile-width) * -274 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * var(--temple-figure-ratio) * -274 / 149) calc(var(--tile-width) * var(--temple-figure-ratio) * -369 / 149);
 }
 
 .ood_temple_red {
-    background-position: calc(var(--tile-width) * -152 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * var(--temple-figure-ratio) * -152 / 149) calc(var(--tile-width) * var(--temple-figure-ratio) * -369 / 149);
 }
 
 .ood_temple_yellow {
-    background-position: calc(var(--tile-width) * -396 / 149) calc(var(--tile-width) * -369 / 149);
+    background-position: calc(var(--tile-width) * var(--temple-figure-ratio) * -396 / 149) calc(var(--tile-width) * var(--temple-figure-ratio) * -369 / 149);
 }
 
 .ood_monster {
@@ -711,33 +713,33 @@
 
 .ood_statue {
     /* TODO: may need size adjustment - especially when in ship hold rather than map */
-    width: calc(var(--tile-width) * 32 / 149);
-    height: calc(var(--tile-width) * 55 / 149);
+    width: calc(var(--tile-width) * var(--statue-figure-ratio) * 32 / 149);
+    height: calc(var(--tile-width) * var(--statue-figure-ratio) * 55 / 149);
     background-size: 1712.5% 903.64%;
 }
 
 .ood_statue_red {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -235 / 149);
+    background-position: calc(var(--tile-width) * var(--statue-figure-ratio) * -506 / 149) calc(var(--tile-width) * var(--statue-figure-ratio) * -235 / 149);
 }
 
 .ood_statue_green {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -160 / 149);
+    background-position: calc(var(--tile-width) * var(--statue-figure-ratio) * -506 / 149) calc(var(--tile-width) * var(--statue-figure-ratio) * -160 / 149);
 }
 
 .ood_statue_pink {
-    background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -432 / 149);
+    background-position: calc(var(--tile-width) * var(--statue-figure-ratio) * -10 / 149) calc(var(--tile-width) * var(--statue-figure-ratio) * -432 / 149);
 }
 
 .ood_statue_black {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -10 / 149);
+    background-position: calc(var(--tile-width) * var(--statue-figure-ratio) * -506 / 149) calc(var(--tile-width) * var(--statue-figure-ratio) * -10 / 149);
 }
 
 .ood_statue_yellow {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -310 / 149);
+    background-position: calc(var(--tile-width) * var(--statue-figure-ratio) * -506 / 149) calc(var(--tile-width) * var(--statue-figure-ratio) * -310 / 149);
 }
 
 .ood_statue_blue {
-    background-position: calc(var(--tile-width) * -506 / 149) calc(var(--tile-width) * -85 / 149);
+    background-position: calc(var(--tile-width) * var(--statue-figure-ratio) * -506 / 149) calc(var(--tile-width) * var(--statue-figure-ratio) * -85 / 149);
 }
 
 .ood_god {
@@ -1214,4 +1216,21 @@
 
 .ood_maphex .ood_monster {
     border: 1px solid white;
+}
+
+.ood_maphex .ood_temple {
+    top: 35%;
+    left: 45%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+}
+
+.ood_maphex .ood_statue {
+    transform: translate(-50%, -50%) rotate(30deg);
+}
+
+.ood_maphex .ood_island_tile {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
 }

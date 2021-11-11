@@ -70,6 +70,14 @@ class TheOracleOfDelphi extends Table
             MAP_COLOR_PINK
         ];
 
+        // mapping of player colors (color hex code) with color strings ("red" etc)
+        $this->colorMapping = [
+            PLAYER_COLOR_RED => MAP_COLOR_RED,
+            PLAYER_COLOR_YELLOW => MAP_COLOR_YELLOW,
+            PLAYER_COLOR_GREEN => MAP_COLOR_GREEN,
+            PLAYER_COLOR_BLUE => MAP_COLOR_BLUE
+        ];
+
         // correspondence of colors with gods
         $this->godColors = [
             MAP_COLOR_RED => GOD_APHRODITE,
@@ -391,7 +399,8 @@ class TheOracleOfDelphi extends Table
             ["x" => $x, "y" => $y] = $islandSpace;
             $islandTile = array_shift($islandTiles);
             ["color" => $color, "status" => $status] = $islandTile;
-            $tokensToAdd[] = "('" . MAP_TYPE_ISLAND . "', '$color', $x, $y, null, '$status')";
+            $sqlColor = $this->colorMapping[$color];
+            $tokensToAdd[] = "('" . MAP_TYPE_ISLAND . "', '$sqlColor', $x, $y, null, '$status')";
         }
 
         // now insert all tokens into the database
@@ -525,12 +534,23 @@ class TheOracleOfDelphi extends Table
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // Gather all information about current game situation (visible by player $current_player_id).
-        // tokens on map
+        // tokens on map.
+        // Note that for island tiles we send the status as -1 for any facedown tile, to avoid leaking
+        // hidden information (the greek letter on face-down tiles)
         $result["tokensOnMap"] = self::getObjectListFromDb(
-            "SELECT location_x, location_y, type, color, player_id, status FROM token
-             WHERE location_x IS NOT NULL"
+            "SELECT location_x, location_y, type, color, player_id,
+            CASE
+                WHEN type = '" . MAP_TYPE_ISLAND . "' AND STATUS < 5 THEN -1
+                ELSE status
+            END AS status
+            FROM token
+            WHERE location_x IS NOT NULL"
         );
-  
+
+        // also send greek letter statuses for islands so it can be "decoded" easily on the frontend
+        // - ensures it's consistent and doesn't have to be in both PHP and JS code!
+        $result["greekLetters"] = array_flip($this->greekLetterStatus);
+
         return $result;
     }
 

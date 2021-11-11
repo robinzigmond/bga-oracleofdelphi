@@ -18,6 +18,17 @@
 // constants sent from backend
 const OFFERING = "offering";
 const MONSTER = "monster";
+const STATUE = "statue";
+const ISLAND = "island";
+
+const RED = "red";
+const YELLOW = "yellow";
+const GREEN = "green";
+const BLUE = "blue";
+const PINK = "pink";
+const BLACK = "black";
+
+const ALL_COLORS = [RED, YELLOW, GREEN, BLUE, PINK, BLACK];
 
 define([
     "dojo", "dojo/_base/declare",
@@ -74,6 +85,18 @@ define([
                 zeusFigure.classList.add("ood_zeus_figure", "ood_hex_center");
                 zeusHex.appendChild(zeusFigure);
 
+                // also place temples (in fixed positions depending only on the map)
+                ALL_COLORS.forEach((color) => {
+                    const templeHex = document.querySelector(`.ood_maphex_temple.ood_maphex_color_${color}`);
+                    const templeDiv = document.createElement("div");
+                    templeDiv.classList.add(
+                        "ood_wooden_piece",
+                        "ood_temple",
+                        `ood_temple_${color}`
+                    );
+                    templeHex.appendChild(templeDiv);
+                });
+
                 // place all tokens of all types on the map
                 const { tokensOnMap } = gamedatas;
                 // keep track of counts of each "type" of token in each location
@@ -118,6 +141,13 @@ define([
                         case MONSTER:
                             this.placeMonster(location_x, location_y, color, position, total);
                             break;
+                        case STATUE:
+                            this.placeStatue(location_x, location_y, color, position);
+                            break;
+                        case ISLAND: {
+                            this.placeIsland(location_x, location_y, color, status, gamedatas.greekLetters);
+                            break;
+                        }
                         default:
                             break;
                     }
@@ -248,6 +278,59 @@ define([
                 const left = top;
                 tokenDiv.style.top = `${top}%`;
                 tokenDiv.style.left = `${left}%`;
+                hex.appendChild(tokenDiv);
+            },
+
+            placeStatue: function (x, y, color, position) {
+                const hex = document.getElementById(`ood_maphex_${x}_${y}`);
+                const tokenDiv = document.createElement("div");
+                tokenDiv.classList.add(
+                    "ood_wooden_piece",
+                    "ood_statue",
+                    `ood_statue_${color}`
+                );
+                let top, left;
+                switch (position) {
+                    case 0:
+                        [top, left] = [40, 80];
+                        break;
+                    case 1:
+                        [top, left] = [15, 50];
+                        break;
+                    case 2:
+                        [top, left] = [40, 20];
+                        break;
+                    default:
+                        console.error(`unexpected position value for statue: ${position}`);
+                        break;
+                }
+                // compensate for tile rotation - rotate clockwise by 30 degrees
+                const cos = Math.cos(-Math.PI / 6);
+                const sin = Math.sin(-Math.PI / 6);
+                let xPos = (left - 50) / 50;
+                let yPos = (50 - top) / 50;
+                [xPos, yPos] = [xPos * cos - yPos * sin, yPos * cos + xPos * sin];
+                left = 50 * (xPos + 1);
+                top = 50 * (1 - yPos);
+                tokenDiv.style.top = `${top}%`;
+                tokenDiv.style.left = `${left}%`;
+                hex.appendChild(tokenDiv);
+            },
+
+            placeIsland: function (x, y, color, status, greekLetterArray) {
+                const hex = document.getElementById(`ood_maphex_${x}_${y}`);
+                const tokenDiv = document.createElement("div");
+                let islandDetails;
+                if (Number(status) === -1) {
+                    islandDetails = "back";
+                } else {
+                    islandDetails = `${color}_${greekLetterArray[status - 4]}`;
+                }
+                tokenDiv.classList.add(
+                    "ood_island_tile",
+                    `ood_island_${islandDetails}`,
+                    "ood_hex_center"
+                );
                 hex.appendChild(tokenDiv);
             },
 
