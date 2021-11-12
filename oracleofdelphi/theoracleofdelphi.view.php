@@ -37,6 +37,14 @@
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count( $players );
 
+        // translated strings for main interface
+        $this->tpl["ORACLE_CARDS"] = self::_("Oracle cards");
+        $this->tpl["INJURY_CARDS"] = self::_("Injury cards");
+        $this->tpl["EQUIPMENT_CARDS"] = self::_("Equipment cards");
+        $this->tpl["DECK"] = self::_("Deck");
+        $this->tpl["DISCARD"] = self::_("Discard");
+        $this->tpl["DISPLAY"] = self::_("Display");
+
         $tiles = $this->game->getObjectListFromDb(
           "SELECT x_coord, y_coord, type, color, orientation FROM map_hex"
         );

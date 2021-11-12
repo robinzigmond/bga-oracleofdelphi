@@ -96,6 +96,9 @@ class TheOracleOfDelphi extends Table
             GREEK_LETTER_OMEGA => 3
         ];
 
+        // set up cards
+        $this->setupCards();
+
         self::initGameStateLabels( array( 
             //    "my_first_global_variable" => 10,
             //    "my_second_global_variable" => 11,
@@ -105,6 +108,45 @@ class TheOracleOfDelphi extends Table
             //      ...
         ) );        
 	}
+
+    private function setupCards() {
+        $this->allCards = self::getNew("module.common.deck");
+        $this->allCards->init("card");
+        // first create all in single "deck" location (even though this won't be used in the game!)
+        $allCards = [];
+        // injury and oracle cards: 7 (resp 5) of each of the 6 colours
+        $index = 0;
+        foreach ($this->allColors as $color) {
+            $allCards[] = [
+                "type" => CARD_TYPE_INJURY,
+                "type_arg" => $index,
+                "nbr" => 7
+            ];
+            $allCards[] = [
+                "type" => CARD_TYPE_ORACLE,
+                "type_arg" => $index,
+                "nbr" => 5
+            ];
+            $index++;
+        }
+        // companion and equipment cards, defined in material file (although the only information we are using
+        // here is the number of cards of each type!)
+        foreach($this->equipmentCards as $cardId => $card) {
+            $allCards[] = [
+                "type" => CARD_TYPE_EQUIPMENT,
+                "type_arg" => $cardId,
+                "nbr" => 1
+            ];
+        }
+        foreach($this->companionCards as $cardId => $card) {
+            $allCards[] = [
+                "type" => CARD_TYPE_COMPANION,
+                "type_arg" => $cardId,
+                "nbr" => 1
+            ];
+        }
+        $this->allCards->createCards($allCards);
+    }
 	
     protected function getGameName( )
     {
@@ -157,6 +199,8 @@ class TheOracleOfDelphi extends Table
 
         // running through game setup in the rulebook.
         // Step 1 - "setup variable game board" (ie the map)
+        //TODO: this won't store the instance var when reloading a game after setup, need to get
+        //it from database!
         $this->map = $this->setupMap();
 
         // temples - randomly place the 6 colors of temples on each of the corresponding map spaces.
@@ -173,44 +217,7 @@ class TheOracleOfDelphi extends Table
 
         // Step 2 - "setup general supply"
         // mostly various decks of cards (Oracle/Injury/Companion/Equipment). We will store all these
-        // in a single "deck" component - initialised below from the material file and other "static"
-        // information.
-        $this->allCards = self::getNew("module.common.deck");
-        $this->allCards->init("card");
-        // first create all in single "deck" location (even though this won't be used in the game!)
-        $allCards = [];
-        // injury and oracle cards: 7 (resp 5) of each of the 6 colours
-        $index = 0;
-        foreach ($this->allColors as $color) {
-            $allCards[] = [
-                "type" => CARD_TYPE_INJURY,
-                "type_arg" => $index,
-                "nbr" => 7
-            ];
-            $allCards[] = [
-                "type" => CARD_TYPE_ORACLE,
-                "type_arg" => $index,
-                "nbr" => 5
-            ];
-            $index++;
-        }
-        // companion and equipment cards, defined in material file (although the only information we are using
-        // here is the number of cards of each type!)
-        foreach($this->equipmentCards as $cardId => $card) {
-            $allCards[] = [
-                "type" => CARD_TYPE_EQUIPMENT,
-                "type_arg" => $cardId,
-                "nbr" => 1
-            ];
-        }
-        foreach($this->companionCards as $cardId => $card) {
-            $allCards[] = [
-                "type" => CARD_TYPE_COMPANION,
-                "type_arg" => $cardId,
-                "nbr" => 1
-            ];
-        }
-        $this->allCards->createCards($allCards);
+        // in a single "deck" component - initialised in constructor.
 
         // then find the cards of each apppropriate "type" and move to the appropriate locations
         $cardsWithIds = $this->allCards->getCardsInLocation("deck"); // that's where they'll be at this stage
@@ -550,6 +557,58 @@ class TheOracleOfDelphi extends Table
         // also send greek letter statuses for islands so it can be "decoded" easily on the frontend
         // - ensures it's consistent and doesn't have to be in both PHP and JS code!
         $result["greekLetters"] = array_flip($this->greekLetterStatus);
+
+        // send info about cards, as follows:
+        // for oracle cards, those held by players, the number in deck and discard, and the top discard
+        // for injury cards, same as for oracle
+        // for companion cards, ALL such cards along with their locations (player or deck)
+        // for equipment cards, those held by players, the 6 on display, the number in deck and discard,
+        // and the top discard
+        $cardInfo = [
+            CARD_TYPE_ORACLE => [],
+            CARD_TYPE_INJURY => [],
+            CARD_TYPE_COMPANION => [],
+            CARD_TYPE_EQUIPMENT => []
+        ];
+        // counts in decks/discard
+        $deckDiscardCounts = self::getCollectionFromDb(
+            "SELECT card_location, COUNT(*) AS count
+             FROM card
+             WHERE card_location LIKE '%_deck' OR card_location LIKE '%_discard'
+             GROUP BY card_location", true
+        );
+        $inHand = self::getDoubleKeyCollectionFromDb(
+            "SELECT card_type, card_location_arg, card_type_arg
+             FROM card
+             WHERE card_location = 'hand'", true
+        );
+        $getCardIdentifier = function($cardType, $cardNum) {
+            return in_array($cardType, [CARD_TYPE_INJURY, CARD_TYPE_ORACLE])
+                ? $this->allColors[(int)$cardNum]
+                : (int)$cardNum;
+        };
+        foreach([CARD_TYPE_ORACLE, CARD_TYPE_INJURY, CARD_TYPE_COMPANION, CARD_TYPE_EQUIPMENT] as $cardType) {
+            $cardInfo[$cardType]["deck_size"] = array_key_exists("${cardType}_deck", $deckDiscardCounts)
+                ? (int)$deckDiscardCounts["${cardType}_deck"]
+                : 0;
+            $cardInfo[$cardType]["discard_size"] = array_key_exists("${cardType}_discard", $deckDiscardCounts)
+                ? (int)$deckDiscardCounts["${cardType}_discard"]
+                : 0;
+            $topDiscard = $this->allCards->getCardOnTop("${cardType}_discard");
+            $cardInfo[$cardType]["top_discard"] = isset($topDiscard)
+                ? $getCardIdentifier($cardType, $topDiscard["type_arg"])
+                : null;
+            $cardInfo[$cardType]["hands"] = array_key_exists($cardType, $inHand)
+                ? array_map(function($cardNum) use ($cardType, $getCardIdentifier) {
+                    return $getCardIdentifier($cardType, $cardNum);
+                  }, $inHand[$cardType])
+                : [];
+        }
+        $cardInfo["equipment"]["display"] = array_map(function($card) use ($getCardIdentifier) {
+            return $getCardIdentifier("equipment", (int)$card["type_arg"]);
+        }, array_values($this->allCards->getCardsInLocation("equipment_display")));
+
+        $result["cards"] = $cardInfo;
 
         return $result;
     }

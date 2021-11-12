@@ -30,6 +30,11 @@ const BLACK = "black";
 
 const ALL_COLORS = [RED, YELLOW, GREEN, BLUE, PINK, BLACK];
 
+const ORACLE = "oracle";
+const INJURY = "injury";
+const COMPANION = "companion";
+const EQUIPMENT = "equipment";
+
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
@@ -152,6 +157,41 @@ define([
                             break;
                     }
                     addToCounts(location_x, location_y, type);
+                }
+
+                // add cards to both player areas and decks/piles below. Also setup counters for deck/discard size.
+                this.counters = {};
+                for (const cardType of [ORACLE, INJURY, EQUIPMENT]) {
+                    const deckCounter = new ebg.counter();
+                    deckCounter.create(`ood_${cardType}_deck_count`);
+                    deckCounter.toValue(gamedatas.cards[cardType].deck_size);
+                    if (gamedatas.cards[cardType].deck_size > 0) {
+                        const deckContainer = document.getElementById(`ood_${cardType}_deck`);
+                        const cardBack = document.createElement("div");
+                        cardBack.classList.add("ood_card", `ood_card_${cardType}`, `ood_card_${cardType}_back`);
+                        deckContainer.appendChild(cardBack);
+                    }
+                    //TODO: leave appropriately-sized blank space if deck count is 0
+                    //(can this even happen - discard pile auto-reshuffled?)
+                    const discardCounter = new ebg.counter();
+                    discardCounter.create(`ood_${cardType}_discard_count`);
+                    discardCounter.toValue(gamedatas.cards[cardType].discard_size);
+                    const { top_discard } = gamedatas.cards[cardType];
+                    if (top_discard) {
+                        const discardContainer = document.getElementById(`ood_${cardType}_discard`);
+                        const card = document.createElement("div");
+                        card.classList.add("ood_card", `ood_card_${cardType}`, `ood_card_${cardType}_${top_discard}`);
+                        discardContainer.appendChild(card);
+                    }
+                    //TODO: leave appropriately-sized blank space if no discard
+
+                    this.counters[cardType] = { deck: deckCounter, discard: discardCounter };
+                }
+                const equipmentDisplay = document.getElementById("ood_equipment_display");
+                for (const equipmentCard in gamedatas.cards.equipment.display) {
+                    const cardDiv = document.createElement("div");
+                    cardDiv.classList.add("ood_card", "ood_card_equipment", `ood_card_equipment_${equipmentCard}`);
+                    equipmentDisplay.appendChild(cardDiv);
                 }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
