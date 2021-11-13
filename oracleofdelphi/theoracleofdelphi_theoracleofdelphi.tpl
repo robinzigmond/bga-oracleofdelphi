@@ -25,40 +25,34 @@
     <div class="ood_card_deck_discard" id="ood_oracle_cards">
         <h3>{ORACLE_CARDS}</h3>
         <div class="ood_card_deck">
-            <h4>{DECK}</h4>
-            <div id="ood_oracle_deck_count"></div>
-            <div id="ood_oracle_deck"></div>
+            <h4>{DECK} (<span id="ood_oracle_deck_count"></span>)</h4>
+            <div id="ood_oracle_deck" class="ood_card_deck_inner"></div>
         </div>
         <div class="ood_card_discard">
-            <h4>{DISCARD}</h4>
-            <div id="ood_oracle_discard_count"></div>
-            <div id="ood_oracle_discard"></div>
+            <h4>{DISCARD}  (<span id="ood_oracle_discard_count"></span>)</h4>
+            <div id="ood_oracle_discard" class="ood_card_discard_inner"></div>
         </div>
     </div>
     <div class="ood_card_deck_discard" id="ood_injury_cards">
         <h3>{INJURY_CARDS}</h3>
         <div class="ood_card_deck">
-            <h4>{DECK}</h4>
-            <div id="ood_injury_deck_count"></div>
-            <div id="ood_injury_deck"></div>
+            <h4>{DECK} (<span id="ood_injury_deck_count"></span>)</h4>
+            <div id="ood_injury_deck" class="ood_card_deck_inner"></div>
         </div>
         <div class="ood_card_discard">
-            <h4>{DISCARD}</h4>
-            <div id="ood_injury_discard_count"></div>
-            <div id="ood_injury_discard"></div>
+            <h4>{DISCARD}  (<span id="ood_injury_discard_count"></span>)</h4>
+            <div id="ood_injury_discard" class="ood_card_discard_inner"></div>
         </div>
     </div>
-        <div class="ood_card_deck_discard" id="ood_equipment_cards">
+    <div class="ood_card_deck_discard" id="ood_equipment_cards">
         <h3>{EQUIPMENT_CARDS}</h3>
         <div class="ood_card_deck">
-            <h4>{DECK}</h4>
-            <div id="ood_equipment_deck_count"></div>
-            <div id="ood_equipment_deck"></div>
+            <h4>{DECK} (<span id="ood_equipment_deck_count"></span>)</h4>
+            <div id="ood_equipment_deck" class="ood_card_deck_inner"></div>
         </div>
         <div class="ood_card_discard">
-            <h4>{DISCARD}</h4>
-            <div id="ood_equipment_discard_count"></div>
-            <div id="ood_equipment_discard"></div>
+            <h4>{DISCARD}  (<span id="ood_equipment_discard_count"></span>)</h4>
+            <div id="ood_equipment_discard" class="ood_card_discard_inner"></div>
         </div>
         <div class="ood_card_display">
             <h4>{DISPLAY}</h4>

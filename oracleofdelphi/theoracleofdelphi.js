@@ -165,25 +165,31 @@ define([
                     const deckCounter = new ebg.counter();
                     deckCounter.create(`ood_${cardType}_deck_count`);
                     deckCounter.toValue(gamedatas.cards[cardType].deck_size);
+                    const deckContainer = document.getElementById(`ood_${cardType}_deck`);
                     if (gamedatas.cards[cardType].deck_size > 0) {
-                        const deckContainer = document.getElementById(`ood_${cardType}_deck`);
                         const cardBack = document.createElement("div");
                         cardBack.classList.add("ood_card", `ood_card_${cardType}`, `ood_card_${cardType}_back`);
                         deckContainer.appendChild(cardBack);
+                    } else {
+                        const spacer = document.createElement("div");
+                        spacer.classList.add("ood_card_spacer");
+                        deckContainer.appendChild(spacer);
                     }
-                    //TODO: leave appropriately-sized blank space if deck count is 0
-                    //(can this even happen - discard pile auto-reshuffled?)
+
                     const discardCounter = new ebg.counter();
                     discardCounter.create(`ood_${cardType}_discard_count`);
                     discardCounter.toValue(gamedatas.cards[cardType].discard_size);
                     const { top_discard } = gamedatas.cards[cardType];
+                    const discardContainer = document.getElementById(`ood_${cardType}_discard`);
                     if (top_discard) {
-                        const discardContainer = document.getElementById(`ood_${cardType}_discard`);
                         const card = document.createElement("div");
                         card.classList.add("ood_card", `ood_card_${cardType}`, `ood_card_${cardType}_${top_discard}`);
                         discardContainer.appendChild(card);
+                    } else {
+                        const spacer = document.createElement("div");
+                        spacer.classList.add("ood_card_spacer");
+                        discardContainer.appendChild(spacer);
                     }
-                    //TODO: leave appropriately-sized blank space if no discard
 
                     this.counters[cardType] = { deck: deckCounter, discard: discardCounter };
                 }

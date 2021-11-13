@@ -75,6 +75,7 @@
     --monster-tile-ratio: 0.6;
     --temple-figure-ratio: 1.4;
     --statue-figure-ratio: 1.4;
+    --card-ratio: 0.75;
 }
 
 #ood_map {
@@ -919,254 +920,251 @@
 
 .ood_card {
     background-image: url('img/cards.jpg');
+    border-radius: 10%;
 }
 
 .ood_card_injury {
-    /* TODO: adjust dimensions etc, make variable */
-    width: 290px;
-    height: 196px;
+    width: calc(290px * var(--card-ratio));
+    height: calc(196px * var(--card-ratio));
     background-size: 711.38% 943.88%;
 }
 
 .ood_card_injury_black {
-    background-position: -580px -1066px;
+    background-position: calc(-580px * var(--card-ratio)) calc(-1066px * var(--card-ratio));
 }
 
 .ood_card_injury_red {
-    background-position: -1160px -1066px;
+    background-position: calc(-1160px * var(--card-ratio)) calc(-1066px * var(--card-ratio));
 }
 
 .ood_card_injury_blue {
-    background-position: -0px -1262px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-1262px * var(--card-ratio));
 }
 
 .ood_card_injury_pink {
-    background-position: -580px -1262px;
+    background-position: calc(-580px * var(--card-ratio)) calc(-1262px * var(--card-ratio));
 }
 
 .ood_card_injury_back {
-    background-position: -1160px -1262px;
+    background-position: calc(-1160px * var(--card-ratio)) calc(-1262px * var(--card-ratio));
 }
 
 .ood_card_injury_yellow {
-    background-position: -0px -1458px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-1458px * var(--card-ratio));
 }
 
 .ood_card_injury_green {
-    background-position: -0px -1654px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-1654px * var(--card-ratio));
 }
 
 .ood_card_oracle {
-    /* TODO: adjust dimensions etc, make variable */
-    width: 196px;
-    height: 290px;
+    width: calc(196px * var(--card-ratio));
+    height: calc(290px * var(--card-ratio));
     background-size: 1052.55% 637.93%;
 }
 
 .ood_card_oracle_black {
-    background-position: -1671px -0px;
+    background-position: calc(-1671px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_oracle_blue {
-    background-position: -1671px -290px;
+    background-position: calc(-1671px * var(--card-ratio)) calc(-290px * var(--card-ratio));
 }
 
 .ood_card_oracle_pink {
-    background-position: -1671px -1160px;
+    background-position: calc(-1671px * var(--card-ratio)) calc(-1160px * var(--card-ratio));
 }
 
 .ood_card_oracle_green {
-    background-position: -1867px -0px;
+    background-position: calc(-1867px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_oracle_back {
-    background-position: -1867px -290px;
+    background-position: calc(-1867px * var(--card-ratio)) calc(-290px * var(--card-ratio));
 }
 
 .ood_card_oracle_red {
-    background-position: -1867px -580px;
+    background-position: calc(-1867px * var(--card-ratio)) calc(-580px * var(--card-ratio));
 }
 
 .ood_card_oracle_yellow {
-    background-position: -1867px -1160px;
+    background-position: calc(-1867px * var(--card-ratio)) calc(-1160px * var(--card-ratio));
 }
 
 .ood_card_equipment {
-    /* TODO: adjust dimensions etc, make variable */
-    width: 290px;
-    height: 196px;
+    width: calc(290px * var(--card-ratio));
+    height: calc(196px * var(--card-ratio));
     background-size: 711.38% 943.88%;
 }
 
 .ood_card_equipment_back {
-    background-position: -1160px -1458px;
+    background-position: calc(-1160px * var(--card-ratio)) calc(-1458px * var(--card-ratio));
 }
 
 .ood_card_equipment_1 {
-    background-position: -588px -486px;
+    background-position: calc(-588px * var(--card-ratio)) calc(-486px * var(--card-ratio));
 }
 
 .ood_card_equipment_2 {
-    background-position: -1185px -0px;
+    background-position: calc(-1185px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_equipment_3 {
-    background-position: -682px -776px;
+    background-position: calc(-682px * var(--card-ratio)) calc(-776px * var(--card-ratio));
 }
 
 .ood_card_equipment_4 {
-    background-position: -290px -1458px;
+    background-position: calc(-290px * var(--card-ratio)) calc(-1458px * var(--card-ratio));
 }
 
 .ood_card_equipment_5 {
-    background-position: -0px -1066px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-1066px * var(--card-ratio));
 }
 
 .ood_card_equipment_6 {
-    background-position: -870px -1458px;
+    background-position: calc(-870px * var(--card-ratio)) calc(-1458px * var(--card-ratio));
 }
 
 .ood_card_equipment_7 {
-    background-position: -290px -1654px;
+    background-position: calc(-290px * var(--card-ratio)) calc(-1654px * var(--card-ratio));
 }
 
 .ood_card_equipment_8 {
-    background-position: -895px -196px;
+    background-position: calc(-895px * var(--card-ratio)) calc(-196px * var(--card-ratio));
 }
 
 .ood_card_equipment_9 {
-    background-position: -392px -776px;
+    background-position: calc(-392px * var(--card-ratio)) calc(-776px * var(--card-ratio));
 }
 
 .ood_card_equipment_10 {
-    background-position: -895px -0px;
+    background-position: calc(-895px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_equipment_11 {
-    background-position: -1450px -1458px;
+    background-position: calc(-1450px * var(--card-ratio)) calc(-1458px * var(--card-ratio));
 }
 
 .ood_card_equipment_12 {
-    background-position: -870px -1066px;
+    background-position: calc(-870px * var(--card-ratio)) calc(-1066px * var(--card-ratio));
 }
 
 .ood_card_equipment_13 {
-    background-position: -870px -1262px;
+    background-position: calc(-870px * var(--card-ratio)) calc(-1262px * var(--card-ratio));
 }
 
 .ood_card_equipment_14 {
-    background-position: -0px -0px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_equipment_15 {
-    background-position: -1185px -196px;
+    background-position: calc(-1185px * var(--card-ratio)) calc(-196px * var(--card-ratio));
 }
 
 .ood_card_equipment_16 {
-    background-position: -1160px -1654px;
+    background-position: calc(-1160px * var(--card-ratio)) calc(-1654px * var(--card-ratio));
 }
 
 .ood_card_equipment_17 {
-    background-position: -580px -1654px;
+    background-position: calc(-580px * var(--card-ratio)) calc(-1654px * var(--card-ratio));
 }
 
 .ood_card_equipment_18 {
-    background-position: -580px -1458px;
+    background-position: calc(-580px * var(--card-ratio)) calc(-1458px * var(--card-ratio));
 }
 
 .ood_card_equipment_19 {
-    background-position: -200px -1066px;
+    background-position: calc(-200px * var(--card-ratio)) calc(-1066px * var(--card-ratio));
 }
 
 .ood_card_equipment_20 {
-    background-position: -870px -1654px;
+    background-position: calc(-870px * var(--card-ratio)) calc(-1654px * var(--card-ratio));
 }
 
 .ood_card_equipment_21 {
-    background-position: -290px -1262px;
+    background-position: calc(-290px * var(--card-ratio)) calc(-1262px * var(--card-ratio));
 }
 
 .ood_card_equipment_22 {
-    background-position: -1185px -682px;
+    background-position: calc(-1185px * var(--card-ratio)) calc(-682px * var(--card-ratio));
 }
 
 .ood_card_companion {
-    /* TODO: adjust dimensions etc, make variable */
-    width: 196px;
-    height: 290px;
+    width: calc(196px * var(--card-ratio));
+    height: calc(290px * var(--card-ratio));
     background-size: 1052.55% 637.93%;
 }
 
 .ood_card_companion_1 {
-    background-position: -0px -196px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-196px * var(--card-ratio));
 }
 
 .ood_card_companion_2 {
-    background-position: -1475px -290px;
+    background-position: calc(-1475px * var(--card-ratio)) calc(-290px * var(--card-ratio));
 }
 
 .ood_card_companion_3 {
-    background-position: -307px -0px;
+    background-position: calc(-307px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_companion_4 {
-    background-position: -1185px -392px;
+    background-position: calc(-1185px * var(--card-ratio)) calc(-392px * var(--card-ratio));
 }
 
 .ood_card_companion_5 {
-    background-position: -503px -0px;
+    background-position: calc(-503px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_companion_6 {
-    background-position: -699px -0px;
+    background-position: calc(-699px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_companion_7 {
-    background-position: -895px -392px;
+    background-position: calc(-895px * var(--card-ratio)) calc(-392px * var(--card-ratio));
 }
 
 .ood_card_companion_8 {
-    background-position: -1475px -0px;
+    background-position: calc(-1475px * var(--card-ratio)) calc(-0px * var(--card-ratio));
 }
 
 .ood_card_companion_9 {
-    background-position: -0px -486px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-486px * var(--card-ratio));
 }
 
 .ood_card_companion_10 {
-    background-position: -196px -486px;
+    background-position: calc(-196px * var(--card-ratio)) calc(-486px * var(--card-ratio));
 }
 
 .ood_card_companion_11 {
-    background-position: -392px -486px;
+    background-position: calc(-392px * var(--card-ratio)) calc(-486px * var(--card-ratio));
 }
 
 .ood_card_companion_12 {
-    background-position: -1671px -580px;
+    background-position: calc(-1671px * var(--card-ratio)) calc(-580px * var(--card-ratio));
 }
 
 .ood_card_companion_13 {
-    background-position: -196px -776px;
+    background-position: calc(-196px * var(--card-ratio)) calc(-776px * var(--card-ratio));
 }
 
 .ood_card_companion_14 {
-    background-position: -0px -776px;
+    background-position: calc(-0px * var(--card-ratio)) calc(-776px * var(--card-ratio));
 }
 
 .ood_card_companion_15 {
-    background-position: -1867px -870px;
+    background-position: calc(-1867px * var(--card-ratio)) calc(-870px * var(--card-ratio));
 }
 
 .ood_card_companion_16 {
-    background-position: -1671px -870px;
+    background-position: calc(-1671px * var(--card-ratio)) calc(-870px * var(--card-ratio));
 }
 
 .ood_card_companion_17 {
-    background-position: -1475px -870px;
+    background-position: calc(-1475px * var(--card-ratio)) calc(-870px * var(--card-ratio));
 }
 
 .ood_card_companion_18 {
-    background-position: -1475px -580px;
+    background-position: calc(-1475px * var(--card-ratio)) calc(-580px * var(--card-ratio));
 }
 
 .ood_playeraid {
@@ -1237,4 +1235,42 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-30deg);
+}
+
+/* cards stock area */
+
+#ood_cards_stock {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.ood_card_deck_discard {
+    display: inline-flex;
+    flex-direction: column;
+    margin: 0 10px;
+    text-align: center;
+}
+
+.ood_card_deck_inner, .ood_card_discard_inner {
+    height: calc(290px * var(--card-ratio));
+}
+
+#ood_equipment_cards {
+    flex: 2 0 750px;
+}
+
+#ood_equipment_deck {
+    display: flex;
+    justify-content: center;
+}
+
+#ood_equipment_display .ood_card_equipment {
+    display: inline-block;
+    margin: 5px 10px;
+}
+
+.ood_card_spacer {
+    width: calc(196px * var(--card-ratio));
+    height: calc(290px * var(--card-ratio));
 }
