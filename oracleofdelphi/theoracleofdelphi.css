@@ -68,7 +68,6 @@
 */
 
 :root {
-    /* TODO: adjust these dimensions as needed! */
     --tile-width: 75px;
     --zeus-figure-ratio: 0.8;
     --offering-cube-ratio: 1.4;
@@ -76,6 +75,14 @@
     --temple-figure-ratio: 1.4;
     --statue-figure-ratio: 1.4;
     --card-ratio: 0.75;
+    --playerboard-ratio: 0.65;
+    --favor-ratio: 0.5;
+    --shiptile-ratio: 0.7;
+    --board-shrine-width-ratio: 100px;
+    --god-ratio: 0.52;
+    --shield-ratio: 0.7;
+    --zeus-tile-ratio: 0.6;
+    --board-card-ratio: 0.45;
 }
 
 #ood_map {
@@ -313,306 +320,305 @@
 
 .ood_favor {
     background-image: url('img/misc_tokens.png');
-    width: 77px;
-    height: 78px;
+    width: calc(77px * var(--favor-ratio));
+    height: calc(78px * var(--favor-ratio));
     background-size: 392.21% 375.64%;
-    background-position: -146px -10px;
+    background-position: calc(-146px * var(--favor-ratio)) calc(-10px * var(--favor-ratio));
 }
 
 .ood_shield {
     background-image: url('img/misc_tokens.png');
-    /* TODO: adjust dimensions etc. based on CSS var for playerboard width */
-    width: 49px;
-    height: 77px;
+    width: calc(49px * var(--shield-ratio));
+    height: calc(77px * var(--shield-ratio));
     background-size: 616.33% 380.52%
 }
 
-.ood_shield_red {
-    background-position: -243px -10px;
+.ood_shield_ff0000 {
+    background-position: calc(-243px * var(--shield-ratio)) calc(-10px * var(--shield-ratio));
 }
 
-.ood_shield_yellow {
-    background-position: -10px -206px;
+.ood_shield_ffa500 {
+    background-position: calc(-10px * var(--shield-ratio)) calc(-206px * var(--shield-ratio));
 }
 
-.ood_shield_green {
-    background-position: -146px -108px;
+.ood_shield_008000 {
+    background-position: calc(-146px * var(--shield-ratio)) calc(-108px * var(--shield-ratio));
 }
 
-.ood_shield_blue {
-    background-position: -243px -107px;
+.ood_shield_0000ff {
+    background-position: calc(-243px * var(--shield-ratio)) calc(-107px * var(--shield-ratio));
 }
 
 .ood_zeus_tile {
     background-image: url('img/zeus_tiles.jpg');
-    /* TODO: adjust dimensions etc, make variable */
-    width: 80px;
-    height: 119px;
+    width: calc(80px * var(--zeus-tile-ratio));
+    height: calc(119px * var(--zeus-tile-ratio));
     background-size: 1000% 600%
 }
 
-.ood_zeus_blue_monster_black {
-    background-position: -0px -0px;
+.ood_zeus_0000ff_monster_black {
+    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_monster_blue {
-    background-position: -80px -0px;
+.ood_zeus_0000ff_monster_blue {
+    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_monster_red {
-    background-position: -160px -0px;
+.ood_zeus_0000ff_monster_red {
+    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_monster_wild {
-    background-position: -0px -119px;
+.ood_zeus_0000ff_monster_wild {
+    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_monster_yellow {
-    background-position: -0px -119px;
+.ood_zeus_0000ff_monster_yellow {
+    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_offering_blue {
-    background-position: -160px -119px;
+.ood_zeus_0000ff_offering_blue {
+    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_offering_green {
-    background-position: -240px -0px;
+.ood_zeus_0000ff_offering_green {
+    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_offering_pink {
-    background-position: -240px -119px;
+.ood_zeus_0000ff_offering_pink {
+    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_offering_wild {
-    background-position: -320px -0px;
+.ood_zeus_0000ff_offering_wild {
+    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_offering_yellow {
-    background-position: -320px -119px;
+.ood_zeus_0000ff_offering_yellow {
+    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_shrine_omega {
-    background-position: -0px -238px;
+.ood_zeus_0000ff_shrine_omega {
+    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_shrine_phi {
-    background-position: -80px -238px;
+.ood_zeus_0000ff_shrine_phi {
+    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_shrine_sigma {
-    background-position: -160px -238px;
+.ood_zeus_0000ff_shrine_sigma {
+    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_blue_statue_wild {
-    background-position: -240px -238px;
+.ood_zeus_0000ff_statue_wild {
+    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_monster_black {
-    background-position: -320px -238px;
+.ood_zeus_008000_monster_black {
+    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_monster_blue {
-    background-position: -400px -0px;
+.ood_zeus_008000_monster_blue {
+    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_monster_red {
-    background-position: -400px -119px;
+.ood_zeus_008000_monster_red {
+    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_monster_wild {
+.ood_zeus_008000_monster_wild {
     background-position: -400px -238px;
+    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_monster_yellow {
-    background-position: -0px -357px;
+.ood_zeus_008000_monster_yellow {
+    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_offering_blue {
-    background-position: -80px -357px;
+.ood_zeus_008000_offering_blue {
+    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_offering_green {
-    background-position: -160px -357px;
+.ood_zeus_008000_offering_green {
+    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_offering_pink {
-    background-position: -240px -357px;
+.ood_zeus_008000_offering_pink {
+    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_offering_wild {
-    background-position: -320px -357px;
+.ood_zeus_008000_offering_wild {
+    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_offering_yellow {
-    background-position: -400px -357px;
+.ood_zeus_008000_offering_yellow {
+    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_shrine_phi {
-    background-position: -480px -0px;
+.ood_zeus_008000_shrine_phi {
+    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_shrine_psi {
-    background-position: -480px -119px;
+.ood_zeus_008000_shrine_psi {
+    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_shrine_sigma {
-    background-position: -480px -238px;
+.ood_zeus_008000_shrine_sigma {
+    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_green_statue_wild {
-    background-position: -480px -357px;
+.ood_zeus_008000_statue_wild {
+    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_monster_black {
-    background-position: -480px -595px;
+.ood_zeus_ffa500_monster_black {
+    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_monster_blue {
-    background-position: -480px -476px;
+.ood_zeus_ffa500_monster_blue {
+    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_monster_red {
-    background-position: -560px -476px;
+.ood_zeus_ffa500_monster_red {
+    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_monster_wild {
-    background-position: -400px -595px;
+.ood_zeus_ffa500_monster_wild {
+    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_monster_yellow {
-    background-position: -640px -0px;
+.ood_zeus_ffa500_monster_yellow {
+    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_offering_blue {
-    background-position: -640px -119px;
+.ood_zeus_ffa500_offering_blue {
+    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_offering_green {
-    background-position: -640px -238px;
+.ood_zeus_ffa500_offering_green {
+    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_offering_pink {
-    background-position: -640px -357px;
+.ood_zeus_ffa500_offering_pink {
+    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_offering_wild {
-    background-position: -240px -595px;
+.ood_zeus_ffa500_offering_wild {
+    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_offering_yellow {
-    background-position: -640px -476px;
+.ood_zeus_ffa500_offering_yellow {
+    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_shrine_omega {
-    background-position: -640px -595px;
+.ood_zeus_ffa500_shrine_omega {
+    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_shrine_psi {
-    background-position: -0px -595px;
+.ood_zeus_ffa500_shrine_psi {
+    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_shrine_sigma {
-    background-position: -80px -595px;
+.ood_zeus_ffa500_shrine_sigma {
+    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_yellow_statue_wild {
-    background-position: -560px -595px;
+.ood_zeus_ffa500_statue_wild {
+    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_monster_black {
-    background-position: -560px -0px;
+.ood_zeus_ff0000_monster_black {
+    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_monster_blue {
-    background-position: -560px -119px;
+.ood_zeus_ff0000_monster_blue {
+    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_monster_red {
-    background-position: -560px -238px;
+.ood_zeus_ff0000_monster_red {
+    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_monster_wild {
-    background-position: -560px -357px;
+.ood_zeus_ff0000_monster_wild {
+    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_monster_yellow {
-    background-position: -160px -595px;
+.ood_zeus_ff0000_monster_yellow {
+    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_offering_blue {
-    background-position: -0px -476px;
+.ood_zeus_ff0000_offering_blue {
+    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_offering_green {
-    background-position: -720px -119px;
+.ood_zeus_ff0000_offering_green {
+    background-position: calc(-720px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_offering_pink {
-    background-position: -80px -476px;
+.ood_zeus_ff0000_offering_pink {
+    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_offering_wild {
-    background-position: -160px -476px;
+.ood_zeus_ff0000_offering_wild {
+    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_offering_yellow {
-    background-position: -240px -476px;
+.ood_zeus_ff0000_offering_yellow {
+    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_shrine_omega {
-    background-position: -720px -0px;
+.ood_zeus_ff0000_shrine_omega {
+    background-position: calc(-720px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_shrine_psi {
-    background-position: -320px -476px;
+.ood_zeus_ff0000_shrine_psi {
+    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_shrine_phi {
-    background-position: -320px -595px;
+.ood_zeus_ff0000_shrine_phi {
+    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
 }
 
-.ood_zeus_red_statue_wild {
-    background-position: -400px -476px;
+.ood_zeus_ff0000_statue_wild {
+    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
 }
 
 .ood_ship_tile {
     background-image: url('img/ship_tiles.jpg');
-    /* TODO: adjust dimensions etc, make variable */
-    width: 110px;
-    height: 216px;
+    width: calc(110px * var(--shiptile-ratio));
+    height: calc(216px * var(--shiptile-ratio));
     background-size: 400% 200%;
+    border-radius: 6%;
 }
 
 .ood_ship_tile_1 {
-    background-position: -0px -0px;
+    background-position: calc(-0px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_2 {
-    background-position: -110px -0px;
+    background-position: calc(-110px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_3 {
-    background-position: -220px -216px;
+    background-position: calc(-220px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_4 {
-    background-position: -330px -0px;
+    background-position: calc(-330px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_5 {
-    background-position: -220px -0px;
+    background-position: calc(-220px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_6 {
-    background-position: -0px -216px;
+    background-position: calc(-0px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_7 {
-    background-position: -330px -216px;
+    background-position: calc(-330px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
 }
 
 .ood_ship_tile_8 {
-    background-position: -110px -216px;
+    background-position: calc(-110px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
 }
 
 .ood_wooden_piece {
@@ -620,7 +626,6 @@
 }
 
 .ood_offering {
-    /* TODO: may need size adjustment - especially when in ship hold rather than map */
     width: calc(var(--tile-width) * var(--offering-cube-ratio) * 26 / 149);
     height: calc(var(--tile-width) * var(--offering-cube-ratio) * 27 / 149);
     background-size: 2107.69% 1840.74%;
@@ -651,7 +656,6 @@
 }
 
 .ood_temple {
-    /* TODO: may need size adjustment */
     width: calc(var(--tile-width) * var(--temple-figure-ratio) * 41 / 149);
     height: calc(var(--tile-width) * var(--temple-figure-ratio) * 42 / 149);
     background-size: 1336.59% 1183.33%;
@@ -682,7 +686,6 @@
 }
 
 .ood_monster {
-    /* TODO: may need size adjustment */
     width: calc(var(--tile-width) * var(--monster-tile-ratio) * 117 / 149);
     height: calc(var(--tile-width) * var(--monster-tile-ratio) * 117 / 149);
     background-size: 468.38% 424.79%;
@@ -713,7 +716,6 @@
 }
 
 .ood_statue {
-    /* TODO: may need size adjustment - especially when in ship hold rather than map */
     width: calc(var(--tile-width) * var(--statue-figure-ratio) * 32 / 149);
     height: calc(var(--tile-width) * var(--statue-figure-ratio) * 55 / 149);
     background-size: 1712.5% 903.64%;
@@ -744,38 +746,37 @@
 }
 
 .ood_god {
-    /* TODO: adjust dimensions etc. based on CSS var for playerboard width */
-    width: 65px;
-    height: 65px;
+    width: calc(65px * var(--god-ratio));
+    height: calc(65px * var(--god-ratio));
     background-size: 843.08% 764.62%;
+    position: absolute;
 }
 
 .ood_god_ares {
-    background-position: -95px -284px;
+    background-position: calc(-95px * var(--god-ratio)) calc(-284px * var(--god-ratio));
 }
 
 .ood_god_apollon {
-    background-position: -10px -284px;
+    background-position: calc(-10px * var(--god-ratio)) calc(-284px * var(--god-ratio));
 }
 
 .ood_god_artemis {
-    background-position: -421px -10px;
+    background-position: calc(-421px * var(--god-ratio)) calc(-10px * var(--god-ratio));
 }
 
 .ood_god_aphrodite {
-    background-position: -265px -284px;
+    background-position: calc(-265px * var(--god-ratio)) calc(-284px * var(--god-ratio));
 }
 
 .ood_god_hermes {
-    background-position: -421px -95px;
+    background-position: calc(-421px * var(--god-ratio)) calc(-95px * var(--god-ratio));
 }
 
 .ood_god_poseidon {
-    background-position: -180px -284px;
+    background-position: calc(-180px * var(--god-ratio)) calc(-284px * var(--god-ratio));
 }
 
 .ood_shrine {
-    /* TODO: may need size adjustment */
     width: calc(var(--tile-width) * 46 / 149);
     height: calc(var(--tile-width) * 49 / 149);
     background-size: 1191.3% 1014.29%;
@@ -783,26 +784,125 @@
 }
 
 .ood_ship {
-    /* TODO: may need size adjustment */
     width: calc(var(--tile-width) * 51 / 149);
     height: calc(var(--tile-width) * 43 / 149);
     background-size: 1074.51% 1155.81%;
 }
 
-.ood_ship_red {
+.ood_ship_ff0000 {
     background-position: calc(var(--tile-width) * -421 / 149) calc(var(--tile-width) * -249 / 149);
 }
 
-.ood_ship_green {
+.ood_ship_008000 {
     background-position: calc(var(--tile-width) * -10 / 149) calc(var(--tile-width) * -369 / 149);
 }
 
-.ood_ship_blue {
+.ood_ship_0000ff {
     background-position: calc(var(--tile-width) * -350 / 149) calc(var(--tile-width) * -284 / 149);
 }
 
-.ood_ship_yellow {
+.ood_ship_ffa500 {
     background-position: calc(var(--tile-width) * -81 / 149) calc(var(--tile-width) * -369 / 149);
+}
+
+.ood_ship_1_of_1 {
+    top: 50%;
+    left: 50%;
+}
+
+.ood_ship_1_of_2 {
+    top: 25%;
+    left: 50%;
+}
+
+.ood_ship_2_of_2 {
+    top: 75%;
+    left: 50%;
+}
+
+.ood_ship_1_of_3 {
+    top: 25%;
+    left: 50%;
+}
+
+.ood_ship_2_of_3 {
+    top: 50%;
+    left: 25%;
+}
+
+.ood_ship_3_of_3 {
+    top: 50%;
+    left: 75%;
+}
+
+.ood_ship_1_of_4 {
+    top: 25%;
+    left: 50%;
+}
+
+.ood_ship_2_of_4 {
+    top: 50%;
+    left: 25%;
+}
+
+.ood_ship_3_of_4 {
+    top: 50%;
+    left: 75%;
+}
+
+.ood_ship_4_of_4 {
+    top: 75%;
+    left: 50%;
+}
+
+.ood_maphex_zeus .ood_ship_1_of_1 {
+    top: 30%;
+    left: 18%;
+}
+
+.ood_maphex_zeus .ood_ship_1_of_2 {
+    top: 30%;
+    left: 18%;
+}
+
+.ood_maphex_zeus .ood_ship_2_of_2 {
+    top: 30%;
+    left: 82%;
+}
+
+.ood_maphex_zeus .ood_ship_1_of_3 {
+    top: 30%;
+    left: 18%;
+}
+
+.ood_maphex_zeus .ood_ship_2_of_3 {
+    top: 30%;
+    left: 82%;
+}
+
+.ood_maphex_zeus .ood_ship_3_of_3 {
+    top: 60%;
+    left: 18%;
+}
+
+.ood_maphex_zeus .ood_ship_1_of_4 {
+    top: 30%;
+    left: 18%;
+}
+
+.ood_maphex_zeus .ood_ship_2_of_4 {
+    top: 30%;
+    left: 82%;
+}
+
+.ood_maphex_zeus .ood_ship_3_of_4 {
+    top: 60%;
+    left: 18%;
+}
+
+.ood_maphex_zeus .ood_ship_4_of_4 {
+    top: 60%;
+    left: 82%;
 }
 
 .ood_die_result {
@@ -888,7 +988,6 @@
 }
 
 .ood_oracle_die {
-    /* TODO: adjust dimensions etc. based on CSS var for playerboard width */
     width: 44px;
     height: 47px;
     background-size: 1072.73% 980.85%;
@@ -1176,27 +1275,28 @@
 }
 
 .ood_playerboard {
+    display: inline-block;
+    position: relative;
     background-image: url('img/playerboards.jpg');
     background-size: 200% 200%;
-    /* TODO: adjust dimensions etc, make variable */
-    width: 1127px;
-    height: 694px;
+    width: calc(1127px * var(--playerboard-ratio));
+    height: calc(694px * var(--playerboard-ratio));
 }
 
-.ood_playerboard_red {
-    background-position: -0px -0px;
+.ood_playerboard_ff0000 {
+    background-position: calc(-0px * var(--playerboard-ratio)) calc(-0px * var(--playerboard-ratio));
 }
 
-.ood_playerboard_yellow {
-    background-position: -1127px -0px;
+.ood_playerboard_ffa500 {
+    background-position: calc(-1127px * var(--playerboard-ratio)) calc(-0px * var(--playerboard-ratio));
 }
 
-.ood_playerboard_blue {
-    background-position: -0px -694px;
+.ood_playerboard_0000ff {
+    background-position: calc(-0px * var(--playerboard-ratio)) calc(-694px * var(--playerboard-ratio));
 }
 
-.ood_playerboard_green {
-    background-position: -1127px -694px;
+.ood_playerboard_008000 {
+    background-position: calc(-1127px * var(--playerboard-ratio)) calc(-694px * var(--playerboard-ratio));
 }
 
 .ood_hex_center {
@@ -1235,6 +1335,555 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-30deg);
+}
+
+/* playerboards */
+#ood_all_playerboards {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.ood_playerboard_container {
+    margin: 50px 30px;
+    padding: 30px;
+    flex: 1 0 750px;
+}
+
+.ood_playerboard_wrapper {
+    height: 100%;
+}
+
+.ood_playerboard_left_side, .ood_playerboard_right_side {
+    display: inline-block;
+    width: 110px;
+    height: 100%;
+    padding-left: 5px;
+    padding-right: 5px;
+    position: relative;
+}
+
+.ood_playerboard_side_section {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: absolute;
+}
+
+.ood_oracle_used_section {
+    top: 5%;
+}
+
+.ood_oracle_used_section .ood_card_oracle {
+    transform: rotate(90deg);
+}
+
+.ood_playerboard_side_section .ood_card_oracle {
+    width: calc(196px * var(--board-card-ratio));
+    height: calc(290px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_oracle_black {
+    background-position: calc(-1671px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_oracle_blue {
+    background-position: calc(-1671px * var(--board-card-ratio)) calc(-290px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_oracle_pink {
+    background-position: calc(-1671px * var(--board-card-ratio)) calc(-1160px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_oracle_green {
+    background-position: calc(-1867px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_oracle_red {
+    background-position: calc(-1867px * var(--board-card-ratio)) calc(-580px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_oracle_yellow {
+    background-position: calc(-1867px * var(--board-card-ratio)) calc(-1160px * var(--board-card-ratio));
+}
+
+.ood_oracle_section {
+    top: 40%;
+}
+
+.ood_oracle_section .ood_card_oracle {
+    position: absolute;
+    top: 0;
+}
+
+.ood_injury_section {
+    top: 80%;
+}
+
+.ood_injury_section .ood_card_injury {
+    position: absolute;
+    top: 0;
+}
+
+.ood_playerboard_side_section .ood_card_injury {
+    width: calc(290px * var(--board-card-ratio));
+    height: calc(196px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_injury_black {
+    background-position: calc(-580px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_injury_red {
+    background-position: calc(-1160px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_injury_blue {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_injury_pink {
+    background-position: calc(-580px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_injury_yellow {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_injury_green {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+}
+
+.ood_favor_section {
+    height: 23%;
+}
+
+.ood_favor_section .ood_favor, .ood_favor_section .ood_favor_count {
+    display: inline-block;
+}
+
+.ood_companion_section {
+    top: 40%;
+}
+
+.ood_companion_section .ood_card_companion {
+    position: absolute;
+    top: 0;
+}
+
+.ood_playerboard_side_section .ood_card_companion {
+    width: calc(196px * var(--board-card-ratio));
+    height: calc(290px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_1 {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-196px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_2 {
+    background-position: calc(-1475px * var(--board-card-ratio)) calc(-290px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_3 {
+    background-position: calc(-307px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_4 {
+    background-position: calc(-1185px * var(--board-card-ratio)) calc(-392px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_5 {
+    background-position: calc(-503px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_6 {
+    background-position: calc(-699px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_7 {
+    background-position: calc(-895px * var(--board-card-ratio)) calc(-392px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_8 {
+    background-position: calc(-1475px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_9 {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_10 {
+    background-position: calc(-196px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_11 {
+    background-position: calc(-392px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_12 {
+    background-position: calc(-1671px * var(--board-card-ratio)) calc(-580px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_13 {
+    background-position: calc(-196px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_14 {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_15 {
+    background-position: calc(-1867px * var(--board-card-ratio)) calc(-870px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_16 {
+    background-position: calc(-1671px * var(--board-card-ratio)) calc(-870px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_17 {
+    background-position: calc(-1475px * var(--board-card-ratio)) calc(-870px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_companion_18 {
+    background-position: calc(-1475px * var(--board-card-ratio)) calc(-580px * var(--board-card-ratio));
+}
+
+.ood_equipment_section {
+    top: 80%;
+}
+
+.ood_equipment_section .ood_card_equipment {
+    position: absolute;
+    top: 0;
+}
+
+.ood_playerboard_side_section .ood_card_equipment {
+    width: calc(290px * var(--board-card-ratio));
+    height: calc(196px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_1 {
+    background-position: calc(-588px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_2 {
+    background-position: calc(-1185px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_3 {
+    background-position: calc(-682px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_4 {
+    background-position: calc(-290px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_5 {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_6 {
+    background-position: calc(-870px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_7 {
+    background-position: calc(-290px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_8 {
+    background-position: calc(-895px * var(--board-card-ratio)) calc(-196px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_9 {
+    background-position: calc(-392px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_10 {
+    background-position: calc(-895px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_11 {
+    background-position: calc(-1450px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_12 {
+    background-position: calc(-870px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_13 {
+    background-position: calc(-870px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_14 {
+    background-position: calc(-0px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_15 {
+    background-position: calc(-1185px * var(--board-card-ratio)) calc(-196px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_16 {
+    background-position: calc(-1160px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_17 {
+    background-position: calc(-580px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_18 {
+    background-position: calc(-580px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_19 {
+    background-position: calc(-200px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_20 {
+    background-position: calc(-870px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_21 {
+    background-position: calc(-290px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+}
+
+.ood_playerboard_side_section .ood_card_equipment_22 {
+    background-position: calc(-1185px * var(--board-card-ratio)) calc(-682px * var(--board-card-ratio));
+}
+
+.ood_zeus_tile_spot {
+    position: absolute;
+    bottom: 101%;
+}
+
+.ood_zeus_tile_spot_1 {
+    left: 5.1%;
+}
+
+.ood_zeus_tile_spot_2 {
+    left: 12.3%;
+}
+
+.ood_zeus_tile_spot_3 {
+    left: 19.5%;
+}
+
+.ood_zeus_tile_spot_4 {
+    left: 28%;
+}
+
+.ood_zeus_tile_spot_5 {
+    left: 35.2%;
+}
+
+.ood_zeus_tile_spot_6 {
+    left: 42.4%;
+}
+
+.ood_zeus_tile_spot_7 {
+    left: 50.9%;
+}
+
+.ood_zeus_tile_spot_8 {
+    left: 58.1%;
+}
+
+.ood_zeus_tile_spot_9 {
+    left: 65.3%;
+}
+
+.ood_zeus_tile_spot_10 {
+    left: 73.8%;
+}
+
+.ood_zeus_tile_spot_11 {
+    left: 81%;
+}
+
+.ood_zeus_tile_spot_12 {
+    left: 88.2%;
+}
+
+.ood_shrine_spot{
+    position: absolute;
+}
+
+.ood_shrine_spot_1 {
+    left: 6.7%;
+    top: 3%;
+}
+
+.ood_shrine_spot_2 {
+    left: 14.1%;
+    top: 3%;
+}
+
+.ood_shrine_spot_3 {
+    left: 21.5%;
+    top: 3%;
+}
+
+.ood_shrine_spot .ood_shrine {
+    width: calc(var(--board-shrine-width-ratio) * 46 / 149);
+    height: calc(var(--board-shrine-width-ratio) * 49 / 149);
+    background-size: 1191.3% 1014.29%;
+    background-position: calc(var(--board-shrine-width-ratio) * -421 / 149) calc(var(--board-shrine-width-ratio) * -180 / 149);
+}
+
+.ood_dice_spot {
+    position: absolute;
+}
+
+.ood_dice_spot_red {
+    left: 8%;
+    top: 45%;
+}
+
+.ood_dice_spot_black {
+    left: 17%;
+    top: 27%;
+}
+
+.ood_dice_spot_pink {
+    left: 31%;
+    top: 27%;
+}
+
+.ood_dice_spot_blue {
+    left: 40%;
+    top: 45%;
+}
+
+.ood_dice_spot_yellow {
+    left: 32%;
+    top: 64%;
+}
+
+.ood_dice_spot_green {
+    left: 15%;
+    top: 63%;
+}
+
+.ood_dice_spot_center {
+    left: 24%;
+    top: 50%;
+}
+
+.ood_die_in_spot_1_of_2 {
+    position: absolute;
+    transform: translate(-30%, -30%);
+}
+
+.ood_die_in_spot_2_of_2 {
+    position: absolute;
+    transform: translate(30%, 30%);
+}
+
+.ood_die_in_spot_1_of_3 {
+    position: absolute;
+    transform: translate(-50%, -40%);
+}
+
+.ood_die_in_spot_2_of_3 {
+    position: absolute;
+    transform: translate(50%, -40%);
+}
+
+.ood_die_in_spot_3_of_3 {
+    position: absolute;
+    transform: translate(0%, 30%);
+}
+
+.ood_shield_spot {
+    position: absolute;
+    top: 82%;
+}
+
+.ood_god_column {
+    position: absolute;
+    height: 100%;
+    width: 4.8%;
+}
+
+.ood_shield_pos_0 {
+    left: 20.5%;
+}
+
+.ood_shield_pos_1 {
+    left: 25.4%;
+}
+
+.ood_shield_pos_2 {
+    left: 30.3%;   
+}
+
+.ood_shield_pos_3 {
+    left: 35.2%;
+}
+
+.ood_shield_pos_4 {
+    left: 40.1%;
+}
+
+.ood_shield_pos_5 {
+    left: 45%;
+}
+
+.ood_god_column_poseidon {
+    left: 52%;
+}
+
+.ood_god_column_apollon {
+    left: 56.8%;
+}
+
+.ood_god_column_artemis {
+    left: 61.6%;
+}
+
+.ood_god_column_aphrodite {
+    left: 66.4%;
+}
+
+.ood_god_column_ares {
+    left: 71.2%;
+}
+
+.ood_god_column_hermes {
+    left: 76%;
+}
+
+.ood_god_position_0 {
+    bottom: 7%;
+}
+
+.ood_god_position_1 {
+    bottom: 31%;
+}
+
+.ood_god_position_2 {
+    bottom: 42%;
+}
+
+.ood_god_position_3 {
+    bottom: 52%;
+}
+
+.ood_god_position_4 {
+    bottom: 63%;
+}
+
+.ood_god_position_5 {
+    bottom: 74%;
+}
+
+.ood_god_position_6 {
+    bottom: 87%;
+}
+
+.ood_shiptile {
+    position: absolute;
+    left: 84%;
+    top: 32%;
+    transform: rotate(-7deg);
 }
 
 /* cards stock area */

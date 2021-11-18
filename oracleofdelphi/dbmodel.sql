@@ -72,8 +72,8 @@ CREATE TABLE IF NOT EXISTS `token` (
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 ALTER TABLE `player`
-    ADD `ship_location_x` INT(10) UNSIGNED NOT NULL,
-    ADD `ship_location_y` INT(10) UNSIGNED NOT NULL,
+    ADD `ship_location_x` INT(10) NOT NULL,
+    ADD `ship_location_y` INT(10) NOT NULL,
     ADD `shields` INT(8) UNSIGNED NOT NULL DEFAULT 0,
     ADD `favors` INT(8) UNSIGNED NOT NULL DEFAULT 0,
     ADD `poseidon` INT(4) UNSIGNED NOT NULL DEFAULT 0,

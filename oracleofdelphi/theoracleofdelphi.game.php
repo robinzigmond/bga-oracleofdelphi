@@ -88,6 +88,8 @@ class TheOracleOfDelphi extends Table
             MAP_COLOR_PINK => GOD_HERMES
         ];
 
+        $this->allGods = array_values($this->godColors);
+
         // statuses of island tiles, based on greek letters
         $this->greekLetterStatus = [
             GREEK_LETTER_SIGMA => 0,
@@ -171,19 +173,18 @@ class TheOracleOfDelphi extends Table
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, favors) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
         $values = array();
         foreach( $players as $player_id => $player )
         {
             $color = array_shift( $default_colors );
-            $favors = (int)$player["player_table_order"] + 2;
-            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."','".$favors."')";
+            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
         }
         $sql .= implode( $values, ',' );
         self::DbQuery( $sql );
         self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
         self::reloadPlayersBasicInfos();
-        
+
         /************ Start the game initialization *****/
         // the "first step" of the God tracks varies depending on the playercount. Although it's a very
         // simple calculation we save it here as an instance property for ease of access.
@@ -315,7 +316,7 @@ class TheOracleOfDelphi extends Table
         // of the 4 "variable" Zeus tiles, randomly choose 2 to be offerings and 2 to be monsters. Each
         // player gets the same. (Later introduce "first game" variant to only use 8 due to random discards).
         // Status column is coded as follows: tile id (1 - 48), plus 100 if "second side" used.
-        // Another 100 will be added if the tile has been completed by the player.
+        // Another 200 will be added if the tile has been completed by the player.
         // (later, for variant with fewer tiles, status 0 will be used for not in game)
         $variableIndices = [0, 0, 1, 1];
         shuffle($variableIndices);
@@ -323,6 +324,10 @@ class TheOracleOfDelphi extends Table
         $idsByColor = [];
         foreach(self::loadPlayersBasicInfos() as $player_id => $player) {
             $idsByColor[$player["player_color"]] = $player_id;
+            // also add starting favors to player table here. For some reason player_no isn't available
+            // in the initial loop above where player info is inserted to the database!
+            $favors = (int)$player["player_no"] + 2;
+            self::DbQuery("UPDATE player SET favors=$favors WHERE player_id=$player_id");
         }
         foreach($this->zeusTiles as $id => ["player" => $playerColor, "tile" => $sides]) {
             // leave out any Zeus tiles belonging to player colors not in the game
@@ -534,12 +539,7 @@ class TheOracleOfDelphi extends Table
         $result = array();
     
         $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
-    
-        // Get information about players
-        // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
-        $result['players'] = self::getCollectionFromDb( $sql );
-  
+
         // Gather all information about current game situation (visible by player $current_player_id).
         // tokens on map.
         // Note that for island tiles we send the status as -1 for any facedown tile, to avoid leaking
@@ -577,10 +577,10 @@ class TheOracleOfDelphi extends Table
              WHERE card_location LIKE '%_deck' OR card_location LIKE '%_discard'
              GROUP BY card_location", true
         );
-        $inHand = self::getDoubleKeyCollectionFromDb(
+        $inHand = self::getObjectListFromDb(
             "SELECT card_type, card_location_arg, card_type_arg
              FROM card
-             WHERE card_location = 'hand'", true
+             WHERE card_location = 'hand'"
         );
         $getCardIdentifier = function($cardType, $cardNum) {
             return in_array($cardType, [CARD_TYPE_INJURY, CARD_TYPE_ORACLE])
@@ -598,17 +598,89 @@ class TheOracleOfDelphi extends Table
             $cardInfo[$cardType]["top_discard"] = isset($topDiscard)
                 ? $getCardIdentifier($cardType, $topDiscard["type_arg"])
                 : null;
-            $cardInfo[$cardType]["hands"] = array_key_exists($cardType, $inHand)
-                ? array_map(function($cardNum) use ($cardType, $getCardIdentifier) {
-                    return $getCardIdentifier($cardType, $cardNum);
-                  }, $inHand[$cardType])
-                : [];
+            $inHandOfType = array_filter($inHand, function($card) use ($cardType) {
+                return $card["card_type"] === $cardType;
+            });
+            $cardInfo[$cardType]["hands"] = [];
+            foreach ($inHandOfType as ["card_location_arg" => $player, "card_type_arg" => $info]) {
+                if (!array_key_exists($player, $cardInfo[$cardType]["hands"])) {
+                    $cardInfo[$cardType]["hands"][$player] = [];
+                }
+                $cardInfo[$cardType]["hands"][$player][] = $getCardIdentifier($cardType, $info);
+            }
         }
+
         $cardInfo["equipment"]["display"] = array_map(function($card) use ($getCardIdentifier) {
             return $getCardIdentifier("equipment", (int)$card["type_arg"]);
         }, array_values($this->allCards->getCardsInLocation("equipment_display")));
 
         $result["cards"] = $cardInfo;
+
+        // Get information about players
+        $sql = "SELECT player_id id, player_score score, favors, shields, ship_location_x, ship_location_y, oracle_used, "
+                . implode(", ", $this->allGods) . "
+                FROM player ";
+        $playerInfo = self::getCollectionFromDb( $sql );
+
+        // also fetch ship tile/shrines/zeus tiles (from tokens table)
+        // We ensure location_x is null to avoid counting shrines which are placed on the map
+        $playerTokens = self::getObjectListFromDb(
+            "SELECT type, status, player_id FROM token
+             WHERE type IN ('" . implode("', '", ["ship", "shrine", "zeus"]) ."')
+             AND location_x IS NULL"
+        );
+        $tokenArray = [];
+        foreach($playerTokens as ["player_id" => $playerId, "type" => $type, "status" => $status]) {
+            if (!array_key_exists($playerId, $tokenArray)) {
+                $tokenArray[$playerId] = ["zeus" => [], "shrines" => 0];
+            }
+            switch($type) {
+                case "ship":
+                    $tokenArray[$playerId]["shipTile"] = (int)$status;
+                    break;
+                case "shrine":
+                    $tokenArray[$playerId]["shrines"] += 1;
+                    break;
+                case "zeus":
+                    // "decode" the Status into info about the tile to show on the frontend.
+                    // (Note: we don't bother getting the tile color, as the tiles are already in
+                    // the array of player info, and the front end can workout the player color!)
+                    $status = (int)$status;
+                    $tileId = $status % 100;
+                    $reverse = ($status % 200) > 100;
+                    $complete = $status > 200;
+                    $tileInfo = $this->zeusTiles[$tileId]["tile"][$reverse ? 1 : 0];
+                    $tileType = substr($tileInfo["type"], 5); // the type string starts zeus_, which we remove
+                    $tileDetails =$tileInfo[array_key_exists("color", $tileInfo) ? "color" : "letter"];
+                    $tokenArray[$playerId]["zeus"][] = [
+                        "originalId" => $tileId % 12 == 0 ? 12 : $tileId % 12,
+                        "type" => $tileType,
+                        "details" => $tileDetails,
+                        "complete" => $complete
+                    ];
+                    break;
+            }
+        }
+
+        // and dice (from player_dice table)
+        $diceDb = self::getObjectListFromDb("SELECT player_id, color, used FROM player_dice");
+        $dice = [];
+        foreach($diceDb as ["player_id" => $playerId, "color" => $color, "used" => $used]) {
+            if (!array_key_exists($playerId, $dice)) {
+                $dice[$playerId] = [];
+            }
+            $dice[$playerId][] = ["color" => $color, "used" => $used != 0];
+        }
+
+        foreach($playerInfo as $playerId => &$info) {
+            $info["dice"] = $dice[$playerId];
+            ["zeus" => $zeus, "shrines" => $shrines, "shipTile" => $shipTile] = $tokenArray[$playerId];
+            $info["zeus"] = $zeus;
+            $info["shrines"] = $shrines;
+            $info["shipTile"] = $shipTile;
+        }
+
+        $result["players"] = $playerInfo;
 
         return $result;
     }

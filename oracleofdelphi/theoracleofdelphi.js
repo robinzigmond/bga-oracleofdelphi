@@ -28,7 +28,18 @@ const BLUE = "blue";
 const PINK = "pink";
 const BLACK = "black";
 
+const WILD = "wild";
+
 const ALL_COLORS = [RED, YELLOW, GREEN, BLUE, PINK, BLACK];
+
+const POSEIDON = "poseidon";
+const APOLLON = "apollon";
+const ARTEMIS = "artemis";
+const APHRODITE = "aphrodite";
+const ARES = "ares";
+const HERMES = "hermes";
+
+const ALL_GODS = [POSEIDON, APOLLON, ARTEMIS, APHRODITE, ARES, HERMES];
 
 const ORACLE = "oracle";
 const INJURY = "injury";
@@ -199,6 +210,175 @@ define([
                     cardDiv.classList.add("ood_card", "ood_card_equipment", `ood_card_equipment_${equipmentCard}`);
                     equipmentDisplay.appendChild(cardDiv);
                 }
+
+                // set up player-related info
+                const { players } = gamedatas;
+                this.counters.favors = {};
+                for (const [playerId, info] of Object.entries(players)) {
+                    const favorCounter = new ebg.counter();
+                    favorCounter.create(`ood_favor_count_${playerId}`);
+                    favorCounter.toValue(info.favors);
+                    this.counters.favors[playerId] = favorCounter;
+
+                    const shiptileWrapper = document.getElementById(`ood_shiptile_${playerId}`);
+                    const shiptile = document.createElement("div");
+                    shiptile.classList.add("ood_ship_tile", `ood_ship_tile_${info.shipTile}`);
+                    shiptileWrapper.appendChild(shiptile);
+
+                    const { dice } = info;
+                    for (const die of dice) {
+                        const { color, used } = die;
+                        const diceDiv = document.createElement("div");
+                        diceDiv.classList.add("ood_die_result", "ood_oracle_die", `ood_oracle_die_${color}`);
+                        const position = document.getElementById(`ood_dice_spot_${used ? "center" : color}_${playerId}`);
+                        position.appendChild(diceDiv);
+                    }
+                    // reposition dice if any are duplicates in the same section, so they're offset nicely
+                    for (const pos of [...ALL_COLORS, "center"]) {
+                        const diceSpot = document.getElementById(`ood_dice_spot_${pos}_${playerId}`);
+                        const diceInSpot = diceSpot.childNodes;
+                        const numDice = diceInSpot.length;
+                        if (numDice === 2) {
+                            diceInSpot[0].classList.add("ood_die_in_spot_1_of_2");
+                            diceInSpot[1].classList.add("ood_die_in_spot_2_of_2");
+                        } else if (numDice === 3) {
+                            diceInSpot[0].classList.add("ood_die_in_spot_1_of_3");
+                            diceInSpot[1].classList.add("ood_die_in_spot_2_of_3");
+                            diceInSpot[2].classList.add("ood_die_in_spot_3_of_3");
+                        }
+                    }
+
+                    for (let i = 1; i <= info.shrines; i++) {
+                        const shrineContainer = document.getElementById(`ood_shrine_spot_${i}_${playerId}`);
+                        const shrineDiv = document.createElement("div");
+                        shrineDiv.classList.add("ood_wooden_piece", "ood_shrine");;
+                        shrineContainer.appendChild(shrineDiv);
+                    }
+
+                    for (const god of ALL_GODS) {
+                        const godValue = Number(info[god]);
+                        const godColumn = document.getElementById(`ood_god_column_${god}_${playerId}`);
+                        const godDisc = document.createElement("div");
+                        godDisc.classList.add(
+                            "ood_wooden_piece",
+                            "ood_god",
+                            `ood_god_${god}`,
+                            `ood_god_position_${godValue}`
+                        );
+                        godColumn.appendChild(godDisc);
+                    }
+
+                    const shieldSpot = document.getElementById(`ood_shield_spot_${playerId}`);
+                    shieldSpot.classList.add(`ood_shield_pos_${info.shields}`);
+                    const shield = document.createElement("div");
+                    shield.classList.add("ood_shield", `ood_shield_${info.color}`);
+                    shieldSpot.appendChild(shield);
+
+                    const shipHex = document.getElementById(`ood_maphex_${info.ship_location_x}_${info.ship_location_y}`);
+                    const shipDiv = document.createElement("div");
+                    shipDiv.classList.add("ood_wooden_piece", "ood_ship", `ood_ship_${info.color}`);
+                    shipHex.appendChild(shipDiv);
+
+                    let nonWildOfferings = 0;
+                    let nonWildMonsters = 0;
+                    info.zeus.filter(({ completed }) => !completed)
+                        .forEach(({ originalId, type, details, complete }) => {
+                            // compute proper position (from 1 - 12), depending on tile details.
+                            // Generally will be same as originalId, but not for monsters and offerings,
+                            // due to the wild tiles (ids 7 and 8).
+                            // Also 9-12 can each be either offering or monster (but always exactly 2 of each).
+                            // This is why we could how many of each we've had
+                            let position = originalId;
+                            if (type === OFFERING) {
+                                if (details === WILD) {
+                                    position = 9;
+                                } else {
+                                    position = 7 + nonWildOfferings;
+                                    nonWildOfferings++;
+                                }
+                            } else if (type === MONSTER) {
+                                if (details === WILD) {
+                                    position = 12;
+                                } else {
+                                    position = 10 + nonWildMonsters;
+                                    nonWildMonsters++;
+                                }
+                            }
+                            const tileSlot = document.getElementById(`ood_zeus_tile_spot_${position}_${playerId}`);
+                            const tileDiv = document.createElement("div");
+                            tileDiv.classList.add("ood_zeus_tile", `ood_zeus_${info.color}_${type}_${details}`);
+                            tileSlot.appendChild(tileDiv);
+                        });
+
+                    // cards:
+                    // used oracle card
+                    if (info.oracle_used) {
+                        const container = document.getElementById(`ood_oracle_used_section_${playerId}`);
+                        const card = document.createElement("div");
+                        card.classList.add("ood_card", "ood_card_oracle", `ood_card_oracle_${info.oracle_used}`);
+                        container.appendChild(card);
+                    }
+
+                    // unused oracle cards (remember to remove used one!)
+                    if (gamedatas.cards.oracle.hands[playerId]) {
+                        let oracleCards = [...gamedatas.cards.oracle.hands[playerId]];
+                        if (info.oracle_used) {
+                            const toRemove = oracleCards.indexOf(info.oracle_used);
+                            oracleCards = oracleCards.filter((card, index) => index !== toRemove);
+                        }
+                        oracleCards.forEach((color, index) => {
+                            const container = document.getElementById(`ood_oracle_section_${playerId}`);
+                            const card = document.createElement("div");
+                            card.classList.add("ood_card", "ood_card_oracle", `ood_card_oracle_${color}`);
+                            card.style.right = `${30 * index - 110}px`;
+                            container.appendChild(card);
+                        });
+                    }
+
+                    // injury cards
+                    if (gamedatas.cards.injury.hands[playerId]) {
+                        gamedatas.cards.injury.hands[playerId].forEach((color, index) => {
+                            const container = document.getElementById(`ood_injury_section_${playerId}`);
+                            const card = document.createElement("div");
+                            card.classList.add("ood_card", "ood_card_injury", `ood_card_injury_${color}`);
+                            card.style.right = `${37 * index - 110}px`;
+                            container.appendChild(card);
+                        });
+                    }
+
+                    // companion cards
+                    if (gamedatas.cards.companion.hands[playerId]) {
+                        gamedatas.cards.companion.hands[playerId].forEach((cardId, index) => {
+                            const container = document.getElementById(`ood_companion_section_${playerId}`);
+                            const card = document.createElement("div");
+                            card.classList.add("ood_card", "ood_card_companion", `ood_card_companion_${cardId}`);
+                            card.style.left = `${37 * index}px`;
+                            container.appendChild(card);
+                        });
+                    }
+
+                    // equipment cards
+                    if (gamedatas.cards.equipment.hands[playerId]) {
+                        gamedatas.cards.equipment.hands[playerId].forEach((cardId, index) => {
+                            const container = document.getElementById(`ood_equipment_section_${playerId}`);
+                            const card = document.createElement("div");
+                            card.classList.add("ood_card", "ood_card_equipment", `ood_card_equipment_${cardId}`);
+                            card.style.left = `${50 * index}px`;
+                            container.appendChild(card);
+                        });
+                    }
+                }
+                // Add CSS classes to position ships nicely in their hex according to the total number.
+                // (Note that the Zeus space gets different positioning, but that is all handled in CSS.)
+                document.querySelectorAll(".ood_maphex").forEach((hex) => {
+                    const ships = hex.querySelectorAll(".ood_ship");
+                    const numShips = ships.length;
+                    let counter = 1;
+                    ships.forEach((ship) => {
+                        ship.classList.add(`ood_ship_${counter}_of_${numShips}`);
+                        counter++;
+                    });
+                });
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
