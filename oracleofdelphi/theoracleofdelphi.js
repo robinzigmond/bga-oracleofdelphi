@@ -61,14 +61,10 @@ define([
                 // this.myGlobalValue = 0;
 
                 //TODO: will need to come from backend
-                const tilesInMapWidth = 14;
-                let screenWidth = document.getElementById("game_play_area").clientWidth;
-                // take BGA zoom into account for small screens
-                if (screenWidth < 740) {
-                    screenWidth = 740;
-                }
-                //TODO: allow user adjustment, and use local storage to recall value
-                this.tileWidth = screenWidth / tilesInMapWidth;
+                this.tilesInMapWidth = 14;
+
+                window.addEventListener("resize", this.onScreenChange.bind(this));
+                window.addEventListener("orientationchange", this.onScreenChange.bind(this));
 
                 // object for all counter components
                 this.counters = {};
@@ -88,9 +84,6 @@ define([
             */
 
             setup: function (gamedatas) {
-                // adjust map tile size to fit screen
-                document.documentElement.style.setProperty("--tile-width", `${this.tileWidth}px`)
-
                 this.placeZeus();
 
                 this.placeTemples();
@@ -163,6 +156,9 @@ define([
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
+
+                // ensure layout is correct for screen resolution
+                this.onScreenChange();
 
                 console.log("Ending game setup");
             },
@@ -252,6 +248,28 @@ define([
                 script.
             
             */
+
+            // calculate CSS variables for screen width, to keep the layout responsive
+            onScreenChange: function () {
+                // need to delay to stop the map extending into the notifications area when shrinking
+                // and then returning to full width
+                setTimeout(() => {
+                    let screenWidth = document.getElementById("game_play_area").clientWidth;
+                    // take BGA zoom into account for small screens
+                    if (screenWidth < 740) {
+                        screenWidth = 740;
+                    }
+                    //TODO: allow user adjustment, and use local storage to recall value
+                    const tileWidth = screenWidth / this.tilesInMapWidth;
+                    // adjust map tile size to fit screen
+                    document.documentElement.style.setProperty("--tile-width", `${tileWidth}px`);
+                    // also adjust width of playerboards and the sections at its sides
+                    const playerboardWidthRatio = 0.65 * Math.min(screenWidth, 1200) / 1200
+                    document.documentElement.style.setProperty("--playerboard-ratio", playerboardWidthRatio);
+                    const playerboardSideWidth = Math.min(110, screenWidth / 12);
+                    document.documentElement.style.setProperty("--playerboard-side-width", playerboardSideWidth);
+                }, 0);
+            },
 
             // utility for placing a div inside another, with particular classes
             placeElement: function (parentId, ...childClasses) {
@@ -517,7 +535,7 @@ define([
                             "ood_card_oracle",
                             `ood_card_oracle_${color}`
                         );
-                        card.style.right = `${30 * index - 110}px`;
+                        card.style.right = `calc(var(--playerboard-side-width) * ${30 * index - 110}px / 110)`;
                     });
                 }
             },
@@ -531,7 +549,7 @@ define([
                             "ood_card_injury",
                             `ood_card_injury_${color}`
                         );
-                        card.style.right = `${37 * index - 110}px`;
+                        card.style.right = `calc(var(--playerboard-side-width) * ${37 * index - 110}px / 110)`;
                     });
                 }
             },
@@ -545,7 +563,7 @@ define([
                             "ood_card_companion",
                             `ood_card_companion_${cardId}`
                         );
-                        card.style.left = `${37 * index}px`;
+                        card.style.right = `calc(var(--playerboard-side-width) * ${37 * index}px / 110)`;
                     });
                 }
             },
@@ -560,6 +578,7 @@ define([
                             `ood_card_equipment_${cardId}`
                         );
                         card.style.left = `${50 * index}px`;
+                        card.style.right = `calc(var(--playerboard-side-width) * ${50 * index}px / 110)`;
                     });
                 }
             },

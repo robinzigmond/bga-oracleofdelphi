@@ -79,10 +79,11 @@
     --favor-ratio: 0.5;
     --shiptile-ratio: 0.7;
     --board-shrine-width-ratio: 100px;
-    --god-ratio: 0.52;
+    --god-ratio: 0.48;
     --shield-ratio: 0.7;
     --zeus-tile-ratio: 0.6;
     --board-card-ratio: 0.45;
+    --playerboard-side-width: 110;
 }
 
 #ood_map {
@@ -320,305 +321,304 @@
 
 .ood_favor {
     background-image: url('img/misc_tokens.png');
-    width: calc(77px * var(--favor-ratio));
-    height: calc(78px * var(--favor-ratio));
+    width: calc(77px * var(--favor-ratio) * var(--playerboard-ratio) / 0.65);
+    height: calc(78px * var(--favor-ratio) * var(--playerboard-ratio) / 0.65);
     background-size: 392.21% 375.64%;
-    background-position: calc(-146px * var(--favor-ratio)) calc(-10px * var(--favor-ratio));
+    background-position: calc(-146px * var(--favor-ratio) * var(--playerboard-ratio) / 0.65) calc(-10px * var(--favor-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_shield {
     background-image: url('img/misc_tokens.png');
-    width: calc(49px * var(--shield-ratio));
-    height: calc(77px * var(--shield-ratio));
+    width: calc(49px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65);
+    height: calc(77px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65);
     background-size: 616.33% 380.52%
 }
 
 .ood_shield_ff0000 {
-    background-position: calc(-243px * var(--shield-ratio)) calc(-10px * var(--shield-ratio));
+    background-position: calc(-243px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65) calc(-10px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_shield_ffa500 {
-    background-position: calc(-10px * var(--shield-ratio)) calc(-206px * var(--shield-ratio));
+    background-position: calc(-10px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65) calc(-206px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_shield_008000 {
-    background-position: calc(-146px * var(--shield-ratio)) calc(-108px * var(--shield-ratio));
+    background-position: calc(-146px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65) calc(-108px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_shield_0000ff {
-    background-position: calc(-243px * var(--shield-ratio)) calc(-107px * var(--shield-ratio));
+    background-position: calc(-243px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65) calc(-107px * var(--shield-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_tile {
     background-image: url('img/zeus_tiles.jpg');
-    width: calc(80px * var(--zeus-tile-ratio));
-    height: calc(119px * var(--zeus-tile-ratio));
+    width: calc(80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
+    height: calc(119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
     background-size: 1000% 600%
 }
 
 .ood_zeus_0000ff_monster_black {
-    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_monster_blue {
-    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_monster_red {
-    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-160px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_monster_wild {
-    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_monster_yellow {
-    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_offering_blue {
-    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-160px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_offering_green {
-    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-240px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_offering_pink {
-    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-240px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_offering_wild {
-    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-320px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_offering_yellow {
-    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-320px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_shrine_omega {
-    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_shrine_phi {
-    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_shrine_sigma {
-    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-160px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_0000ff_statue_wild {
-    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-240px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_monster_black {
-    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-320px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_monster_blue {
-    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-400px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_monster_red {
-    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-400px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_monster_wild {
-    background-position: -400px -238px;
-    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-400px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_monster_yellow {
-    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_offering_blue {
-    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_offering_green {
-    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-160px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_offering_pink {
-    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-240px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_offering_wild {
-    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-320px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_offering_yellow {
-    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-400px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_shrine_phi {
-    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-480px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_shrine_psi {
-    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-480px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_shrine_sigma {
-    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-480px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_008000_statue_wild {
-    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-480px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_monster_black {
-    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-480px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_monster_blue {
-    background-position: calc(-480px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-480px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_monster_red {
-    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-560px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_monster_wild {
-    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-400px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_monster_yellow {
-    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-640px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_offering_blue {
-    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-640px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_offering_green {
-    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-640px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_offering_pink {
-    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-640px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_offering_wild {
-    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-240px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_offering_yellow {
-    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-640px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_shrine_omega {
-    background-position: calc(-640px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-640px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_shrine_psi {
-    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_shrine_sigma {
-    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ffa500_statue_wild {
-    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-560px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_monster_black {
-    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-560px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_monster_blue {
-    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-560px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_monster_red {
-    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-238px * var(--zeus-tile-ratio));
+    background-position: calc(-560px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-238px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_monster_wild {
-    background-position: calc(-560px * var(--zeus-tile-ratio)) calc(-357px * var(--zeus-tile-ratio));
+    background-position: calc(-560px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-357px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_monster_yellow {
-    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-160px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_offering_blue {
-    background-position: calc(-0px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_offering_green {
-    background-position: calc(-720px * var(--zeus-tile-ratio)) calc(-119px * var(--zeus-tile-ratio));
+    background-position: calc(-720px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-119px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_offering_pink {
-    background-position: calc(-80px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-80px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_offering_wild {
-    background-position: calc(-160px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-160px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_offering_yellow {
-    background-position: calc(-240px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-240px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_shrine_omega {
-    background-position: calc(-720px * var(--zeus-tile-ratio)) calc(-0px * var(--zeus-tile-ratio));
+    background-position: calc(-720px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_shrine_psi {
-    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-320px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_shrine_phi {
-    background-position: calc(-320px * var(--zeus-tile-ratio)) calc(-595px * var(--zeus-tile-ratio));
+    background-position: calc(-320px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-595px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_zeus_ff0000_statue_wild {
-    background-position: calc(-400px * var(--zeus-tile-ratio)) calc(-476px * var(--zeus-tile-ratio));
+    background-position: calc(-400px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65) calc(-476px * var(--zeus-tile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile {
     background-image: url('img/ship_tiles.jpg');
-    width: calc(110px * var(--shiptile-ratio));
-    height: calc(216px * var(--shiptile-ratio));
+    width: calc(110px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
+    height: calc(216px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
     background-size: 400% 200%;
     border-radius: 6%;
 }
 
 .ood_ship_tile_1 {
-    background-position: calc(-0px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
+    background-position: calc(-0px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_2 {
-    background-position: calc(-110px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
+    background-position: calc(-110px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_3 {
-    background-position: calc(-220px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
+    background-position: calc(-220px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-216px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_4 {
-    background-position: calc(-330px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
+    background-position: calc(-330px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_5 {
-    background-position: calc(-220px * var(--shiptile-ratio)) calc(-0px * var(--shiptile-ratio));
+    background-position: calc(-220px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-0px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_6 {
-    background-position: calc(-0px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
+    background-position: calc(-0px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-216px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_7 {
-    background-position: calc(-330px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
+    background-position: calc(-330px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-216px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_ship_tile_8 {
-    background-position: calc(-110px * var(--shiptile-ratio)) calc(-216px * var(--shiptile-ratio));
+    background-position: calc(-110px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65) calc(-216px * var(--shiptile-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_wooden_piece {
@@ -746,34 +746,34 @@
 }
 
 .ood_god {
-    width: calc(65px * var(--god-ratio));
-    height: calc(65px * var(--god-ratio));
+    width: calc(65px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
+    height: calc(65px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
     background-size: 843.08% 764.62%;
     position: absolute;
 }
 
 .ood_god_ares {
-    background-position: calc(-95px * var(--god-ratio)) calc(-284px * var(--god-ratio));
+    background-position: calc(-95px * var(--god-ratio) * var(--playerboard-ratio) / 0.65) calc(-284px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_god_apollon {
-    background-position: calc(-10px * var(--god-ratio)) calc(-284px * var(--god-ratio));
+    background-position: calc(-10px * var(--god-ratio) * var(--playerboard-ratio) / 0.65) calc(-284px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_god_artemis {
-    background-position: calc(-421px * var(--god-ratio)) calc(-10px * var(--god-ratio));
+    background-position: calc(-421px * var(--god-ratio) * var(--playerboard-ratio) / 0.65) calc(-10px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_god_aphrodite {
-    background-position: calc(-265px * var(--god-ratio)) calc(-284px * var(--god-ratio));
+    background-position: calc(-265px * var(--god-ratio) * var(--playerboard-ratio) / 0.65) calc(-284px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_god_hermes {
-    background-position: calc(-421px * var(--god-ratio)) calc(-95px * var(--god-ratio));
+    background-position: calc(-421px * var(--god-ratio) * var(--playerboard-ratio) / 0.65) calc(-95px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_god_poseidon {
-    background-position: calc(-180px * var(--god-ratio)) calc(-284px * var(--god-ratio));
+    background-position: calc(-180px * var(--god-ratio) * var(--playerboard-ratio) / 0.65) calc(-284px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_shrine {
@@ -910,7 +910,6 @@
 }
 
 .ood_battle_die {
-    /* TODO: adjust dimensions etc, make variable */
     width: 98px;
     height: 84px;
     background-size: 481.63% 548.81%;
@@ -988,33 +987,33 @@
 }
 
 .ood_oracle_die {
-    width: 44px;
-    height: 47px;
+    width: calc(44px * var(--playerboard-ratio) / 0.65);
+    height: calc(47px * var(--playerboard-ratio) / 0.65);
     background-size: 1072.73% 980.85%;
 }
 
 .ood_oracle_die_yellow {
-    background-position: -330px -322px;
+    background-position: calc(-330px * var(--playerboard-ratio) / 0.65) calc(-322px * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_oracle_die_blue {
-    background-position: -394px -322px;
+    background-position: calc(-394px * var(--playerboard-ratio) / 0.65) calc(-322px * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_oracle_die_pink {
-    background-position: -10px -404px;
+    background-position: calc(-10px * var(--playerboard-ratio) / 0.65) calc(-404px * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_oracle_die_red {
-    background-position: -74px -404px;
+    background-position: calc(-74px * var(--playerboard-ratio) / 0.65) calc(-404px * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_oracle_die_green {
-    background-position: -138px -404px;
+    background-position: calc(-138px * var(--playerboard-ratio) / 0.65) calc(-404px * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_oracle_die_black {
-    background-position: -202px -404px;
+    background-position: calc(-202px * var(--playerboard-ratio) / 0.65) calc(-404px * var(--playerboard-ratio) / 0.65);
 }
 
 .ood_card {
@@ -1346,16 +1345,19 @@
 .ood_playerboard_container {
     margin: 50px 30px;
     padding: 30px;
-    flex: 1 0 750px;
+    flex: 1 1 840px;
 }
 
 .ood_playerboard_wrapper {
     height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
 }
 
 .ood_playerboard_left_side, .ood_playerboard_right_side {
     display: inline-block;
-    width: 110px;
+    width: calc(var(--playerboard-side-width) * 110px / 110);
     height: 100%;
     padding-left: 5px;
     padding-right: 5px;
@@ -1378,32 +1380,32 @@
 }
 
 .ood_playerboard_side_section .ood_card_oracle {
-    width: calc(196px * var(--board-card-ratio));
-    height: calc(290px * var(--board-card-ratio));
+    width: calc(196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
+    height: calc(290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_oracle_black {
-    background-position: calc(-1671px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_oracle_blue {
-    background-position: calc(-1671px * var(--board-card-ratio)) calc(-290px * var(--board-card-ratio));
+    background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_oracle_pink {
-    background-position: calc(-1671px * var(--board-card-ratio)) calc(-1160px * var(--board-card-ratio));
+    background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1160px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_oracle_green {
-    background-position: calc(-1867px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_oracle_red {
-    background-position: calc(-1867px * var(--board-card-ratio)) calc(-580px * var(--board-card-ratio));
+    background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_oracle_yellow {
-    background-position: calc(-1867px * var(--board-card-ratio)) calc(-1160px * var(--board-card-ratio));
+    background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1160px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_oracle_section {
@@ -1425,36 +1427,36 @@
 }
 
 .ood_playerboard_side_section .ood_card_injury {
-    width: calc(290px * var(--board-card-ratio));
-    height: calc(196px * var(--board-card-ratio));
+    width: calc(290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
+    height: calc(196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_injury_black {
-    background-position: calc(-580px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+    background-position: calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1066px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_injury_red {
-    background-position: calc(-1160px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+    background-position: calc(-1160px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1066px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_injury_blue {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1262px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_injury_pink {
-    background-position: calc(-580px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+    background-position: calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1262px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_injury_yellow {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1458px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_injury_green {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1654px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_favor_section {
-    height: 23%;
+    height: 25%;
 }
 
 .ood_favor_section .ood_favor, .ood_favor_section .ood_favor_count {
@@ -1471,80 +1473,80 @@
 }
 
 .ood_playerboard_side_section .ood_card_companion {
-    width: calc(196px * var(--board-card-ratio));
-    height: calc(290px * var(--board-card-ratio));
+    width: calc(196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
+    height: calc(290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_1 {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-196px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_2 {
-    background-position: calc(-1475px * var(--board-card-ratio)) calc(-290px * var(--board-card-ratio));
+    background-position: calc(-1475px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_3 {
-    background-position: calc(-307px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-307px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_4 {
-    background-position: calc(-1185px * var(--board-card-ratio)) calc(-392px * var(--board-card-ratio));
+    background-position: calc(-1185px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-392px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_5 {
-    background-position: calc(-503px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-503px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_6 {
-    background-position: calc(-699px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-699px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_7 {
-    background-position: calc(-895px * var(--board-card-ratio)) calc(-392px * var(--board-card-ratio));
+    background-position: calc(-895px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-392px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_8 {
-    background-position: calc(-1475px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-1475px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_9 {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-486px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_10 {
-    background-position: calc(-196px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+    background-position: calc(-196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-486px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_11 {
-    background-position: calc(-392px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+    background-position: calc(-392px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-486px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_12 {
-    background-position: calc(-1671px * var(--board-card-ratio)) calc(-580px * var(--board-card-ratio));
+    background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_13 {
-    background-position: calc(-196px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+    background-position: calc(-196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-776px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_14 {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-776px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_15 {
-    background-position: calc(-1867px * var(--board-card-ratio)) calc(-870px * var(--board-card-ratio));
+    background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_16 {
-    background-position: calc(-1671px * var(--board-card-ratio)) calc(-870px * var(--board-card-ratio));
+    background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_17 {
-    background-position: calc(-1475px * var(--board-card-ratio)) calc(-870px * var(--board-card-ratio));
+    background-position: calc(-1475px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_companion_18 {
-    background-position: calc(-1475px * var(--board-card-ratio)) calc(-580px * var(--board-card-ratio));
+    background-position: calc(-1475px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_equipment_section {
@@ -1557,96 +1559,96 @@
 }
 
 .ood_playerboard_side_section .ood_card_equipment {
-    width: calc(290px * var(--board-card-ratio));
-    height: calc(196px * var(--board-card-ratio));
+    width: calc(290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
+    height: calc(196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_1 {
-    background-position: calc(-588px * var(--board-card-ratio)) calc(-486px * var(--board-card-ratio));
+    background-position: calc(-588px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-486px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_2 {
-    background-position: calc(-1185px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-1185px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_3 {
-    background-position: calc(-682px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+    background-position: calc(-682px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-776px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_4 {
-    background-position: calc(-290px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+    background-position: calc(-290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1458px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_5 {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1066px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_6 {
-    background-position: calc(-870px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+    background-position: calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1458px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_7 {
-    background-position: calc(-290px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+    background-position: calc(-290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1654px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_8 {
-    background-position: calc(-895px * var(--board-card-ratio)) calc(-196px * var(--board-card-ratio));
+    background-position: calc(-895px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_9 {
-    background-position: calc(-392px * var(--board-card-ratio)) calc(-776px * var(--board-card-ratio));
+    background-position: calc(-392px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-776px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_10 {
-    background-position: calc(-895px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-895px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_11 {
-    background-position: calc(-1450px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+    background-position: calc(-1450px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1458px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_12 {
-    background-position: calc(-870px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+    background-position: calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1066px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_13 {
-    background-position: calc(-870px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+    background-position: calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1262px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_14 {
-    background-position: calc(-0px * var(--board-card-ratio)) calc(-0px * var(--board-card-ratio));
+    background-position: calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_15 {
-    background-position: calc(-1185px * var(--board-card-ratio)) calc(-196px * var(--board-card-ratio));
+    background-position: calc(-1185px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_16 {
-    background-position: calc(-1160px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+    background-position: calc(-1160px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1654px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_17 {
-    background-position: calc(-580px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+    background-position: calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1654px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_18 {
-    background-position: calc(-580px * var(--board-card-ratio)) calc(-1458px * var(--board-card-ratio));
+    background-position: calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1458px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_19 {
-    background-position: calc(-200px * var(--board-card-ratio)) calc(-1066px * var(--board-card-ratio));
+    background-position: calc(-200px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1066px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_20 {
-    background-position: calc(-870px * var(--board-card-ratio)) calc(-1654px * var(--board-card-ratio));
+    background-position: calc(-870px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1654px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_21 {
-    background-position: calc(-290px * var(--board-card-ratio)) calc(-1262px * var(--board-card-ratio));
+    background-position: calc(-290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1262px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_playerboard_side_section .ood_card_equipment_22 {
-    background-position: calc(-1185px * var(--board-card-ratio)) calc(-682px * var(--board-card-ratio));
+    background-position: calc(-1185px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-682px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
 .ood_zeus_tile_spot {
@@ -1722,10 +1724,10 @@
 }
 
 .ood_shrine_spot .ood_shrine {
-    width: calc(var(--board-shrine-width-ratio) * 46 / 149);
-    height: calc(var(--board-shrine-width-ratio) * 49 / 149);
+    width: calc(var(--board-shrine-width-ratio) * var(--playerboard-ratio) * 46 / (0.65 * 149));
+    height: calc(var(--board-shrine-width-ratio) * var(--playerboard-ratio) * 49 / (0.65 * 149));
     background-size: 1191.3% 1014.29%;
-    background-position: calc(var(--board-shrine-width-ratio) * -421 / 149) calc(var(--board-shrine-width-ratio) * -180 / 149);
+    background-position: calc(var(--board-shrine-width-ratio) * var(--playerboard-ratio) * -421 / (0.65 * 149)) calc(var(--board-shrine-width-ratio) * var(--playerboard-ratio) * -180 / (0.65 * 149));
 }
 
 .ood_dice_spot {
