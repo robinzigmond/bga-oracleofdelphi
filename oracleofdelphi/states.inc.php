@@ -61,13 +61,14 @@ if (!defined('STATE_END_GAME')) { // ensure this block is only invoked once, sin
     define("STATE_ORACLE_CHOOSE_GOD", 5);
     define("STATE_FIGHT_MONSTER", 6);
     define("STATE_CONTINUE_FIGHT", 7);
-    define("STATE_SHRINE_REWARD", 8);
-    define("STATE_STATUE_REWARD", 9);
-    define("STATE_MONSTER_REWARD", 10);
+    define("STATE_NO_INJURY_REWARD", 8);
+    define("STATE_DISCARD_EXCESS_INJURIES", 9);
     define("STATE_END_GAME", 99);
  }
 
- 
+//TODO: rethink state machine, need to handle full "turn framework" as well as
+//all possible outcomes of injury card check phase (most aren't in as states, just as
+//"possibleactions"!) 
 $machinestates = array(
 
     // The initial state. Please do not modify.
@@ -83,37 +84,11 @@ $machinestates = array(
 
     STATE_PLAYER_TURN => [
         "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must take an action or end their turn'),
-        "descriptionmyturn" => clienttranslate('${you} must take an action or end your turn'),
+        "description" => clienttranslate('${actplayer} is taking their turn'),
+        "descriptionmyturn" => clienttranslate('${you} must take your turn'),
         "type" => STATE_TYPE_ACTIVEPLAYER,
-        "possibleactions" => [
-            "undo",
-            "recolor",
-            "godAction",
-            "drawOracle",
-            "takeFavors",
-            "lookAtIslands",
-            "moveShip",
-            "fightMonster",
-            "explore",
-            "buildShrine",
-            "loadOffering",
-            "makeOffering",
-            "loadStatue",
-            "raiseStatue",
-            "discardInjury",
-            "advanceGod",
-            "endTurn",
-            "noInjuryReward",
-            "recovery"
-        ],
-        "transitions" => [
-            "buildShrine" => STATE_SHRINE_REWARD,
-            "raiseStatue" => STATE_STATUE_REWARD,
-            "fightMonster" => STATE_FIGHT_MONSTER,
-            "endFightRound" => STATE_CONTINUE_FIGHT,
-            "endNormalTurn" => STATE_CONSULT_ORACLE,
-            "endRecovery" => STATE_TURN_END
+        "possibleactions" => ["takeActions"],
+        "transitions" => ["fightMonster" => STATE_FIGHT_MONSTER, "endTurn" => STATE_CONSULT_ORACLE
         ]
     ],
 
@@ -123,7 +98,12 @@ $machinestates = array(
         "descriptionmyturn" => "",
         "type" => STATE_TYPE_GAME,
         "action" => "stTurnEnd",
-        "transitions" => ["gameEnd" => STATE_END_GAME, "nextTurn" => STATE_PLAYER_TURN]
+        "transitions" => [
+            "gameEnd" => STATE_END_GAME,
+            "noInjuries" => STATE_NO_INJURY_REWARD,
+            "recovery" => STATE_DISCARD_EXCESS_INJURIES,
+            "nextTurn" => STATE_PLAYER_TURN
+        ]
     ],
 
     STATE_CONSULT_ORACLE => [
@@ -151,7 +131,7 @@ $machinestates = array(
         "descriptionmyturn" => "",
         "type" => STATE_TYPE_GAME,
         "action" => "stFightMonster",
-        "transitions" => ["win" => STATE_MONSTER_REWARD, "lose" => STATE_CONTINUE_FIGHT]
+        "transitions" => ["win" => STATE_PLAYER_TURN, "lose" => STATE_CONTINUE_FIGHT]
     ],
 
     STATE_CONTINUE_FIGHT => [
@@ -162,36 +142,27 @@ $machinestates = array(
         "possibleactions" => ["continueOrNot"],
         "transitions" => [
             "end" => STATE_PLAYER_TURN,
-            "continueAndWin" => STATE_MONSTER_REWARD,
+            "continueAndWin" => STATE_PLAYER_TURN,
             "continueAndLose" => STATE_CONTINUE_FIGHT
         ]
     ],
 
-    STATE_SHRINE_REWARD => [
-        "name" => "shrineReward",
-        "description" => '${actplayer} must choose which God to advance',
-        "descriptionmyturn" => '${you} must choose which God to advance',
+    STATE_NO_INJURY_REWARD => [
+        "name" => "noInjuryReward",
+        "description" => '${actplayer} can gain a favor token or advance a God by one step',
+        "descriptionmyturn" => '${you} can gain a favor token or advance a God by one step',
         "type" => STATE_TYPE_ACTIVEPLAYER,
-        "possibleactions" => ["chooseGodShrineReward"],
+        "possibleactions" => ["gainFavor", "advanceGod"],
         "transitions" => ["" => STATE_PLAYER_TURN]
     ],
 
-    STATE_STATUE_REWARD => [
-        "name" => "statueReward",
-        "description" => '${actplayer} must choose a Companion Card',
-        "descriptionmyturn" => '${you} must choose a Companion Card',
+    STATE_DISCARD_EXCESS_INJURIES => [
+        "name" => "discardExessInjuries",
+        "description" => '${actplayer} must recover by discarding 3 injury cards',
+        "descriptionmyturn" => '${you} must recover by discarding 3 injury cards',
         "type" => STATE_TYPE_ACTIVEPLAYER,
-        "possibleactions" => ["chooseCompanion"],
-        "transitions" => ["" => STATE_PLAYER_TURN]
-    ],
-
-    STATE_MONSTER_REWARD => [
-        "name" => "monsterReward",
-        "description" => '${actplayer} must choose an Equipment Card',
-        "descriptionmyturn" => '${you} must choose an Equipment Card',
-        "type" => STATE_TYPE_ACTIVEPLAYER,
-        "possibleactions" => ["chooseEquipment"],
-        "transitions" => ["" => STATE_PLAYER_TURN]
+        "possibleactions" => ["discard"],
+        "transitions" => ["" => STATE_TURN_END]
     ],
 
     // Final state.

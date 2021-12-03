@@ -722,31 +722,11 @@ class TheOracleOfDelphi extends Table
         (note: each method below must match an input method in theoracleofdelphi.action.php)
     */
 
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
-        $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
+    public function handleActions($actions) {
+        //TODO. "top-level" handler which handles each action in the array in turn
+        //and passes those to the corresponding functions to handle.
+        //[Need those to return notifications(s) so those can be handled properly.]
     }
-    
-    */
 
     
 //////////////////////////////////////////////////////////////////////////////

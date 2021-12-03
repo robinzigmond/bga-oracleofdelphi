@@ -46,6 +46,8 @@ const INJURY = "injury";
 const COMPANION = "companion";
 const EQUIPMENT = "equipment";
 
+const OOD_ACTION_QUEUE = "bga_ood_actions";
+
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
@@ -160,7 +162,11 @@ define([
                 // ensure layout is correct for screen resolution
                 this.onScreenChange();
 
-                console.log("Ending game setup");
+                // fetch action queue from local storage, if it exists
+                const savedActions = localStorage.getItem(OOD_ACTION_QUEUE);
+                this.actionQueue = savedActions ? JSON.parse(savedActions) : [];
+                //TODO: need to "play through" actions in the just-fetched queue (if non-empty),
+                //so that the UI matches the partially-played turn
             },
 
 
@@ -248,6 +254,49 @@ define([
                 script.
             
             */
+
+            // wrapper for ajaxcall
+            ajaxAction: function (action, args, handler) {
+                if (!args) {
+                    args = {};
+                }
+                // this allows to avoid rapid action clicking which can cause race condition on server
+                args.lock = true;
+                if (this.checkAction(action)) {
+                    this.ajaxcall(
+                        `/${this.game_name}/${this.game_name}/${action}.html`, args, this, () => { }, () => {
+                            if (handler) {
+                                handler();
+                            }
+                        }
+                    );
+                }
+            },
+
+            submitActions: function () {
+                this.ajaxAction("submitActions", this.actionQueue, () => this.clearActions());
+            },
+
+            // shorthand function to update local storage with the latest value of the action queue
+            saveActions: function () {
+                localStorage.setItem(OOD_ACTION_QUEUE, JSON.stringify(this.actionQueue));
+            },
+
+            clearActions: function () {
+                this.actionQueue = [];
+                this.saveActions();
+            },
+
+            undoLast: function () {
+                this.actionQueue.pop();
+                this.saveActions();
+                //TODO: update UI appropriately
+            },
+
+            undoAll: function () {
+                this.clearActions();
+                //TODO: update UI appropriately
+            },
 
             // calculate CSS variables for screen width, to keep the layout responsive
             onScreenChange: function () {
