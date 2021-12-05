@@ -86,6 +86,11 @@
     --playerboard-side-width: 110;
 }
 
+/* alter some CSS variables in lower scopes */
+.bgabutton {
+    --card-ratio: 0.2;
+}
+
 #ood_map {
     position: relative;
     /* TODO: adjust dimensions (perhaps eventually dynamic based on random map generated!) */
@@ -749,7 +754,6 @@
     width: calc(65px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
     height: calc(65px * var(--god-ratio) * var(--playerboard-ratio) / 0.65);
     background-size: 843.08% 764.62%;
-    position: absolute;
 }
 
 .ood_god_ares {
@@ -1829,6 +1833,10 @@
     left: 45%;
 }
 
+.ood_god_column .ood_god {
+    position: absolute;
+}
+
 .ood_god_column_poseidon {
     left: 52%;
 }
@@ -1924,4 +1932,11 @@
 .ood_card_spacer {
     width: calc(196px * var(--card-ratio));
     height: calc(290px * var(--card-ratio));
+}
+
+/* miscellaneous things for user interface */
+
+.ood_action_trigger {
+    /* todo: some visual highlight here too, probably specific for each game element */
+    cursor: pointer;
 }

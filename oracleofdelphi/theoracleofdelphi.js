@@ -48,6 +48,9 @@ const EQUIPMENT = "equipment";
 
 const OOD_ACTION_QUEUE = "bga_ood_actions";
 
+// state names. Note: must match "name" attribute of state in states.inc.php
+const STATE_PLAYER_TURN = "playerTurn";
+
 define([
     "dojo", "dojo/_base/declare",
     "ebg/core/gamegui",
@@ -70,6 +73,14 @@ define([
 
                 // object for all counter components
                 this.counters = {};
+
+                // used for keeping references to various click handlers that need to
+                // be selectively removed
+                this.handlers = {
+                    dice: {},
+                    oracles: {},
+                    gods: {}
+                };
             },
 
             /*
@@ -204,19 +215,55 @@ define([
                 console.log('Leaving state: ' + stateName);
 
                 switch (stateName) {
+                    case STATE_PLAYER_TURN: {
+                        // remove all ood_action_trigger classes, and event listeners.
+                        // Remove class last as it's used to determine the elements with listeners
+                        // to remove.
+                        const { dice, oracles, gods } = this.handlers;
 
-                    /* Example:
-                    
-                    case 'myGameState':
-                    
-                        // Hide the HTML block we are displaying only during this game state
-                        dojo.style( 'my_html_block_id', 'display', 'none' );
-                        
+                        const actualDice = document.querySelectorAll(
+                            ".ood_playerboard .ood_oracle_die.ood_action_trigger"
+                        );
+
+                        actualDice.forEach((die) => {
+                            const color = Array.from(die.classList)
+                                .find(className => className.startsWith("ood_oracle_die_"))
+                                .slice("ood_oracle_die_".length);
+                            die.removeEventListener("click", dice[color]);
+                        });
+
+                        const actualOracles = document.querySelectorAll(
+                            ".ood_playerboard_left_side .ood_card_oracle.ood_action_trigger"
+                        );
+                        actualOracles.forEach((card) => {
+                            const color = Array.from(card.classList)
+                                .find(className => className.startsWith("ood_card_oracle_"))
+                                .slice("ood_card_oracle_".length);
+                            card.removeEventListener("click", oracles[color]);
+                        });
+
+                        const actualGods = document.querySelectorAll(
+                            ".ood_playerboard .ood_god.ood_action_trigger"
+                        );
+                        actualGods.forEach((god) => {
+                            const color = Array.from(god.classList)
+                                .find(className => className.startsWith("ood_god_"))
+                                .slice("ood_god_".length);
+                            god.removeEventListener("click", gods[color]);
+                        });
+
+                        Array.from(document.getElementsByClassName("ood_action_trigger")).forEach((element) => {
+                            element.classList.remove("ood_action_trigger");
+                        });
+
+                        this.handlers = {
+                            dice: {},
+                            oracles: {},
+                            gods: {}
+                        };
                         break;
-                   */
-
-
-                    case 'dummmy':
+                    }
+                    default:
                         break;
                 }
             },
@@ -229,18 +276,76 @@ define([
 
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
-                        /*               
-                                         Example:
-                         
-                                         case 'myGameState':
-                                            
-                                            // Add 3 action buttons in the action status bar:
-                                            
-                                            this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                                            this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                                            this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
-                                            break;
-                        */
+                        case STATE_PLAYER_TURN: {
+                            const activePlayerId = this.getActivePlayerId();
+                            const parentSelector = `#ood_playerboard_${activePlayerId}`;
+                            // TODO: use client state to track info as well! Needs to be updated
+                            // in client-side action handlers
+                            let colorIndex = 0;
+                            const { dice, oracles, gods } = this.handlers;
+                            for (const dieColor of args.unusedDice) {
+                                const handler = () => { console.log(`${dieColor} die action`); }; //TODO
+                                if (!dice[dieColor]) {
+                                    dice[dieColor] = handler;
+                                }
+                                this.addActionButton(
+                                    `ood_actionbutton_die_${dieColor}_${colorIndex}`,
+                                    `<div class="ood_die_result ood_oracle_die ood_oracle_die_${dieColor}"></div>`,
+                                    handler
+                                );
+                                const actualDice = document.querySelectorAll(
+                                    `${parentSelector} .ood_oracle_die_${dieColor}`
+                                );
+                                // ugly, but effective, way to ensure each die of the appropriate color
+                                // has exactly 1 handler: remove them all then re-add, each time through
+                                // the loop
+                                actualDice.forEach((die) => {
+                                    die.classList.add("ood_action_trigger");
+                                    die.removeEventListener("click", dice[dieColor]);
+                                    // can't use handler for listener in line below, as have to ensure
+                                    // it's the same reference that will later be removed
+                                    die.addEventListener("click", dice[dieColor]);
+                                });
+                                colorIndex++;
+                            }
+                            for (const oracleColor of args.unusedOracleColors) {
+                                const handler = () => { console.log(`${oracleColor} oracle action`); }; //TODO
+                                if (!oracles[oracleColor]) {
+                                    oracles[oracleColor] = handler;
+                                }
+                                this.addActionButton(
+                                    `ood_actionbutton_oracle_${oracleColor}`,
+                                    `<div class="ood_card ood_card_oracle ood_card_oracle_${oracleColor}"></div>`,
+                                    handler
+                                );
+                                const actualCards = document.querySelectorAll(
+                                    `${parentSelector} .ood_oracle_section .ood_card_oracle_${oracleColor}`
+                                );
+                                actualCards.forEach((card) => {
+                                    card.classList.add("ood_action_trigger");
+                                    card.addEventListener("click", handler);
+                                });
+                            }
+                            for (const god of args.godsOnTop) {
+                                const handler = () => { console.log(`${god} god action`); }; //TODO
+                                if (!gods[god]) {
+                                    gods[god] = handler;
+                                }
+                                this.addActionButton(
+                                    `ood_actionbutton_god_${god}`,
+                                    `<div class="ood_wooden_piece ood_god ood_god_${god}"></div>`,
+                                    handler
+                                );
+                                const pieceOnBoard = document.querySelector(
+                                    `${parentSelector} .ood_god_${god}`
+                                );
+                                pieceOnBoard.classList.add("ood_action_trigger");
+                                pieceOnBoard.addEventListener("click", handler);
+                            }
+                            break;
+                        }
+                        default:
+                            break;
                     }
                 }
             },

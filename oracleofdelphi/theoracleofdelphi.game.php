@@ -45,6 +45,8 @@ if (!defined("CARD_TYPE_INJURY")) {
     define("GOD_HERMES", "hermes");
 
     define("TOKEN_STATUE", "statue");
+    
+    define("MAX_GOD_VALUE", 6);
 }
 
 class TheOracleOfDelphi extends Table
@@ -99,7 +101,8 @@ class TheOracleOfDelphi extends Table
         ];
 
         // set up cards
-        $this->setupCards();
+        $this->allCards = self::getNew("module.common.deck");
+        $this->allCards->init("card");
 
         self::initGameStateLabels( array( 
             //    "my_first_global_variable" => 10,
@@ -112,8 +115,6 @@ class TheOracleOfDelphi extends Table
 	}
 
     private function setupCards() {
-        $this->allCards = self::getNew("module.common.deck");
-        $this->allCards->init("card");
         // first create all in single "deck" location (even though this won't be used in the game!)
         $allCards = [];
         // injury and oracle cards: 7 (resp 5) of each of the 6 colours
@@ -219,6 +220,7 @@ class TheOracleOfDelphi extends Table
         // Step 2 - "setup general supply"
         // mostly various decks of cards (Oracle/Injury/Companion/Equipment). We will store all these
         // in a single "deck" component - initialised in constructor.
+        $this->setupCards();
 
         // then find the cards of each apppropriate "type" and move to the appropriate locations
         $cardsWithIds = $this->allCards->getCardsInLocation("deck"); // that's where they'll be at this stage
@@ -739,22 +741,41 @@ class TheOracleOfDelphi extends Table
         game state.
     */
 
-    /*
-    
-    Example for game state "MyGameState":
-    
-    function argMyGameState()
-    {
-        // Get some values from the current game situation in database...
-    
-        // return values:
-        return array(
-            'variable1' => $value1,
-            'variable2' => $value2,
-            ...
+    public function argPlayerTurn() {
+        $activePlayerId = self::getActivePlayerId();
+        $unusedDice = self::getObjectListFromDb(
+            "SELECT color FROM player_dice
+            WHERE player_id = $activePlayerId AND used = 0"
+        , true );
+        $playerInfo = self::getObjectFromDb(
+            "SELECT favors, oracle_used, " . implode(", ", $this->allGods) . "
+            FROM player WHERE player_id = $activePlayerId"
         );
-    }    
-    */
+        $oracleCards = $this->allCards->getCardsOfTypeInLocation(
+            CARD_TYPE_ORACLE, null, "hand", $activePlayerId
+        );
+        $unusedOracleColors = [];
+        $countedUsed = false;
+        foreach($oracleCards as $cardId => ["color" => $color]) {
+            if ($color !== $playerInfo["oracle_used"] || $countedUsed) {
+                if (!in_array($color, $unusedOracleColors)) {
+                    $unusedOracleColors[] = $color;
+                }
+            }
+            if ($color === $playerInfo["oracle_used"] && !$countedUsed) {
+                $countedUsed = true;
+            }
+        }
+        $usableGods = array_filter($this->allGods, function($god) use ($playerInfo) {
+            return $playerInfo[$god] === MAX_GOD_VALUE;
+        });
+        return [
+            "unusedDice" => $unusedDice,
+            "favors" => (int)$playerInfo["favors"],
+            "unusedOracleColors" => $unusedOracleColors,
+            "godsOnTop" => $usableGods
+        ];
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions
