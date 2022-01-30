@@ -20,6 +20,7 @@ const OFFERING = "offering";
 const MONSTER = "monster";
 const STATUE = "statue";
 const ISLAND = "island";
+const TEMPLE = "temple";
 
 const RED = "red";
 const YELLOW = "yellow";
@@ -32,6 +33,22 @@ const WILD = "wild";
 
 const ALL_COLORS = [RED, YELLOW, GREEN, BLUE, PINK, BLACK];
 
+const FRIENDLY_COLORS = {
+    ["ff0000"]: RED,
+    ["008000"]: GREEN,
+    ["0000ff"]: BLUE,
+    ["ffa500"]: YELLOW
+};
+
+const COLOR_STATUE_COMBINATIONS = {
+    [RED]: [`${STATUE}_${RED}_${BLUE}_${PINK}`, `${STATUE}_${RED}_${PINK}_${BLACK}`, `${STATUE}_${RED}_${GREEN}_${YELLOW}`],
+    [YELLOW]: [`${STATUE}_${GREEN}_${YELLOW}_${PINK}`, `${STATUE}_${BLACK}_${BLUE}_${YELLOW}`, `${STATUE}_${RED}_${GREEN}_${YELLOW}`],
+    [GREEN]: [`${STATUE}_${GREEN}_${YELLOW}_${PINK}`, `${STATUE}_${GREEN}_${BLUE}_${BLACK}`, `${STATUE}_${RED}_${GREEN}_${YELLOW}`],
+    [BLUE]: [`${STATUE}_${RED}_${BLUE}_${PINK}`, `${STATUE}_${BLACK}_${BLUE}_${YELLOW}`, `${STATUE}_${GREEN}_${BLUE}_${BLACK}`],
+    [PINK]: [`${STATUE}_${RED}_${BLUE}_${PINK}`, `${STATUE}_${GREEN}_${YELLOW}_${PINK}`, `${STATUE}_${RED}_${PINK}_${BLACK}`],
+    [BLACK]: [`${STATUE}_${BLACK}_${BLUE}_${YELLOW}`, `${STATUE}_${RED}_${PINK}_${BLACK}`, `${STATUE}_${GREEN}_${BLUE}_${BLACK}`]
+};
+
 const POSEIDON = "poseidon";
 const APOLLON = "apollon";
 const ARTEMIS = "artemis";
@@ -39,7 +56,23 @@ const APHRODITE = "aphrodite";
 const ARES = "ares";
 const HERMES = "hermes";
 
+const GOD_COLORS = {
+    [RED]: APHRODITE,
+    [YELLOW]: APOLLON,
+    [GREEN]: ARTEMIS,
+    [BLUE]: POSEIDON,
+    [PINK]: HERMES,
+    [BLACK]: ARES
+};
+
 const ALL_GODS = [POSEIDON, APOLLON, ARTEMIS, APHRODITE, ARES, HERMES];
+
+const SIGMA = "sigma";
+const PHI = "phi";
+const PSI = "psi";
+const OMEGA = "omega";
+
+const ALL_GREEK_LETTERS = [SIGMA, PHI, PSI, OMEGA];
 
 const ORACLE = "oracle";
 const INJURY = "injury";
@@ -50,6 +83,10 @@ const OOD_ACTION_QUEUE = "bga_ood_actions";
 
 // state names. Note: must match "name" attribute of state in states.inc.php
 const STATE_PLAYER_TURN = "playerTurn";
+
+// client states
+const STATE_DIE_CHOSEN = "client_dieChosen";
+const STATE_RECOLOR_DIE = "client_recolorDie";
 
 define([
     "dojo", "dojo/_base/declare",
@@ -81,6 +118,9 @@ define([
                     oracles: {},
                     gods: {}
                 };
+
+                // client state arguments, which will be used extensively!
+                this.clientStateArgs = {};
             },
 
             /*
@@ -277,14 +317,18 @@ define([
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
                         case STATE_PLAYER_TURN: {
-                            const activePlayerId = this.getActivePlayerId();
-                            const parentSelector = `#ood_playerboard_${activePlayerId}`;
+                            const parentSelector = `#ood_playerboard_${this.player_id}`;
                             // TODO: use client state to track info as well! Needs to be updated
                             // in client-side action handlers
                             let colorIndex = 0;
                             const { dice, oracles, gods } = this.handlers;
                             for (const dieColor of args.unusedDice) {
-                                const handler = () => { console.log(`${dieColor} die action`); }; //TODO
+                                const handler = () => {
+                                    this.clientStateArgs.dieChosen = dieColor;
+                                    this.setClientState(STATE_DIE_CHOSEN, {
+                                        descriptionmyturn: _("${you} must choose an action with this die")
+                                    });
+                                };
                                 if (!dice[dieColor]) {
                                     dice[dieColor] = handler;
                                 }
@@ -342,6 +386,195 @@ define([
                                 pieceOnBoard.classList.add("ood_action_trigger");
                                 pieceOnBoard.addEventListener("click", handler);
                             }
+                            //TODO: submit and undo buttons (x2) where appropriate. Probably put
+                            //in separate methods as won't just be used here (actually, maybe they
+                            //will - but separate methods still better!)
+                            break;
+                        }
+                        case STATE_DIE_CHOSEN: {
+                            // add many buttons (eventually):
+                            // Want some way to visually show the chosen die - can't really do on a button
+                            // as not interactive!
+                            // Need (up to, some may not be accessible - deal with individually) one button
+                            // for each of the 13 die actions.
+                            // Plus (provided at least 1 favor possessed) a button to recolor.
+                            this.addActionButton(
+                                "ood_actionbutton_recolor",
+                                _("Recolor die"),
+                                () => {
+                                    this.setClientState(STATE_RECOLOR_DIE, {
+                                        descriptionmyturn: _("${you} must choose how to recolor this die")
+                                    });
+                                },
+                                null, null, "gray"
+                            );
+
+                            this.addActionButton(
+                                "ood_actionbutton_draworacle",
+                                `<div class="ood_action_graphic ood_action_graphic_draw_oracle"></div>`,
+                                () => { /*TODO*/ }
+                            );
+
+                            this.addActionButton(
+                                "ood_actionbutton_takefavors",
+                                `<div class="ood_action_graphic ood_action_graphic_favors"></div>`,
+                                () => { /*TODO*/ }
+                            );
+
+                            // only possible if there is at least one face-down island tile
+                            if (this.getAllCoords(`${ISLAND}_back`).length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_lookatislands",
+                                    `<div class="ood_action_graphic ood_action_graphic_look_islands"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            this.addActionButton(
+                                "ood_actionbutton_moveship",
+                                `<div class="ood_action_graphic ood_action_graphic_move_ship"></div>`,
+                                () => { /*TODO*/ }
+                            );
+
+                            // only display this if currently next to a monster
+                            if (this.findAdjacent(this.player_id, `${MONSTER}_${this.clientStateArgs.dieChosen}`).length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_fightmonster",
+                                    `<div class="ood_action_graphic ood_action_graphic_fight_monster"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            // only display this if currently next to a face-down island tile whose hex color
+                            // matches the die
+                            for (const {x, y} of this.findAdjacent(this.player_id, `${ISLAND}_back`)) {
+                                const tile = document.getElementById(`ood_maphex_${x}_${y}`);
+                                if (tile.classList.contains(`ood_maphex_color_${this.clientStateArgs.dieChosen}`)) {
+                                    this.addActionButton(
+                                        "ood_actionbutton_exploreisland",
+                                        `<div class="ood_action_graphic ood_action_graphic_explore_island"></div>`,
+                                        () => { /*TODO*/ }
+                                    );
+                                    break;                                    
+                                }
+                            }
+
+                            // build shrine action - don't display if no shrines on the player board!
+                            if (document.querySelectorAll(`#ood_playerboard_${this.player_id} .ood_shrine`).length > 0) {
+                                // only display build shrine action player's ship is currently next to a face-up island
+                                // on a hex whose clor matches the die
+                                const faceUpIslands = [];
+                                for (const letter of ALL_GREEK_LETTERS) {
+                                    faceUpIslands.push(...this.findAdjacent(
+                                        this.player_id,
+                                        `${ISLAND}_${FRIENDLY_COLORS[this.gamedatas.players[this.player_id].color]}_${letter}`
+                                    ))
+                                }
+                                for (const {x, y} of faceUpIslands) {
+                                    const tile = document.getElementById(`ood_maphex_${x}_${y}`);
+                                    if (tile.classList.contains(`ood_maphex_color_${this.clientStateArgs.dieChosen}`)) {
+                                        // also not if that island already has a shrine on it!
+                                        if (!tile.querySelector(".ood_shrine")) {
+                                            this.addActionButton(
+                                                "ood_actionbutton_buildshrine",
+                                                `<div class="ood_action_graphic ood_action_graphic_build_shrine"></div>`,
+                                                () => { /*TODO*/ }
+                                            );
+                                        }
+                                    break;
+                                    }
+                                }
+                            }
+
+                            // only display this if currently next to an offering of the correct die color
+                            //TODO: don't show if ship's storage is full
+                            if (this.findAdjacent(
+                                    this.player_id, `${OFFERING}_${this.clientStateArgs.dieChosen}`
+                                ).length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_loadoffering",
+                                    `<div class="ood_action_graphic ood_action_graphic_load_offering"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            // only display this if currently next to a temple of the correct die color
+                            //TODO: don't show if no offering cube of the correct color is held in storage
+                            if (this.findAdjacent(
+                                    this.player_id, `${TEMPLE}_${this.clientStateArgs.dieChosen}`
+                                ).length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_makeoffering",
+                                    `<div class="ood_action_graphic ood_action_graphic_make_offering"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            // only display this if currently next to a statue of the correct die color
+                            //TODO: don't show if ship's storage is full
+                            if (this.findAdjacent(
+                                    this.player_id, `${STATUE}_${this.clientStateArgs.dieChosen}`
+                                ).length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_loadstatue",
+                                    `<div class="ood_action_graphic ood_action_graphic_load_statue"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            // only show if next to a "statue_x_y_z" hex which includes the die color
+                            //TODO: only show if carrying a statue of the appropriate color
+                            const statueHexes = [];
+                            for (const colorCombo of COLOR_STATUE_COMBINATIONS[this.clientStateArgs.dieChosen]) {
+                                statueHexes.push(...this.findAdjacent(this.player_id, colorCombo, true))
+                            }
+                            if (statueHexes.length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_raisestatue",
+                                    `<div class="ood_action_graphic ood_action_graphic_raise_statue"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            // only show if the player has at least one injury card of the die color
+                            if (document.querySelector(
+                                    `#ood_playerboard_${this.player_id} .ood_card_injury_${this.clientStateArgs.dieChosen}`
+                                )) {
+                                this.addActionButton(
+                                    "ood_actionbutton_discardinjury",
+                                    `<div class="ood_action_graphic ood_action_graphic_discard_injury"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            // don't show if the God of the corresponding color is at the top of the track
+                            const godCounter = document.querySelector(
+                                `#ood_playerboard_${this.player_id} .ood_god_${GOD_COLORS[this.clientStateArgs.dieChosen]}`
+                            );
+                            if (!godCounter.classList.contains("ood_god_position_6")) {
+                                this.addActionButton(
+                                    "ood_actionbutton_advancegod",
+                                    `<div class="ood_action_graphic ood_action_graphic_advance_god"></div>`,
+                                    () => { /*TODO*/ }
+                                );
+                            }
+
+                            this.addActionButton(
+                                "ood_actionbutton_canceldie",
+                                _("Cancel die selection"),
+                                () => {
+                                    this.setClientState(STATE_PLAYER_TURN, {
+                                        descriptionmyturn: _("${you} can select an oracle die or card, or god, to perform an action")
+                                    });
+                                },
+                                null, null, "red"
+                            );
+                            break;
+                        }
+                        case STATE_RECOLOR_DIE: {
+                            //TODO: use die color and number of favors (in original server args
+                            //- possibly modified by subsequent client actions, but leave that for now)
+                            //to display the color options and costs
                             break;
                         }
                         default:
@@ -354,10 +587,10 @@ define([
             //// Utility methods
 
             /*
-            
+             
                 Here, you can defines some utility methods that you can use everywhere in your javascript
                 script.
-            
+             
             */
 
             // wrapper for ajaxcall
@@ -778,33 +1011,89 @@ define([
                 }
             },
 
+            // general map-related utilies:
+
+            // checks if two given hexes are adjacent, via their coordinates
+            areAdjacent: function({ x: x1, y: y1}, { x: x2, y: y2}) {
+                switch (y2 - y1) {
+                    case -1:
+                        return [0, 1].includes(x2 - x1);
+                    case 0:
+                        return [-1, 1].includes(x2 - x1);
+                    case 1:
+                        return [-1, 0].includes(x2 - x1);
+                    default:
+                        return false;
+                }
+            },
+
+            // gets the hex co-ords of all game items of a given type (eg monster, statue, etc.), as an array of
+            // {x, y} co-ord objects
+            getAllCoords: function(type) {
+                const items = document.querySelectorAll(`.ood_${type}`);
+                return [...items].map(item => {
+                    const hexId = item.parentElement.id;
+                    // id is of the form ood_maphex_x_y
+                    const parts = hexId.split("_");
+                    return { x: parts[2], y: parts[3] };
+                });
+            },
+
+            // variant of the above - this time finds coords for map hexes where the hex itself has the
+            // specific type
+            getCoordsOfAllHexes: function(type) {
+                const mapHexes = document.querySelectorAll(`.ood_maphex_${type}`);
+                return [...mapHexes].map(mapHex => {
+                    const hexId = mapHex.id;
+                    // id is of the form ood_maphex_x_y
+                    const parts = hexId.split("_");
+                    return { x: parts[2], y: parts[3] };
+                });
+            },
+
+            // gets the ship location of a given player - given by player ID
+            getShipLocation: function(playerId) {
+                const playerColor = this.gamedatas.players[playerId].color;
+                const shipToken = document.querySelector(`.ood_ship_${playerColor}`);
+                const idParts = shipToken.parentElement.id.split("_");
+                return { x: idParts[2], y: idParts[3] };
+            },
+
+            // combines the above functions to get an array - possibly empty - of all coords
+            // containing a type of object on the map that are adjacent to the player's ship
+            findAdjacent: function(playerId, type, isMapHex = false) {
+                const shipLocation = this.getShipLocation(playerId);
+                const coords = isMapHex ? this.getCoordsOfAllHexes(type) : this.getAllCoords(type);
+                return coords.filter(tokenLocation => this.areAdjacent(shipLocation, tokenLocation));
+            },
+
             ///////////////////////////////////////////////////
             //// Player's action
 
             /*
-            
+             
                 Here, you are defining methods to handle player's action (ex: results of mouse click on 
                 game objects).
                 
                 Most of the time, these methods:
                 _ check the action is possible at this game state.
                 _ make a call to the game server
-            
+             
             */
 
             /* Example:
-            
+             
             onMyMethodToCall1: function( evt )
             {
                 console.log( 'onMyMethodToCall1' );
                 
                 // Preventing default browser reaction
                 dojo.stopEvent( evt );
-    
+             
                 // Check that this action is possible (see "possibleactions" in states.inc.php)
                 if( ! this.checkAction( 'myAction' ) )
                 {   return; }
-    
+             
                 this.ajaxcall( "/theoracleofdelphi/theoracleofdelphi/myAction.html", { 
                                                                         lock: true, 
                                                                         myArgument1: arg1, 
@@ -817,13 +1106,13 @@ define([
                                 // (most of the time: nothing)
                                 
                              }, function( is_error) {
-    
+             
                                 // What to do after the server call in anyway (success or failure)
                                 // (most of the time: nothing)
-    
+             
                              } );        
             },        
-            
+             
             */
 
 
@@ -837,7 +1126,7 @@ define([
                 
                 Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
                       your theoracleofdelphi.game.php file.
-            
+             
             */
             setupNotifications: function () {
                 console.log('notifications subscriptions setup');

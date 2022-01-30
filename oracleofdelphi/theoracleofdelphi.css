@@ -1940,3 +1940,90 @@
     /* todo: some visual highlight here too, probably specific for each game element */
     cursor: pointer;
 }
+
+/* graphics for individual actions (for buttons - taken from player aid) */
+.ood_actionbutton_icon {
+    padding: 5px;
+}
+
+.ood_action_graphic {
+    background-image: url('img/actions.png');
+}
+
+.ood_action_graphic_advance_god {
+    width: 34px;
+    height: 44px;
+    background-position: -350px -146px;
+}
+
+.ood_action_graphic_build_shrine {
+    width: 91px;
+    height: 56px;
+    background-position: -239px -90px;
+}
+
+.ood_action_graphic_discard_injury {
+    width: 86px;
+    height: 35px;
+    background-position: -10px -247px;
+}
+
+.ood_action_graphic_explore_island {
+    width: 91px;
+    height: 68px;
+    background-position: -10px -10px;
+}
+
+.ood_action_graphic_draw_oracle {
+    width: 33px;
+    height: 48px;
+    background-position: -350px -78px;
+}
+
+.ood_action_graphic_favors {
+    width: 40px;
+    height: 48px;
+    background-position: -350px -10px;
+}
+
+.ood_action_graphic_fight_monster {
+    width: 91px;
+    height: 49px;
+    background-position: -233px -168px;
+}
+
+.ood_action_graphic_load_offering {
+    width: 92px;
+    height: 57px;
+    background-position: -121px -168px;
+}
+
+.ood_action_graphic_load_statue {
+    width: 98px;
+    height: 62px;
+    background-position: -121px -10px;
+}
+
+.ood_action_graphic_look_islands {
+    width: 61px;
+    height: 40px;
+    background-position: -139px -98px;
+}
+
+.ood_action_graphic_make_offering {
+    width: 91px;
+    height: 59px;
+    background-position: -10px -168px;
+}
+
+.ood_action_graphic_move_ship {
+    width: 109px;
+    height: 50px;
+    background-position: -10px -98px;
+}
+
+.ood_action_graphic_raise_statue {
+    width: 91px;
+    height: 60px;
+    background-position: -239px -10px;
+}

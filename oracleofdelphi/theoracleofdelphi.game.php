@@ -769,6 +769,7 @@ class TheOracleOfDelphi extends Table
         $usableGods = array_filter($this->allGods, function($god) use ($playerInfo) {
             return $playerInfo[$god] === MAX_GOD_VALUE;
         });
+
         return [
             "unusedDice" => $unusedDice,
             "favors" => (int)$playerInfo["favors"],
