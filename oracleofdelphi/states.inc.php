@@ -86,9 +86,8 @@ $machinestates = array(
         "name" => "playerTurn",
         "description" => clienttranslate('${actplayer} is taking their turn'),
         "descriptionmyturn" => clienttranslate('${you} can select an oracle die or card, or god, to perform an action'),
-        "args" => "argPlayerTurn",
         "type" => STATE_TYPE_ACTIVEPLAYER,
-        "possibleactions" => ["takeActions"],
+        "possibleactions" => ["submitActions"],
         "transitions" => ["fightMonster" => STATE_FIGHT_MONSTER, "endTurn" => STATE_CONSULT_ORACLE
         ]
     ],

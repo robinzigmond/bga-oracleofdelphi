@@ -996,6 +996,10 @@
     background-size: 1072.73% 980.85%;
 }
 
+.ood_playerboard .ood_oracle_die {
+    position: absolute;
+}
+
 .ood_oracle_die_yellow {
     background-position: calc(-330px * var(--playerboard-ratio) / 0.65) calc(-322px * var(--playerboard-ratio) / 0.65);
 }
@@ -1062,6 +1066,7 @@
 .ood_card_oracle {
     width: calc(196px * var(--card-ratio));
     height: calc(290px * var(--card-ratio));
+    transition: width 0.5s, height 0.5s, background-position 0.5s;
     background-size: 1052.55% 637.93%;
 }
 
@@ -1383,32 +1388,32 @@
     transform: rotate(90deg);
 }
 
-.ood_playerboard_side_section .ood_card_oracle {
+.ood_playerboard_side_section .ood_card_oracle, .ood_card_oracle.ood_shrink {
     width: calc(196px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
     height: calc(290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
-.ood_playerboard_side_section .ood_card_oracle_black {
+.ood_playerboard_side_section .ood_card_oracle_black, .ood_card_oracle_black.ood_shrink {
     background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
-.ood_playerboard_side_section .ood_card_oracle_blue {
+.ood_playerboard_side_section .ood_card_oracle_blue, .ood_card_oracle_blue.ood_shrink {
     background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-290px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
-.ood_playerboard_side_section .ood_card_oracle_pink {
+.ood_playerboard_side_section .ood_card_oracle_pink, .ood_card_oracle_pink.ood_shrink {
     background-position: calc(-1671px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1160px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
-.ood_playerboard_side_section .ood_card_oracle_green {
+.ood_playerboard_side_section .ood_card_oracle_green, .ood_card_oracle_green.ood_shrink {
     background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-0px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
-.ood_playerboard_side_section .ood_card_oracle_red {
+.ood_playerboard_side_section .ood_card_oracle_red, .ood_card_oracle_red.ood_shrink {
     background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-580px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
-.ood_playerboard_side_section .ood_card_oracle_yellow {
+.ood_playerboard_side_section .ood_card_oracle_yellow, .ood_card_oracle_yellow.ood_shrink {
     background-position: calc(-1867px * var(--board-card-ratio) * var(--playerboard-side-width) / 110) calc(-1160px * var(--board-card-ratio) * var(--playerboard-side-width) / 110);
 }
 
@@ -1774,27 +1779,22 @@
 }
 
 .ood_die_in_spot_1_of_2 {
-    position: absolute;
     transform: translate(-30%, -30%);
 }
 
 .ood_die_in_spot_2_of_2 {
-    position: absolute;
     transform: translate(30%, 30%);
 }
 
 .ood_die_in_spot_1_of_3 {
-    position: absolute;
     transform: translate(-50%, -40%);
 }
 
 .ood_die_in_spot_2_of_3 {
-    position: absolute;
     transform: translate(50%, -40%);
 }
 
 .ood_die_in_spot_3_of_3 {
-    position: absolute;
     transform: translate(0%, 30%);
 }
 

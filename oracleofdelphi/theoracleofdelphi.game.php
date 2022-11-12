@@ -540,14 +540,18 @@ class TheOracleOfDelphi extends Table
     {
         $result = array();
     
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
-
         // Gather all information about current game situation (visible by player $current_player_id).
-        // tokens on map.
+
+        // Static map information. Already done in .view.php but also need in the JS.
+        $result["mapData"] = self::getObjectListFromDb(
+            "SELECT x_coord, y_coord, type, color FROM map_hex"
+        );
+
+        // Tokens on the map.
         // Note that for island tiles we send the status as -1 for any facedown tile, to avoid leaking
         // hidden information (the greek letter on face-down tiles)
         $result["tokensOnMap"] = self::getObjectListFromDb(
-            "SELECT location_x, location_y, type, color, player_id,
+            "SELECT id, location_x, location_y, type, color, player_id,
             CASE
                 WHEN type = '" . MAP_TYPE_ISLAND . "' AND STATUS < 5 THEN -1
                 ELSE status
@@ -580,7 +584,7 @@ class TheOracleOfDelphi extends Table
              GROUP BY card_location", true
         );
         $inHand = self::getObjectListFromDb(
-            "SELECT card_type, card_location_arg, card_type_arg
+            "SELECT card_id, card_type, card_location_arg, card_type_arg
              FROM card
              WHERE card_location = 'hand'"
         );
@@ -604,11 +608,14 @@ class TheOracleOfDelphi extends Table
                 return $card["card_type"] === $cardType;
             });
             $cardInfo[$cardType]["hands"] = [];
-            foreach ($inHandOfType as ["card_location_arg" => $player, "card_type_arg" => $info]) {
+            foreach ($inHandOfType as ["card_id" => $id, "card_location_arg" => $player, "card_type_arg" => $info]) {
                 if (!array_key_exists($player, $cardInfo[$cardType]["hands"])) {
                     $cardInfo[$cardType]["hands"][$player] = [];
                 }
-                $cardInfo[$cardType]["hands"][$player][] = $getCardIdentifier($cardType, $info);
+                $cardInfo[$cardType]["hands"][$player][] = [
+                    "card" => $getCardIdentifier($cardType, $info),
+                    "id" => $id
+                ];
             }
         }
 
@@ -621,21 +628,23 @@ class TheOracleOfDelphi extends Table
         // Get information about players
         $sql = "SELECT player_id id, player_score score, favors, shields, ship_location_x, ship_location_y, oracle_used, "
                 . implode(", ", $this->allGods) . "
-                FROM player ";
+                FROM player";
         $playerInfo = self::getCollectionFromDb( $sql );
 
         // also fetch ship tile/shrines/zeus tiles (from tokens table)
         // We ensure location_x is null to avoid counting shrines which are placed on the map
         $playerTokens = self::getObjectListFromDb(
-            "SELECT type, status, player_id FROM token
+            "SELECT id, type, status, player_id FROM token
              WHERE type IN ('" . implode("', '", ["ship", "shrine", "zeus"]) ."')
              AND location_x IS NULL"
         );
         $tokenArray = [];
-        foreach($playerTokens as ["player_id" => $playerId, "type" => $type, "status" => $status]) {
+        foreach($playerTokens as ["id" => $id, "player_id" => $playerId, "type" => $type, "status" => $status]) {
             if (!array_key_exists($playerId, $tokenArray)) {
                 $tokenArray[$playerId] = ["zeus" => [], "shrines" => 0];
             }
+            //TODO: send id in gamedata for ships and shrines (if it turns out to be necessary/helpful for frontend!)
+            //Will have to change data structure sent so not doing until I know it's needed.
             switch($type) {
                 case "ship":
                     $tokenArray[$playerId]["shipTile"] = (int)$status;
@@ -658,20 +667,21 @@ class TheOracleOfDelphi extends Table
                         "originalId" => $tileId % 12 == 0 ? 12 : $tileId % 12,
                         "type" => $tileType,
                         "details" => $tileDetails,
-                        "complete" => $complete
+                        "complete" => $complete,
+                        "id" => $id
                     ];
                     break;
             }
         }
 
         // and dice (from player_dice table)
-        $diceDb = self::getObjectListFromDb("SELECT player_id, color, used FROM player_dice");
+        $diceDb = self::getObjectListFromDb("SELECT id, player_id, color, used FROM player_dice");
         $dice = [];
-        foreach($diceDb as ["player_id" => $playerId, "color" => $color, "used" => $used]) {
+        foreach($diceDb as ["id" => $id, "player_id" => $playerId, "color" => $color, "used" => $used]) {
             if (!array_key_exists($playerId, $dice)) {
                 $dice[$playerId] = [];
             }
-            $dice[$playerId][] = ["color" => $color, "used" => $used != 0];
+            $dice[$playerId][] = ["id" => $id, "color" => $color, "used" => $used != 0];
         }
 
         foreach($playerInfo as $playerId => &$info) {
@@ -725,11 +735,59 @@ class TheOracleOfDelphi extends Table
     */
 
     public function handleActions($actions) {
-        //TODO. "top-level" handler which handles each action in the array in turn
-        //and passes those to the corresponding functions to handle.
-        //[Need those to return notifications(s) so those can be handled properly.]
+        self::checkAction("submitActions");
+
+        //TODO: may need adjustment/expansion - this may be discovered as individual actions are implemented!
+        //In particular I'm not yet sure if sending notifications for each action individually will work, or
+        //if we need to return those from the methods, build up an array of notifications, and send all at the
+        //end.
+        foreach ($actions as $action) {
+            $methodName = "handleAction_" . $action["type"];
+            $this->{$methodName}($action);
+        }
+        //TODO: check game state and do appropriate transition
     }
 
+    // individual action handling methods
+    private function handleAction_draw_oracle($action) {
+        $dieColor = $action["die"];
+        // [note: die color necessary because needs to be removed from player's active dice,
+        // even though it doesn't affect what happens]
+
+        $activePlayerId = self::getActivePlayerId();
+
+        // check move is legal (player has a die of the specified color)
+        //TODO: move this somewhere common - it will be used on basically every die action!
+        $checkDieSql = "SELECT id FROM player_dice
+                        WHERE player_id = $activePlayerId AND color = '$dieColor' AND used=0
+                        LIMIT 1";
+        $dieIdArray = self::getObjectListFromDb($checkDieSql, true);
+        if (count($dieIdArray) === 0) {
+            throw new BgaUserException("You do not have an unused die of that color!");
+        }
+
+        // update database:
+        // draw new oracle card from deck into player's hand
+        $drawn = $this->allCards->pickCard(CARD_LOCATION_ORACLE_DECK, $activePlayerId);
+
+        // mark die as used
+        $idToUpdate = $dieIdArray[0];
+        self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$idToUpdate");
+
+        // send notification (die used and card color drawn)
+        self::notifyAllPlayers(
+            "draw_oracle",
+            clienttranslate('${player_name} uses ${die_color} to draw an Oracle card, and gets ${oracle_color}'),
+            [
+                "player_id" => $activePlayerId,
+                "player_name" => self::getActivePlayerName(),
+                "die_color" => $dieColor,
+                "die_id" => $dieIdArray[0],
+                "oracle_color" => $this->allColors[$drawn["type_arg"]],
+                "card_id" => $drawn["id"]
+            ]
+        );
+    }
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -741,42 +799,6 @@ class TheOracleOfDelphi extends Table
         game state.
     */
 
-    public function argPlayerTurn() {
-        $activePlayerId = self::getActivePlayerId();
-        $unusedDice = self::getObjectListFromDb(
-            "SELECT color FROM player_dice
-            WHERE player_id = $activePlayerId AND used = 0"
-        , true );
-        $playerInfo = self::getObjectFromDb(
-            "SELECT favors, oracle_used, " . implode(", ", $this->allGods) . "
-            FROM player WHERE player_id = $activePlayerId"
-        );
-        $oracleCards = $this->allCards->getCardsOfTypeInLocation(
-            CARD_TYPE_ORACLE, null, "hand", $activePlayerId
-        );
-        $unusedOracleColors = [];
-        $countedUsed = false;
-        foreach($oracleCards as $cardId => ["color" => $color]) {
-            if ($color !== $playerInfo["oracle_used"] || $countedUsed) {
-                if (!in_array($color, $unusedOracleColors)) {
-                    $unusedOracleColors[] = $color;
-                }
-            }
-            if ($color === $playerInfo["oracle_used"] && !$countedUsed) {
-                $countedUsed = true;
-            }
-        }
-        $usableGods = array_filter($this->allGods, function($god) use ($playerInfo) {
-            return $playerInfo[$god] === MAX_GOD_VALUE;
-        });
-
-        return [
-            "unusedDice" => $unusedDice,
-            "favors" => (int)$playerInfo["favors"],
-            "unusedOracleColors" => $unusedOracleColors,
-            "godsOnTop" => $usableGods
-        ];
-    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state actions

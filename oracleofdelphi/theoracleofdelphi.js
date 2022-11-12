@@ -21,6 +21,7 @@ const MONSTER = "monster";
 const STATUE = "statue";
 const ISLAND = "island";
 const TEMPLE = "temple";
+const SHRINE = "shrine";
 
 const RED = "red";
 const YELLOW = "yellow";
@@ -66,13 +67,14 @@ const GOD_COLORS = {
 };
 
 const ALL_GODS = [POSEIDON, APOLLON, ARTEMIS, APHRODITE, ARES, HERMES];
+const MAX_GOD_VALUE = 6;
 
 const SIGMA = "sigma";
 const PHI = "phi";
 const PSI = "psi";
 const OMEGA = "omega";
 
-const ALL_GREEK_LETTERS = [SIGMA, PHI, PSI, OMEGA];
+//const ALL_GREEK_LETTERS = [SIGMA, PHI, PSI, OMEGA];
 
 const ORACLE = "oracle";
 const INJURY = "injury";
@@ -87,6 +89,16 @@ const STATE_PLAYER_TURN = "playerTurn";
 // client states
 const STATE_DIE_CHOSEN = "client_dieChosen";
 const STATE_RECOLOR_DIE = "client_recolorDie";
+
+// action types
+const DRAW_ORACLE = "draw_oracle";
+
+const MOVING_PIECE_CLASS = "ood_moving_piece";
+const DIE_CLASS_PREFIX = "ood_die_in_spot_";
+
+const PLAYERBOARD_BASE_WIDTH_RATIO = 0.65;
+const DIE_BASE_WIDTH = 44;
+const DIE_BASE_HEIGHT = 47;
 
 define([
     "dojo", "dojo/_base/declare",
@@ -119,6 +131,9 @@ define([
                     gods: {}
                 };
 
+                // current game data, taken from the server in setup method but updated on the client side
+                this.currentGameData = {};
+
                 // client state arguments, which will be used extensively!
                 this.clientStateArgs = {};
             },
@@ -137,6 +152,11 @@ define([
             */
 
             setup: function (gamedatas) {
+                // take local copy of gamedatas to keep in sync with client actions
+                // (taking a reference shouldn't matter despite mutating this - I don't believe gamedatas is
+                // a reference to anything needed elsewhere?)
+                this.currentGameData = gamedatas;
+
                 this.placeZeus();
 
                 this.placeTemples();
@@ -261,9 +281,7 @@ define([
                         // to remove.
                         const { dice, oracles, gods } = this.handlers;
 
-                        const actualDice = document.querySelectorAll(
-                            ".ood_playerboard .ood_oracle_die.ood_action_trigger"
-                        );
+                        const actualDice = document.querySelectorAll(".ood_oracle_die.ood_action_trigger");
 
                         actualDice.forEach((die) => {
                             const color = Array.from(die.classList)
@@ -272,9 +290,8 @@ define([
                             die.removeEventListener("click", dice[color]);
                         });
 
-                        const actualOracles = document.querySelectorAll(
-                            ".ood_playerboard_left_side .ood_card_oracle.ood_action_trigger"
-                        );
+                        const actualOracles = document.querySelectorAll(".ood_card_oracle.ood_action_trigger");
+
                         actualOracles.forEach((card) => {
                             const color = Array.from(card.classList)
                                 .find(className => className.startsWith("ood_card_oracle_"))
@@ -282,6 +299,7 @@ define([
                             card.removeEventListener("click", oracles[color]);
                         });
 
+                        //as in above comment!
                         const actualGods = document.querySelectorAll(
                             ".ood_playerboard .ood_god.ood_action_trigger"
                         );
@@ -317,12 +335,13 @@ define([
                 if (this.isCurrentPlayerActive()) {
                     switch (stateName) {
                         case STATE_PLAYER_TURN: {
-                            const parentSelector = `#ood_playerboard_${this.player_id}`;
-                            // TODO: use client state to track info as well! Needs to be updated
-                            // in client-side action handlers
                             let colorIndex = 0;
                             const { dice, oracles, gods } = this.handlers;
-                            for (const dieColor of args.unusedDice) {
+                            const unusedDice = this.currentGameData.players[this.player_id].dice
+                                .filter(({ used }) => !used)
+                                .map(({ color }) => color);
+                    
+                            for (const dieColor of unusedDice) {
                                 const handler = () => {
                                     this.clientStateArgs.dieChosen = dieColor;
                                     this.setClientState(STATE_DIE_CHOSEN, {
@@ -337,9 +356,11 @@ define([
                                     `<div class="ood_die_result ood_oracle_die ood_oracle_die_${dieColor}"></div>`,
                                     handler
                                 );
-                                const actualDice = document.querySelectorAll(
-                                    `${parentSelector} .ood_oracle_die_${dieColor}`
-                                );
+
+                                const actualDice = this.currentGameData.players[this.player_id].dice
+                                    .filter(({ used, color }) => !used && color === dieColor)
+                                    .map(({ id }) => document.getElementById(`die_id_${id}`));
+
                                 // ugly, but effective, way to ensure each die of the appropriate color
                                 // has exactly 1 handler: remove them all then re-add, each time through
                                 // the loop
@@ -352,7 +373,18 @@ define([
                                 });
                                 colorIndex++;
                             }
-                            for (const oracleColor of args.unusedOracleColors) {
+
+                            const usedOracle = this.currentGameData.players[this.player_id].oracle_used;
+                            const unusedOracleColors = usedOracle
+                                ? []
+                                : (
+                                    this.currentGameData.cards.oracle.hands[this.player_id]
+                                    ? this.currentGameData.cards.oracle.hands[this.player_id]
+                                        .map(({ card }) => card)
+                                    : []
+                                );
+
+                            for (const oracleColor of unusedOracleColors) {
                                 const handler = () => { console.log(`${oracleColor} oracle action`); }; //TODO
                                 if (!oracles[oracleColor]) {
                                     oracles[oracleColor] = handler;
@@ -362,15 +394,19 @@ define([
                                     `<div class="ood_card ood_card_oracle ood_card_oracle_${oracleColor}"></div>`,
                                     handler
                                 );
-                                const actualCards = document.querySelectorAll(
-                                    `${parentSelector} .ood_oracle_section .ood_card_oracle_${oracleColor}`
-                                );
+
+                                const actualCards = this.currentGameData.cards.oracle.hands[this.player_id]
+                                    .map(({ id }) => document.getElementById(`card_id_${id}`));
                                 actualCards.forEach((card) => {
                                     card.classList.add("ood_action_trigger");
                                     card.addEventListener("click", handler);
                                 });
                             }
-                            for (const god of args.godsOnTop) {
+
+                            const godsOnTop = ALL_GODS.filter(
+                                god => Number(this.currentGameData.players[this.player_id][god]) === MAX_GOD_VALUE
+                            );
+                            for (const god of godsOnTop) {
                                 const handler = () => { console.log(`${god} god action`); }; //TODO
                                 if (!gods[god]) {
                                     gods[god] = handler;
@@ -380,8 +416,11 @@ define([
                                     `<div class="ood_wooden_piece ood_god ood_god_${god}"></div>`,
                                     handler
                                 );
+                                // (OK to use a DOM query here - the god pieces don't have database IDs
+                                // and the token will never leave the player board. It can be moved without
+                                // slide functions, just by changing the CSS class and using transitions.)
                                 const pieceOnBoard = document.querySelector(
-                                    `${parentSelector} .ood_god_${god}`
+                                    `#ood_playerboard_${this.player_id} .ood_god_${god}`
                                 );
                                 pieceOnBoard.classList.add("ood_action_trigger");
                                 pieceOnBoard.addEventListener("click", handler);
@@ -392,6 +431,7 @@ define([
                             break;
                         }
                         case STATE_DIE_CHOSEN: {
+                            const { dieChosen } = this.clientStateArgs;
                             // add many buttons (eventually):
                             // Want some way to visually show the chosen die - can't really do on a button
                             // as not interactive!
@@ -412,7 +452,7 @@ define([
                             this.addActionButton(
                                 "ood_actionbutton_draworacle",
                                 `<div class="ood_action_graphic ood_action_graphic_draw_oracle"></div>`,
-                                () => { /*TODO*/ }
+                                () => { this.doAction({ type: DRAW_ORACLE, die: dieChosen, cannotUndo: true }) }
                             );
 
                             this.addActionButton(
@@ -422,7 +462,7 @@ define([
                             );
 
                             // only possible if there is at least one face-down island tile
-                            if (this.getAllCoords(`${ISLAND}_back`).length > 0) {
+                            if (this.getAllCoords({ type: ISLAND, status: -1 }).length > 0) {
                                 this.addActionButton(
                                     "ood_actionbutton_lookatislands",
                                     `<div class="ood_action_graphic ood_action_graphic_look_islands"></div>`,
@@ -437,7 +477,7 @@ define([
                             );
 
                             // only display this if currently next to a monster
-                            if (this.findAdjacent(this.player_id, `${MONSTER}_${this.clientStateArgs.dieChosen}`).length > 0) {
+                            if (this.findAdjacent(this.player_id, { type: MONSTER, color: dieChosen }).length > 0) {
                                 this.addActionButton(
                                     "ood_actionbutton_fightmonster",
                                     `<div class="ood_action_graphic ood_action_graphic_fight_monster"></div>`,
@@ -447,9 +487,17 @@ define([
 
                             // only display this if currently next to a face-down island tile whose hex color
                             // matches the die
-                            for (const {x, y} of this.findAdjacent(this.player_id, `${ISLAND}_back`)) {
-                                const tile = document.getElementById(`ood_maphex_${x}_${y}`);
-                                if (tile.classList.contains(`ood_maphex_color_${this.clientStateArgs.dieChosen}`)) {
+                            for (const {x, y} of this.findAdjacent(this.player_id, { type: ISLAND, status: -1 })) {
+                                const islandTile = this.currentGameData.mapData.find(
+                                    ({ x_coord, y_coord }) => Number(x_coord) === Number(x) && Number(y_coord) === Number(y)
+                                );
+                                if (!islandTile) {
+                                    console.error("found an adjacent island token that has no corresponding map tile???");
+                                }
+                                if (islandTile.type === ISLAND) {
+                                    console.error("island token not on island tile?? Investigate!");
+                                }
+                                if (tile.color === dieChosen) {
                                     this.addActionButton(
                                         "ood_actionbutton_exploreisland",
                                         `<div class="ood_action_graphic ood_action_graphic_explore_island"></div>`,
@@ -460,21 +508,32 @@ define([
                             }
 
                             // build shrine action - don't display if no shrines on the player board!
-                            if (document.querySelectorAll(`#ood_playerboard_${this.player_id} .ood_shrine`).length > 0) {
+                            if (this.currentGameData.players[this.player_id].shrines > 0) {
                                 // only display build shrine action player's ship is currently next to a face-up island
-                                // on a hex whose clor matches the die
+                                // on a hex whose color matches the die
                                 const faceUpIslands = [];
-                                for (const letter of ALL_GREEK_LETTERS) {
-                                    faceUpIslands.push(...this.findAdjacent(
-                                        this.player_id,
-                                        `${ISLAND}_${FRIENDLY_COLORS[this.gamedatas.players[this.player_id].color]}_${letter}`
-                                    ))
-                                }
+                                faceUpIslands.push(...this.findAdjacent(
+                                    this.player_id,
+                                    {
+                                        type: ISLAND,
+                                        color: FRIENDLY_COLORS[this.gamedatas.players[this.player_id].color]
+                                    }
+                                ))
                                 for (const {x, y} of faceUpIslands) {
-                                    const tile = document.getElementById(`ood_maphex_${x}_${y}`);
-                                    if (tile.classList.contains(`ood_maphex_color_${this.clientStateArgs.dieChosen}`)) {
+                                    const islandMapTile = this.currentGameData.mapData.find(({ x_coord, y_coord}) => {
+                                        return Number(x_coord) === Number(x) && Number(y_coord) === Number(y);
+                                    });
+                                    if (!islandMapTile) {
+                                        console.error("no island on map where island token is??");
+                                    }
+                                    if (islandTile.color === dieChosen) {
                                         // also not if that island already has a shrine on it!
-                                        if (!tile.querySelector(".ood_shrine")) {
+                                        const hasShrine = this.currentGameData.tokensOnMap.find(
+                                            ({ type, location_x, location_y }) => {
+                                                return location_x === x && location_y === y && type === SHRINE;
+                                            }
+                                        );
+                                        if (!hasShrine) {
                                             this.addActionButton(
                                                 "ood_actionbutton_buildshrine",
                                                 `<div class="ood_action_graphic ood_action_graphic_build_shrine"></div>`,
@@ -489,7 +548,7 @@ define([
                             // only display this if currently next to an offering of the correct die color
                             //TODO: don't show if ship's storage is full
                             if (this.findAdjacent(
-                                    this.player_id, `${OFFERING}_${this.clientStateArgs.dieChosen}`
+                                    this.player_id, { type: OFFERING, color: dieChosen }
                                 ).length > 0) {
                                 this.addActionButton(
                                     "ood_actionbutton_loadoffering",
@@ -501,7 +560,7 @@ define([
                             // only display this if currently next to a temple of the correct die color
                             //TODO: don't show if no offering cube of the correct color is held in storage
                             if (this.findAdjacent(
-                                    this.player_id, `${TEMPLE}_${this.clientStateArgs.dieChosen}`
+                                    this.player_id, { type: TEMPLE, color: dieChosen }
                                 ).length > 0) {
                                 this.addActionButton(
                                     "ood_actionbutton_makeoffering",
@@ -513,7 +572,7 @@ define([
                             // only display this if currently next to a statue of the correct die color
                             //TODO: don't show if ship's storage is full
                             if (this.findAdjacent(
-                                    this.player_id, `${STATUE}_${this.clientStateArgs.dieChosen}`
+                                    this.player_id, { type: STATUE, color: dieChosen }
                                 ).length > 0) {
                                 this.addActionButton(
                                     "ood_actionbutton_loadstatue",
@@ -525,8 +584,8 @@ define([
                             // only show if next to a "statue_x_y_z" hex which includes the die color
                             //TODO: only show if carrying a statue of the appropriate color
                             const statueHexes = [];
-                            for (const colorCombo of COLOR_STATUE_COMBINATIONS[this.clientStateArgs.dieChosen]) {
-                                statueHexes.push(...this.findAdjacent(this.player_id, colorCombo, true))
+                            for (const colorCombo of COLOR_STATUE_COMBINATIONS[dieChosen]) {
+                                statueHexes.push(...this.findAdjacent(this.player_id, { type: colorCombo }, true))
                             }
                             if (statueHexes.length > 0) {
                                 this.addActionButton(
@@ -537,9 +596,8 @@ define([
                             }
 
                             // only show if the player has at least one injury card of the die color
-                            if (document.querySelector(
-                                    `#ood_playerboard_${this.player_id} .ood_card_injury_${this.clientStateArgs.dieChosen}`
-                                )) {
+                            if (this.currentGameData.cards.injury.hands[this.player_id]
+                                    .find(({ card: color }) => color === dieChosen)) {
                                 this.addActionButton(
                                     "ood_actionbutton_discardinjury",
                                     `<div class="ood_action_graphic ood_action_graphic_discard_injury"></div>`,
@@ -548,10 +606,7 @@ define([
                             }
 
                             // don't show if the God of the corresponding color is at the top of the track
-                            const godCounter = document.querySelector(
-                                `#ood_playerboard_${this.player_id} .ood_god_${GOD_COLORS[this.clientStateArgs.dieChosen]}`
-                            );
-                            if (!godCounter.classList.contains("ood_god_position_6")) {
+                            if (Number(this.currentGameData.players[this.player_id][GOD_COLORS[dieChosen]]) < MAX_GOD_VALUE) {
                                 this.addActionButton(
                                     "ood_actionbutton_advancegod",
                                     `<div class="ood_action_graphic ood_action_graphic_advance_god"></div>`,
@@ -562,19 +617,13 @@ define([
                             this.addActionButton(
                                 "ood_actionbutton_canceldie",
                                 _("Cancel die selection"),
-                                () => {
-                                    this.setClientState(STATE_PLAYER_TURN, {
-                                        descriptionmyturn: _("${you} can select an oracle die or card, or god, to perform an action")
-                                    });
-                                },
+                                () => { this.resetClientState(); },
                                 null, null, "red"
                             );
                             break;
                         }
                         case STATE_RECOLOR_DIE: {
-                            //TODO: use die color and number of favors (in original server args
-                            //- possibly modified by subsequent client actions, but leave that for now)
-                            //to display the color options and costs
+                            //TODO: use die color and number of favors to display the color options and costs
                             break;
                         }
                         default:
@@ -612,7 +661,25 @@ define([
             },
 
             submitActions: function () {
-                this.ajaxAction("submitActions", this.actionQueue, () => this.clearActions());
+                this.ajaxAction("submitActions",
+                    { actions: JSON.stringify(this.actionQueue.map(({ action }) => action)) },
+                    () => this.clearActions()
+                );
+            },
+
+            // called when an action is selected by the player in the UI. Handles on either client
+            // or server side, depending on whether it's undoable or not
+            doAction: function(action) {
+                const { cannotUndo, ...restOfAction } = action;
+                this.actionQueue.push({ action: restOfAction, gameState: JSON.parse(JSON.stringify(this.currentGameData)) });
+                if (cannotUndo) {
+                    //TODO: confirmation/warning to ensure player doesn't submit actions to the server
+                    //without being aware of it
+                    this.submitActions();
+                } else {
+                    this.saveActions();
+                    this.playActionNotification(action);
+                }
             },
 
             // shorthand function to update local storage with the latest value of the action queue
@@ -626,14 +693,29 @@ define([
             },
 
             undoLast: function () {
-                this.actionQueue.pop();
+                const { gameState } = this.actionQueue.pop();
                 this.saveActions();
-                //TODO: update UI appropriately
+                this.currentGameData = gameState;
             },
 
             undoAll: function () {
-                this.clearActions();
-                //TODO: update UI appropriately
+                if (this.actionQueue.length) {
+                    const { gameState } = this.actionQueue[0];
+                    this.clearActions();
+                    this.currentGameData = gameState;
+                }
+            },
+
+            playActionNotification: function(action) {
+                //TODO: determine which notification handler function to execute based on the action type. Should
+                //be a simple systemic way to do it (probably store notification args inside action?)
+            },
+
+            // used after a player action is taken or cancelled, to reset the client state to the default one
+            resetClientState: function() {
+                this.setClientState(STATE_PLAYER_TURN, {
+                    descriptionmyturn: _("${you} can select an oracle die or card, or god, to perform an action")
+                });
             },
 
             // calculate CSS variables for screen width, to keep the layout responsive
@@ -651,7 +733,7 @@ define([
                     // adjust map tile size to fit screen
                     document.documentElement.style.setProperty("--tile-width", `${tileWidth}px`);
                     // also adjust width of playerboards and the sections at its sides
-                    const playerboardWidthRatio = 0.65 * Math.min(screenWidth, 1200) / 1200
+                    const playerboardWidthRatio = PLAYERBOARD_BASE_WIDTH_RATIO * Math.min(screenWidth, 1200) / 1200
                     document.documentElement.style.setProperty("--playerboard-ratio", playerboardWidthRatio);
                     const playerboardSideWidth = Math.min(110, screenWidth / 12);
                     document.documentElement.style.setProperty("--playerboard-side-width", playerboardSideWidth);
@@ -702,21 +784,21 @@ define([
                     )).length;
                 }
 
-                for (const { location_x, location_y, type, color, status } of tokensOnMap) {
+                for (const { id, location_x, location_y, type, color, status } of tokensOnMap) {
                     const position = getCount(location_x, location_y, type);
                     const total = getTotal(location_x, location_y, type);
                     switch (type) {
                         case OFFERING:
-                            this.placeOffering(location_x, location_y, color, position, total);
+                            this.placeOffering(id, location_x, location_y, color, position, total);
                             break;
                         case MONSTER:
-                            this.placeMonster(location_x, location_y, color, position, total);
+                            this.placeMonster(id, location_x, location_y, color, position, total);
                             break;
                         case STATUE:
-                            this.placeStatue(location_x, location_y, color, position);
+                            this.placeStatue(id, location_x, location_y, color, position);
                             break;
                         case ISLAND: {
-                            this.placeIsland(location_x, location_y, color, status, greekLetters);
+                            this.placeIsland(id, location_x, location_y, color, status, greekLetters);
                             break;
                         }
                         default:
@@ -727,7 +809,7 @@ define([
             },
 
             // utilities for placing components on the map and player areas
-            placeOffering: function (x, y, color, position, total) {
+            placeOffering: function (id, x, y, color, position, total) {
                 const hexId = `ood_maphex_${x}_${y}`;
                 const tokenDiv = this.placeElement(
                     hexId, "ood_wooden_piece", "ood_offering", `ood_offering_${color}`
@@ -738,10 +820,10 @@ define([
                 const left = 50 + Math.cos(angle) * 30;
                 tokenDiv.style.top = `${top}%`;
                 tokenDiv.style.left = `${left}%`;
-
+                tokenDiv.id = `token_id_${id}`;
             },
 
-            placeMonster: function (x, y, color, position, total) {
+            placeMonster: function (id, x, y, color, position, total) {
                 const hexId = `ood_maphex_${x}_${y}`;
                 const tokenDiv = this.placeElement(
                     hexId, "ood_wooden_piece", "ood_monster", `ood_monster_${color}`
@@ -752,9 +834,10 @@ define([
                 const left = top;
                 tokenDiv.style.top = `${top}%`;
                 tokenDiv.style.left = `${left}%`;
+                tokenDiv.id = `token_id_${id}`;
             },
 
-            placeStatue: function (x, y, color, position) {
+            placeStatue: function (id, x, y, color, position) {
                 const hexId = `ood_maphex_${x}_${y}`;
                 const tokenDiv = this.placeElement(
                     hexId, "ood_wooden_piece", "ood_statue", `ood_statue_${color}`
@@ -784,9 +867,10 @@ define([
                 top = 50 * (1 - yPos);
                 tokenDiv.style.top = `${top}%`;
                 tokenDiv.style.left = `${left}%`;
+                tokenDiv.id = `token_id_${id}`;
             },
 
-            placeIsland: function (x, y, color, status, greekLetterArray) {
+            placeIsland: function (id, x, y, color, status, greekLetterArray) {
                 let islandDetails;
                 if (Number(status) === -1) {
                     islandDetails = "back";
@@ -795,9 +879,10 @@ define([
                 }
 
                 const hexId = `ood_maphex_${x}_${y}`;
-                this.placeElement(
+                const tokenDiv = this.placeElement(
                     hexId, "ood_island_tile", `ood_island_${islandDetails}`, "ood_hex_center"
                 );
+                tokenDiv.id = `token_id_${id}`;
             },
 
             // place Zeus in appropriate spot of the map. (Never changes so no parameters needed.)
@@ -822,13 +907,14 @@ define([
 
             placePlayerDice(playerId, diceInfo) {
                 for (const die of diceInfo) {
-                    const { color, used } = die;
-                    this.placeElement(
+                    const { color, used, id } = die;
+                    const dieDiv = this.placeElement(
                         `ood_dice_spot_${used ? "center" : color}_${playerId}`,
                         "ood_die_result",
                         "ood_oracle_die",
                         `ood_oracle_die_${color}`
                     );
+                    dieDiv.id = `die_id_${id}`;
                 }
                 // reposition dice if any are duplicates in the same section, so they're offset nicely
                 for (const pos of [...ALL_COLORS, "center"]) {
@@ -878,7 +964,7 @@ define([
             setupZeusTiles: function (playerId, playerColor, incompleteZeusTiles) {
                 let nonWildOfferings = 0;
                 let nonWildMonsters = 0;
-                incompleteZeusTiles.forEach(({ originalId, type, details, complete }) => {
+                incompleteZeusTiles.forEach(({ id, originalId, type, details, complete }) => {
                     // compute proper position (from 1 - 12), depending on tile details.
                     // Generally will be same as originalId, but not for monsters and offerings,
                     // due to the wild tiles (ids 7 and 8).
@@ -900,11 +986,12 @@ define([
                             nonWildMonsters++;
                         }
                     }
-                    this.placeElement(
+                    const tile = this.placeElement(
                         `ood_zeus_tile_spot_${position}_${playerId}`,
                         "ood_zeus_tile",
                         `ood_zeus_${playerColor}_${type}_${details}`
                     );
+                    tile.id = `token_id_${id}`;
                 });
             },
 
@@ -915,13 +1002,14 @@ define([
                         const toRemove = oracleCards.indexOf(usedOracleCard);
                         oracleCards = oracleCards.filter((card, index) => index !== toRemove);
                     }
-                    oracleCards.forEach((color, index) => {
+                    oracleCards.forEach(({ id, card: color }, index) => {
                         const card = this.placeElement(
                             `ood_oracle_section_${playerId}`,
                             "ood_card",
                             "ood_card_oracle",
                             `ood_card_oracle_${color}`
                         );
+                        card.id = `card_id_${id}`;
                         card.style.right = `calc(var(--playerboard-side-width) * ${30 * index - 110}px / 110)`;
                     });
                 }
@@ -929,13 +1017,14 @@ define([
 
             placeInjuryCards: function (playerId, playerCards) {
                 if (playerCards) {
-                    playerCards.forEach((color, index) => {
+                    playerCards.forEach(({ id, card: color }, index) => {
                         const card = this.placeElement(
                             `ood_injury_section_${playerId}`,
                             "ood_card",
                             "ood_card_injury",
                             `ood_card_injury_${color}`
                         );
+                        card.id = `card_id_${id}`;
                         card.style.right = `calc(var(--playerboard-side-width) * ${37 * index - 110}px / 110)`;
                     });
                 }
@@ -943,13 +1032,14 @@ define([
 
             placeCompanionCards: function (playerId, playerCards) {
                 if (playerCards) {
-                    playerCards.forEach((cardId, index) => {
+                    playerCards.forEach(({ id, card: cardId }, index) => {
                         const card = this.placeElement(
                             `ood_companion_section_${playerId}`,
                             "ood_card",
                             "ood_card_companion",
                             `ood_card_companion_${cardId}`
                         );
+                        card.id = `card_id_${id}`;
                         card.style.right = `calc(var(--playerboard-side-width) * ${37 * index}px / 110)`;
                     });
                 }
@@ -957,13 +1047,14 @@ define([
 
             placeEquipmentCards: function (playerId, playerCards) {
                 if (playerCards) {
-                    playerCards.forEach((cardId, index) => {
+                    playerCards.forEach(({ id, card: cardId }, index) => {
                         const card = this.placeElement(
                             `ood_equipment_section_${playerId}`,
                             "ood_card",
                             "ood_card_equipment",
                             `ood_card_equipment_${cardId}`
                         );
+                        card.id = `card_id_${id}`;                        
                         card.style.left = `${50 * index}px`;
                         card.style.right = `calc(var(--playerboard-side-width) * ${50 * index}px / 110)`;
                     });
@@ -1027,44 +1118,58 @@ define([
                 }
             },
 
-            // gets the hex co-ords of all game items of a given type (eg monster, statue, etc.), as an array of
-            // {x, y} co-ord objects
-            getAllCoords: function(type) {
-                const items = document.querySelectorAll(`.ood_${type}`);
-                return [...items].map(item => {
-                    const hexId = item.parentElement.id;
-                    // id is of the form ood_maphex_x_y
-                    const parts = hexId.split("_");
-                    return { x: parts[2], y: parts[3] };
-                });
+            // gets the hex co-ords of all game tokens of a given type (eg monster, statue, etc.), as an array of
+            // {x, y} co-ord objects and optionally of a particular type and/or color.
+            getAllCoords: function({ type, status, color }) {
+                return this.currentGameData.tokensOnMap.filter(
+                    ({ type: foundType, status: foundStatus, color: foundColor }) => {
+                        let result = type === foundType;
+                        if (status !== undefined) {
+                            result = result && (Number(status) === Number(foundStatus));
+                        }
+                        if (color !== undefined) {
+                            result = result && (color === foundColor);
+                        }
+                        return result;
+                }).map(({ location_x: x, location_y: y }) => ({ x, y}));
             },
 
-            // variant of the above - this time finds coords for map hexes where the hex itself has the
-            // specific type
+            // like the above, but rather than the tokens currently on the map this finds all hexes on the map
+            // where the tile itself is of a particular type
             getCoordsOfAllHexes: function(type) {
-                const mapHexes = document.querySelectorAll(`.ood_maphex_${type}`);
-                return [...mapHexes].map(mapHex => {
-                    const hexId = mapHex.id;
-                    // id is of the form ood_maphex_x_y
-                    const parts = hexId.split("_");
-                    return { x: parts[2], y: parts[3] };
-                });
+                return this.currentGameData.mapData
+                        .filter(({ type: actualType }) => actualType === type)
+                        .map(({ "x_coord": x, "y_coord": y }) => ({ x: Number(x), y: Number(y) }));
             },
 
             // gets the ship location of a given player - given by player ID
             getShipLocation: function(playerId) {
-                const playerColor = this.gamedatas.players[playerId].color;
-                const shipToken = document.querySelector(`.ood_ship_${playerColor}`);
-                const idParts = shipToken.parentElement.id.split("_");
-                return { x: idParts[2], y: idParts[3] };
+                const { ship_location_x: x, ship_location_y: y } = this.currentGameData.players[playerId];
+                return { x, y };
             },
 
             // combines the above functions to get an array - possibly empty - of all coords
             // containing a type of object on the map that are adjacent to the player's ship
-            findAdjacent: function(playerId, type, isMapHex = false) {
+            findAdjacent: function(playerId, {type, status, color}, isMapHex = false) {
                 const shipLocation = this.getShipLocation(playerId);
-                const coords = isMapHex ? this.getCoordsOfAllHexes(type) : this.getAllCoords(type);
+                const coords = isMapHex ? this.getCoordsOfAllHexes(type) : this.getAllCoords({type, status, color});
                 return coords.filter(tokenLocation => this.areAdjacent(shipLocation, tokenLocation));
+            },
+
+            // utils for manipulating CSS classes of dice
+
+            // returns the "count class" ("ood_die_in_spot_x_of_y") from a list of CSS classes
+            // (can return undefined if there is no such class)
+            getCountClass: function(classList) {
+                return Array.from(classList).find(className => className.startsWith(DIE_CLASS_PREFIX));
+            },
+
+            removeCountClass: function(dieElement) {
+                const { classList } = dieElement;
+                const countClass = this.getCountClass(classList);
+                if (countClass) {
+                    classList.remove(countClass);
+                }
             },
 
             ///////////////////////////////////////////////////
@@ -1142,23 +1247,153 @@ define([
                 // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
                 // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
                 // 
+                //TODO - same pattern will likely be used for many different notifs, make a global list of
+                //the and repeat the same subscription logic
+                dojo.subscribe("draw_oracle", this, "notif_draw_oracle");
             },
 
-            // TODO: from this point and below, you can write your game notifications handling methods
+            spend_die_animation: function(player_id, die_id) {
+                const targetId = `ood_dice_spot_center_${player_id}`;
 
-            /*
-            Example:
-            
-            notif_cardPlayed: function( notif )
-            {
-                console.log( 'notif_cardPlayed' );
-                console.log( notif );
+                const movingDie = document.getElementById(`die_id_${die_id}`);
+
+                // We need to remove the position class, if it exists, from the just moved die.
+                // We also must do this before the slide otherwise the calculations are incorrect due to
+                // the die being translated at the start of the move.
+                this.removeCountClass(movingDie);
+
+                // need to offset by half of die width/height to centre the die in the center spot
+                // - but BGA slideToObjectPos actually measures relative to the CENTER of each element,
+                // which here has size 0 for the center spot but obviously half the die offsets for the die.
+                // To make the position accurate we have to remove these again, hence the quarters...
+                // [NOTE: result not pixel-perfect - but close enough, at least for early development!]
+                const playerboardRatio = document.documentElement.style.getPropertyValue("--playerboard-ratio") / PLAYERBOARD_BASE_WIDTH_RATIO;
+                const dieWidth = DIE_BASE_WIDTH * playerboardRatio;
+                const dieHeight = DIE_BASE_HEIGHT * playerboardRatio;
+                const anim = this.slideToObjectPos(movingDie, targetId, dieWidth / 4, dieHeight / 4, 500);
+
+                const usedDiceIds = this.currentGameData.players[player_id].dice
+                    .filter(({ used }) => used)
+                    .map(({ id }) => id);
+
+                const numUsedDice = usedDiceIds.length;
+
+                usedDiceIds.forEach((usedId) => {
+                    const dieElement = document.getElementById(`die_id_${usedId}`);
+                    const dieClasses = dieElement.classList;
+                    //not ideal as removeCountClass ends up calling getCountClass as well.
+                    //it's not expensive as there won't be many classes, but still feels unsatisfactory.
+                    //Will no better how to fix once written the other class-updating code, below!
+                    const existingCountClass = this.getCountClass(dieClasses);
+                    this.removeCountClass(dieElement);
+                    const currentCount = existingCountClass
+                        ? Number(existingCountClass.slice(DIE_CLASS_PREFIX.length, DIE_CLASS_PREFIX.length + 1))
+                        : 1;
+
+                    dieClasses.add(`${DIE_CLASS_PREFIX}${currentCount}_of_${numUsedDice + 1}`);
+                });
+
+                if (numUsedDice > 0) {
+                    movingDie.classList.add(`${DIE_CLASS_PREFIX}${numUsedDice + 1}_of_${numUsedDice + 1}`);
+                }
+
+                // need to update count classes of any dice remaining in the starting spot
+                dojo.connect(anim, "onEnd", () => {
+                    const { dice } = this.currentGameData.players[player_id];
+                    const movedDieColor = dice.find(({ id }) => id === die_id).color;
+                    const dieIdsLeft = dice.filter(({ id, color, used }) => !used && id !== die_id && color === movedDieColor)
+                                            .map(({ id }) => id);
+
+                    if (dieIdsLeft.length > 0) {
+                        dieIdsLeft.forEach((die_id, index) => {
+                            const element = document.getElementById(`die_id_${die_id}`);
+                            this.removeCountClass(element);
+                            // no need for a new count class if there is only one remaining
+                            if (dieIdsLeft.length > 1) {
+                                const newCountClass = `${DIE_CLASS_PREFIX}_${index+1}_of_${dieIdsLeft.length}`;
+                                element.classList.add(newCountClass);
+                            }
+                        });
+                    }
+                });
+
+                anim.play();
+
+                // update data to mark die used
+                const dieInfo = this.currentGameData.players[player_id].dice.find(({ id }) => id === die_id);
+
+                if (!dieInfo) {
+                    console.error(`can't find die id ${die_id} belonging to player with id ${player_id}!`);
+                }
+
+                dieInfo.used = true;
+            },
+
+            notif_draw_oracle: function(notif) {
+                const { player_id, die_id, oracle_color, card_id } = notif.args;
+
+                this.spend_die_animation(player_id, die_id);
+
+                const oracleDeck = document.getElementById("ood_oracle_deck");
+                let newCard = document.createElement("div");
+                newCard.id = `card_id_${card_id}`;
+                newCard.classList.add("ood_card", "ood_card_oracle", `ood_card_oracle_${oracle_color}`);
+                newCard.style.position = "absolute";
+                oracleDeck.appendChild(newCard);
+
+                const targetId = `ood_oracle_section_${player_id}`;
+                const anim = this.slideToObject(newCard, targetId, 500);
+
+                // need to adjust width of card, which is based on DOM parent
+                dojo.connect(anim, "onEnd", () => {
+                    // for the card to nicely transition its shrink in size, we can't just use attachToNewParent
+                    // as this removes and recreates the DOM element, thereby disabling the transition.
+                    // So we add a new CSS class which also has the reduced size, and only reattach after
+                    // a sufficient delay for the transition to be observed
+                    // TODO: would be nice for the position to not suddenly jump either. Not a priority yet though!
+                    newCard.classList.add("ood_shrink");
+                    setTimeout(() => {
+                        const numPreviousOracles = document.getElementById(targetId).childElementCount;
+                        newCard = this.attachToNewParent(newCard, targetId);
+                        newCard.style.position = "";
+                        newCard.style.top = "";
+                        newCard.style.left = "";
+                        //TODO: put this right calculation into separate function?
+                        newCard.style.right = `calc(var(--playerboard-side-width) * ${30 * numPreviousOracles - 110}px / 110)`;
+                        // not strictly necessary, but keeps things tidier!
+                        newCard.classList.remove("ood_shrink");
+                    }, 500);
+                });
                 
-                // Note: notif.args contains the arguments specified during you "notifyAllPlayers" / "notifyPlayer" PHP call
-                
-                // TODO: play the card in the user interface.
-            },    
-            
-            */
+                anim.play();
+
+                // Adjust counters, and also deal with case when a reshuffle of the oracle deck has been triggered.
+                const { deck, discard } = this.counters[ORACLE];
+                const deckCount = deck.getValue();
+                if (deckCount > 0) {
+                    deck.incValue(-1)
+                    // if the count is now 0 (ie. it was 1), then we need to remove the card back image:
+                    if (deckCount === 1) {
+                        document.getElementById("ood_oracle_deck").innerHTML = '<div class="ood_card_spacer"></div>';
+                    }
+                } else {
+                    deck.toValue(deckCount - 1);
+                    discard.toValue(0);
+                    // remove the discard card back and add it in to the deck section
+                    document.getElementById("ood_oracle_discard").innerHTML = '<div class="ood_card_spacer"></div>';
+                    document.getElementById("ood_oracle_deck").innerHTML =
+                        '<div class="ood_card ood_card_oracle ood_card_oracle_back"></div>';
+                }
+
+
+                // adjust currentGameDatas with the new oracle card
+                const cardData = this.currentGameData.cards.oracle;
+                cardData.deck_size = deck.getValue();
+                cardData.discard_size = discard.getValue();
+                cardData.hands[player_id].push({ card: oracle_color, id: card_id });
+
+                // finally reset the client state since an action is complete and a new one needs to be selected
+                this.resetClientState();
+            }
         });
     });

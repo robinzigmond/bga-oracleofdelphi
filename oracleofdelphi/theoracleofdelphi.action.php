@@ -40,11 +40,14 @@
   	} 
   	
   	public function submitActions() {
+      self::setAjaxMode();
+
       $actions = self::getArg("actions", AT_json, true);
-      //is $actions the raw JSON string that we need to json_decode, or is it already decoded?
-      //won't know until we try this in practice!
       //TODO: preliminary validation of actions (eg check "type" of each) here
+
       $this->game->handleActions($actions);
+
+      self::ajaxResponse();
     }
 
 
