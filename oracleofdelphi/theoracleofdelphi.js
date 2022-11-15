@@ -1310,7 +1310,7 @@ define([
                             this.removeCountClass(element);
                             // no need for a new count class if there is only one remaining
                             if (dieIdsLeft.length > 1) {
-                                const newCountClass = `${DIE_CLASS_PREFIX}_${index+1}_of_${dieIdsLeft.length}`;
+                                const newCountClass = `${DIE_CLASS_PREFIX}${index+1}_of_${dieIdsLeft.length}`;
                                 element.classList.add(newCountClass);
                             }
                         });
@@ -1390,6 +1390,9 @@ define([
                 const cardData = this.currentGameData.cards.oracle;
                 cardData.deck_size = deck.getValue();
                 cardData.discard_size = discard.getValue();
+                if (!cardData.hands[player_id]) {
+                    cardData.hands[player_id] = [];
+                }
                 cardData.hands[player_id].push({ card: oracle_color, id: card_id });
 
                 // finally reset the client state since an action is complete and a new one needs to be selected
