@@ -199,12 +199,15 @@ define([
                     // cards:
                     // used oracle card
                     if (info.oracle_used) {
-                        this.placeElement(
+                        const usedColor = gamedatas.cards.oracle.hands[playerId].find(({ id }) => id === info.oracle_used).card;
+
+                        const card = this.placeElement(
                             `ood_oracle_used_section_${playerId}`,
                             "ood_card",
                             "ood_card_oracle",
-                            `ood_card_oracle_${info.oracle_used}`
+                            `ood_card_oracle_${usedColor}`
                         );
+                        card.id = `card_id_${info.oracle_used}`;
                     }
 
                     this.placeAvailableOracleCards(
@@ -343,6 +346,8 @@ define([
                     
                             for (const dieColor of unusedDice) {
                                 const handler = () => {
+                                    // need to reset flag here
+                                    this.clientStateArgs.cardNotDie = false;
                                     this.clientStateArgs.dieChosen = dieColor;
                                     this.setClientState(STATE_DIE_CHOSEN, {
                                         descriptionmyturn: _("${you} must choose an action with this die")
@@ -357,6 +362,7 @@ define([
                                     handler
                                 );
 
+                                // get all dice of the selected color and add the click handler for each
                                 const actualDice = this.currentGameData.players[this.player_id].dice
                                     .filter(({ used, color }) => !used && color === dieColor)
                                     .map(({ id }) => document.getElementById(`die_id_${id}`));
@@ -379,13 +385,27 @@ define([
                                 ? []
                                 : (
                                     this.currentGameData.cards.oracle.hands[this.player_id]
-                                    ? this.currentGameData.cards.oracle.hands[this.player_id]
-                                        .map(({ card }) => card)
+                                    // remove duplicates from array
+                                    ? Array.from(new Set(
+                                        this.currentGameData.cards.oracle.hands[this.player_id]
+                                            .map(({ card }) => card)
+                                        ))
                                     : []
                                 );
 
                             for (const oracleColor of unusedOracleColors) {
-                                const handler = () => { console.log(`${oracleColor} oracle action`); }; //TODO
+                                // just use previously setup handler as very little changes.
+                                // Repeating the code though as dice[oracleColor] won't exist if there are no
+                                // unused dice of that color.
+                                const handler = () => {
+                                    this.clientStateArgs.dieChosen = oracleColor;
+                                    // set flag so we can always know we're dealing with a card rather than a die
+                                    this.clientStateArgs.cardNotDie = true;
+                                    this.setClientState(STATE_DIE_CHOSEN, {
+                                        descriptionmyturn: _("${you} must choose an action with this card")
+                                    });
+                                };
+
                                 if (!oracles[oracleColor]) {
                                     oracles[oracleColor] = handler;
                                 }
@@ -397,6 +417,7 @@ define([
 
                                 const actualCards = this.currentGameData.cards.oracle.hands[this.player_id]
                                     .map(({ id }) => document.getElementById(`card_id_${id}`));
+
                                 actualCards.forEach((card) => {
                                     card.classList.add("ood_action_trigger");
                                     card.addEventListener("click", handler);
@@ -431,7 +452,7 @@ define([
                             break;
                         }
                         case STATE_DIE_CHOSEN: {
-                            const { dieChosen } = this.clientStateArgs;
+                            const { dieChosen, cardNotDie } = this.clientStateArgs;
                             // add many buttons (eventually):
                             // Want some way to visually show the chosen die - can't really do on a button
                             // as not interactive!
@@ -452,7 +473,14 @@ define([
                             this.addActionButton(
                                 "ood_actionbutton_draworacle",
                                 `<div class="ood_action_graphic ood_action_graphic_draw_oracle"></div>`,
-                                () => { this.doAction({ type: DRAW_ORACLE, die: dieChosen, cannotUndo: true }) }
+                                () => {
+                                    this.doAction({
+                                        type: DRAW_ORACLE,
+                                        die: dieChosen,
+                                        isCard: !!cardNotDie,
+                                        cannotUndo: true
+                                    });
+                                }
                             );
 
                             this.addActionButton(
@@ -616,7 +644,7 @@ define([
 
                             this.addActionButton(
                                 "ood_actionbutton_canceldie",
-                                _("Cancel die selection"),
+                                this.clientStateArgs.cardNotDie ? _("Cancel card selection") : _("Cancel die selection"),
                                 () => { this.resetClientState(); },
                                 null, null, "red"
                             );
@@ -641,6 +669,35 @@ define([
                 script.
              
             */
+
+            /* override (borrowed from studio cookbook, but overwritten with key parts of the actual function
+            in BGA source!) */
+            attachToNewParent: function (mobile_in, new_parent_in, relation) {
+                const mobile = $(mobile_in);
+                const new_parent = $(new_parent_in);
+    
+                const src = dojo.position(mobile);
+                const s = this.getAbsRotationAngle(mobile);
+                const o = this.disable3dIfNeeded();
+                dojo.place(mobile, new_parent, relation);
+                const l = dojo.position(mobile);
+                let d = dojo.style(mobile, "left");
+                let c = dojo.style(mobile, "top");
+                const h = this.getAbsRotationAngle(mobile);
+                const u = this.getAbsRotationAngle(new_parent_in);
+                const p = {
+                  x: src.x - l.x + (src.w - l.w) / 2,
+                  y: src.y - l.y + (src.h - l.h) / 2
+                };
+                const m = this.vector_rotate(p, u);
+                d += m.x;
+                c += m.y;
+                dojo.style(mobile, "top", c + "px");
+                dojo.style(mobile, "left", d + "px");
+                h != s && this.rotateInstantDelta(mobile, s - h);
+                this.enable3dIfNeeded(o);
+                return mobile;
+            },
 
             // wrapper for ajaxcall
             ajaxAction: function (action, args, handler) {
@@ -999,7 +1056,7 @@ define([
                 if (playerCards) {
                     let oracleCards = [...playerCards];
                     if (usedOracleCard) {
-                        const toRemove = oracleCards.indexOf(usedOracleCard);
+                        const toRemove = oracleCards.findIndex(({ id }) => id === usedOracleCard);
                         oracleCards = oracleCards.filter((card, index) => index !== toRemove);
                     }
                     oracleCards.forEach(({ id, card: color }, index) => {
@@ -1329,10 +1386,46 @@ define([
                 dieInfo.used = true;
             },
 
-            notif_draw_oracle: function(notif) {
-                const { player_id, die_id, oracle_color, card_id } = notif.args;
+            spend_card_animation: function(player_id, card_id) {
+                const cardToMove = document.getElementById(`card_id_${card_id}`);
+                const targetId = `ood_oracle_used_section_${player_id}`;
+                const anim = this.slideToObject(cardToMove, targetId, 500);
+                // need to get this here to ensure currentGameData hasn't yet updated with the newly-draw oracle card,
+                // otherwise it appears twice!
+                const remainingOracles = this.currentGameData.cards.oracle.hands[player_id].filter
+                    (({ id }) => Number(id) !== card_id);
+                dojo.connect(anim, "onEnd", () => {
+                    // would be nice to create a transition for the rotation - but tricky (TODO)
+                    this.attachToNewParent(cardToMove, targetId);
+                    // also adjust positions of any remaining oracle cards. Let's just remove the existing
+                    // cards and replace them using the existing function!
+                    const currentOracleCards = remainingOracles.map(({ id }) => document.getElementById(`card_id_${id}`));
+                    currentOracleCards.forEach(cardElement => cardElement.remove());
+                    this.placeAvailableOracleCards(
+                        player_id,
+                        remainingOracles,
+                        card_id
+                    );
+                });
 
-                this.spend_die_animation(player_id, die_id);
+                anim.play();
+
+                // update currentGameData to add played card to oracle_used
+                this.currentGameData.players[player_id].oracle_used = card_id;
+            },
+
+            notif_draw_oracle: function(notif) {
+                const { player_id, used_id, oracle_color, card_id, is_card } = notif.args;
+
+                //TODO** (not here!)
+                //implement format_string_recursive to put image in log - and use this to distinguish
+                //between card and die. (Note - also need "plain name" to make sense in replay logs, ideally
+                //in a way that reading this makes clear when it's a card and when a die!)
+                if (is_card) {
+                    this.spend_card_animation(player_id, used_id);
+                } else {
+                    this.spend_die_animation(player_id, used_id);
+                }
 
                 const oracleDeck = document.getElementById("ood_oracle_deck");
                 let newCard = document.createElement("div");

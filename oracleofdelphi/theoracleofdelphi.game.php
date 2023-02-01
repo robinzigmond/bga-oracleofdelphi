@@ -751,40 +751,66 @@ class TheOracleOfDelphi extends Table
     // individual action handling methods
     private function handleAction_draw_oracle($action) {
         $dieColor = $action["die"];
+        $isCard = $action["isCard"];
         // [note: die color necessary because needs to be removed from player's active dice,
         // even though it doesn't affect what happens]
 
         $activePlayerId = self::getActivePlayerId();
 
-        // check move is legal (player has a die of the specified color)
-        //TODO: move this somewhere common - it will be used on basically every die action!
-        $checkDieSql = "SELECT id FROM player_dice
-                        WHERE player_id = $activePlayerId AND color = '$dieColor' AND used=0
-                        LIMIT 1";
-        $dieIdArray = self::getObjectListFromDb($checkDieSql, true);
-        if (count($dieIdArray) === 0) {
-            throw new BgaUserException("You do not have an unused die of that color!");
+        // check move is legal
+        //TODO: move this somewhere common - it will be used on basically every die/card action!
+        if ($isCard) {
+            // check the player hasn't yet used an Oracle card this turn
+            $checkUsedOracleSql = "SELECT COUNT(*) FROM player WHERE player_id = $activePlayerId AND ORACLE_USED IS NOT NULL";
+            $hasUsedOracle = self::getUniqueValueFromDb($checkUsedOracleSql);
+            if ($hasUsedOracle != 0) {
+                throw new BgaUserException("You have already used an Oracle card this turn!");
+            }
+            // make sure they actually have a card of that color
+            $oraclesOfColorInHand = $this->allCards->getCardsOfTypeInLocation(
+                CARD_TYPE_ORACLE, array_search($dieColor, $this->allColors), "hand", $activePlayerId
+            );
+            $oracleIds = array_keys($oraclesOfColorInHand);
+            if (count($oracleIds) == 0) {
+                throw new BgaUserException("You do not have an oracle card of that color!");
+            }
+        } else {
+            // we only have to check that the player has an unused die of the specified color
+            $checkDieSql = "SELECT id FROM player_dice
+                            WHERE player_id = $activePlayerId AND color = '$dieColor' AND used=0
+                            LIMIT 1";
+            $dieIdArray = self::getObjectListFromDb($checkDieSql, true);
+            if (count($dieIdArray) === 0) {
+                throw new BgaUserException("You do not have an unused die of that color!");
+            }
         }
 
         // update database:
         // draw new oracle card from deck into player's hand
         $drawn = $this->allCards->pickCard(CARD_LOCATION_ORACLE_DECK, $activePlayerId);
 
-        // mark die as used
-        $idToUpdate = $dieIdArray[0];
-        self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$idToUpdate");
+        if ($isCard) {
+            // mark that an oracle card has been used this turn
+            self::DbQuery("UPDATE player SET oracle_used={$oracleIds[0]} WHERE player_id=$activePlayerId");
+        } else {
+            // mark die as used
+            $idToUpdate = $dieIdArray[0];
+            self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$idToUpdate");
+        }
 
         // send notification (die used and card color drawn)
         self::notifyAllPlayers(
             "draw_oracle",
+            //TODO - change message to distinguish between die and card used in log
             clienttranslate('${player_name} uses ${die_color} to draw an Oracle card, and gets ${oracle_color}'),
             [
                 "player_id" => $activePlayerId,
                 "player_name" => self::getActivePlayerName(),
                 "die_color" => $dieColor,
-                "die_id" => $dieIdArray[0],
+                "used_id" => $isCard ? $oracleIds[0] : $dieIdArray[0],
                 "oracle_color" => $this->allColors[$drawn["type_arg"]],
-                "card_id" => $drawn["id"]
+                "card_id" => $drawn["id"],
+                "is_card" => $isCard
             ]
         );
     }

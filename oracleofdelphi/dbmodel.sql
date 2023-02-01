@@ -82,5 +82,5 @@ ALTER TABLE `player`
     ADD `apollon` INT(4) UNSIGNED NOT NULL DEFAULT 0,
     ADD `aphrodite` INT(4) UNSIGNED NOT NULL DEFAULT 0,
     ADD `hermes` INT(4) UNSIGNED NOT NULL DEFAULT 0,
-    ADD `oracle_used` ENUM('pink', 'blue', 'yellow', 'green', 'red', 'black') NULL DEFAULT NULL,
+    ADD `oracle_used` INT(10) UNSIGNED NULL DEFAULT NULL,
     ADD `apollo_used` TINYINT(1) UNSIGNED NOT NULL DEFAULT 0;
