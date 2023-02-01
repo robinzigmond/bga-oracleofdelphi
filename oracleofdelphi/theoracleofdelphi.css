@@ -91,6 +91,15 @@
     --card-ratio: 0.2;
 }
 
+#logs .log {
+    --card-ratio: 0.3;
+}
+
+.ood_log_entry_token {
+    display: inline-block;
+    vertical-align: middle;
+}
+
 #ood_map {
     position: relative;
     /* TODO: adjust dimensions (perhaps eventually dynamic based on random map generated!) */

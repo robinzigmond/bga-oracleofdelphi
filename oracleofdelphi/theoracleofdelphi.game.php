@@ -798,19 +798,23 @@ class TheOracleOfDelphi extends Table
             self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$idToUpdate");
         }
 
+        $isCardText = $isCard ? "card" : "die";
+        $oracleColor = $this->allColors[$drawn["type_arg"]];
         // send notification (die used and card color drawn)
         self::notifyAllPlayers(
             "draw_oracle",
             //TODO - change message to distinguish between die and card used in log
-            clienttranslate('${player_name} uses ${die_color} to draw an Oracle card, and gets ${oracle_color}'),
+            clienttranslate('${player_name} uses ${token_used} to draw an Oracle card, and gets ${card_gained}'),
             [
                 "player_id" => $activePlayerId,
                 "player_name" => self::getActivePlayerName(),
                 "die_color" => $dieColor,
                 "used_id" => $isCard ? $oracleIds[0] : $dieIdArray[0],
-                "oracle_color" => $this->allColors[$drawn["type_arg"]],
+                "oracle_color" => $oracleColor,
                 "card_id" => $drawn["id"],
-                "is_card" => $isCard
+                "is_card" => $isCard,
+                "token_used" => "$dieColor $isCardText",
+                "card_gained" => "$oracleColor card"
             ]
         );
     }

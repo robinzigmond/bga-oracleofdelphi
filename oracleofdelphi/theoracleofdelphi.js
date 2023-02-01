@@ -699,6 +699,34 @@ define([
                 return mobile;
             },
 
+            /* @Override */
+            format_string_recursive: function format_string_recursive(log, args) {
+                if (log && args && !args.processed) {
+                    args.processed = true;
+
+                    const { token_used, card_gained } = args;
+
+                    const getTokenElement = (tokenString) => {
+                        const [color, type] = tokenString.split(" ");
+                        switch (type) {
+                            case "die":
+                                return `<div class="ood_log_entry_token ood_die_result ood_oracle_die ood_oracle_die_${color}"></div>`;
+                            case "card":
+                                return `<div class="ood_log_entry_token ood_card ood_card_oracle ood_card_oracle_${color}"></div>`;
+                            default:
+                                console.error(`unexpected token type in notification message: ${type}`);
+                        }
+                    };
+                    if (token_used) {
+                        args.token_used = getTokenElement(args.token_used);
+                    }
+                    if (card_gained) {
+                        args.card_gained = getTokenElement(args.card_gained);
+                    }
+                }
+                return this.inherited({callee: format_string_recursive}, arguments);
+            },
+
             // wrapper for ajaxcall
             ajaxAction: function (action, args, handler) {
                 if (!args) {
