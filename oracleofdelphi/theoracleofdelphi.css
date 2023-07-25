@@ -2036,3 +2036,14 @@
     height: 60px;
     background-position: -239px -10px;
 }
+
+/* special styles for the action buttons for recoloring */
+[id^=ood_actionbutton_recolor_] {
+    font-size: 16px;
+}
+
+[id^=ood_actionbutton_recolor_] .ood_favor, [id^=ood_actionbutton_recolor_] .ood_oracle_die {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 10px;
+}

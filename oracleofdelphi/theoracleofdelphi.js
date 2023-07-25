@@ -32,7 +32,9 @@ const BLACK = "black";
 
 const WILD = "wild";
 
-const ALL_COLORS = [RED, YELLOW, GREEN, BLUE, PINK, BLACK];
+// note: the order of this array matters, as they're in the order of the player circle which
+// is used for recoloring dice.
+const ALL_COLORS = [RED, BLACK, PINK, BLUE, YELLOW, GREEN];
 
 const FRIENDLY_COLORS = {
     ["ff0000"]: RED,
@@ -81,7 +83,7 @@ const INJURY = "injury";
 const COMPANION = "companion";
 const EQUIPMENT = "equipment";
 
-const OOD_ACTION_QUEUE = "bga_ood_actions";
+//const OOD_ACTION_QUEUE = "bga_ood_actions";
 
 // state names. Note: must match "name" attribute of state in states.inc.php
 const STATE_PLAYER_TURN = "playerTurn";
@@ -91,6 +93,7 @@ const STATE_DIE_CHOSEN = "client_dieChosen";
 const STATE_RECOLOR_DIE = "client_recolorDie";
 
 // action types
+const RECOLOR_DIE = "recolor_die";
 const DRAW_ORACLE = "draw_oracle";
 
 const MOVING_PIECE_CLASS = "ood_moving_piece";
@@ -99,6 +102,9 @@ const DIE_CLASS_PREFIX = "ood_die_in_spot_";
 const PLAYERBOARD_BASE_WIDTH_RATIO = 0.65;
 const DIE_BASE_WIDTH = 44;
 const DIE_BASE_HEIGHT = 47;
+
+// miscellaneous consts for the UI
+const TEMP_DIE_ID = "temp_for_card";
 
 define([
     "dojo", "dojo/_base/declare",
@@ -151,7 +157,7 @@ define([
                 "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
             */
 
-            setup: function (gamedatas) {
+            setup: function (gamedatas, fromUndo = false) {
                 // take local copy of gamedatas to keep in sync with client actions
                 // (taking a reference shouldn't matter despite mutating this - I don't believe gamedatas is
                 // a reference to anything needed elsewhere?)
@@ -199,7 +205,7 @@ define([
                     // cards:
                     // used oracle card
                     if (info.oracle_used) {
-                        const usedColor = gamedatas.cards.oracle.hands[playerId].find(({ id }) => id === info.oracle_used).card;
+                        const usedColor = gamedatas.cards.oracle.hands[playerId].find(({ id }) => id == info.oracle_used).card;
 
                         const card = this.placeElement(
                             `ood_oracle_used_section_${playerId}`,
@@ -218,29 +224,101 @@ define([
                     this.placeEquipmentCards(playerId, gamedatas.cards.equipment.hands[playerId]);
                 }
 
-                // Add CSS classes to position ships nicely in their hex according to the total number.
-                // (Note that the Zeus space gets different positioning, but that is all handled in CSS.)
-                document.querySelectorAll(".ood_maphex").forEach((hex) => {
-                    const ships = hex.querySelectorAll(".ood_ship");
-                    const numShips = ships.length;
-                    let counter = 1;
-                    ships.forEach((ship) => {
-                        ship.classList.add(`ood_ship_${counter}_of_${numShips}`);
-                        counter++;
+                if (!fromUndo) {
+                    // Add CSS classes to position ships nicely in their hex according to the total number.
+                    // (Note that the Zeus space gets different positioning, but that is all handled in CSS.)
+                    document.querySelectorAll(".ood_maphex").forEach((hex) => {
+                        const ships = hex.querySelectorAll(".ood_ship");
+                        const numShips = ships.length;
+                        let counter = 1;
+                        ships.forEach((ship) => {
+                            ship.classList.add(`ood_ship_${counter}_of_${numShips}`);
+                            counter++;
+                        });
                     });
-                });
 
-                // Setup game notifications to handle (see "setupNotifications" method below)
-                this.setupNotifications();
+                    // Setup game notifications to handle (see "setupNotifications" method below)
+                    this.setupNotifications();
 
-                // ensure layout is correct for screen resolution
-                this.onScreenChange();
+                    // ensure layout is correct for screen resolution
+                    this.onScreenChange();
 
-                // fetch action queue from local storage, if it exists
-                const savedActions = localStorage.getItem(OOD_ACTION_QUEUE);
-                this.actionQueue = savedActions ? JSON.parse(savedActions) : [];
-                //TODO: need to "play through" actions in the just-fetched queue (if non-empty),
-                //so that the UI matches the partially-played turn
+                    this.actionQueue = [];
+                }
+            },
+
+            // removes everything placed in the setup method. Used to clear everything before
+            // running setup again when using client-side undo
+            undoSetup: function() {
+                const zeusFigure = document.querySelector("#ood_map .ood_zeus_figure");
+                zeusFigure.remove();
+
+                const templePieces = document.querySelectorAll("#ood_map .ood_temple");
+                templePieces.forEach(temple => temple.remove());
+
+                //TODO: will also need to remove offering cubes on the player's ship tile
+                const offeringCubes = document.querySelectorAll("#ood_map .ood_offering");
+                offeringCubes.forEach(offering => offering.remove());
+
+                //TODO: will also need to remove defeated monsters by a player's board
+                const monsterPieces = document.querySelectorAll("#ood_map .ood_monster");
+                monsterPieces.forEach(monster => monster.remove());
+
+                //TODO: will also need to remove statues on the player's ship tile
+                const statuePieces = document.querySelectorAll("ood_map .ood_statue");
+                statuePieces.forEach(statue => statue.remove());
+
+                const islandTiles = document.querySelectorAll(".ood_island_tile");
+                islandTiles.forEach(island => island.remove());
+
+                for (const cardType of [ORACLE, INJURY, EQUIPMENT]) {
+                    const deckContainerId = `ood_${cardType}_deck`;
+                    document.getElementById(deckContainerId)
+                            .querySelectorAll(`.ood_card_${cardType}, .ood_card_spacer`)
+                            .forEach(elt => elt.remove());
+
+
+                    const discardContainerId = `ood_${cardType}_discard`;
+                    document.getElementById(discardContainerId)
+                            .querySelectorAll(`.ood_card_${cardType}, .ood_card_spacer`)
+                            .forEach(elt => elt.remove());
+                    document.getElementById(discardContainerId)
+                            .querySelectorAll(".ood_card_equipment")
+                            .forEach(elt => elt.remove());
+                }
+
+                const shipTiles = document.querySelectorAll(".ood_ship_tile");
+                shipTiles.forEach(shipTile => shipTile.remove());
+
+                const oracleDice = document.querySelectorAll(".ood_playerboard .ood_die_result.ood_oracle_die");
+                oracleDice.forEach(die => die.remove());
+
+                const shrinePieces = document.querySelectorAll(".ood_playerboard .ood_shrine");
+                shrinePieces.forEach(shrine => shrine.remove());
+
+                const godTokens = document.querySelectorAll(".ood_playerboard .ood_god");
+                godTokens.forEach(god => god.remove());
+
+                const shieldTokens = document.querySelectorAll(".ood_playerboard .ood_shield");
+                shieldTokens.forEach(shield => shield.remove());
+
+                const shipTokens = document.querySelectorAll("#ood_map .ood_wooden_piece.ood_ship");
+                shipTokens.forEach(ship => ship.remove());
+
+                const zeusTiles = document.querySelectorAll(".ood_playerboard .ood_zeus_tile");
+                zeusTiles.forEach(tile => tile.remove());
+
+                const oracleCards = document.querySelectorAll(".ood_playerboard .ood_card_oracle");
+                oracleCards.forEach(card => card.remove());
+
+                const injuryCards = document.querySelectorAll(".ood_playerboard .ood_card_injury");
+                injuryCards.forEach(card => card.remove());
+
+                const companionCards = document.querySelectorAll(".ood_playerboard .ood_card_companion");
+                companionCards.forEach(card => card.remove());
+
+                const equipmentCards = document.querySelectorAll(".ood_playerboard .ood_card_equipment");
+                equipmentCards.forEach(card => card.remove());
             },
 
 
@@ -446,29 +524,52 @@ define([
                                 pieceOnBoard.classList.add("ood_action_trigger");
                                 pieceOnBoard.addEventListener("click", handler);
                             }
-                            //TODO: submit and undo buttons (x2) where appropriate. Probably put
-                            //in separate methods as won't just be used here (actually, maybe they
-                            //will - but separate methods still better!)
+                            if (this.actionQueue.length > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_undo_last",
+                                    _("Undo last action"),
+                                    () => this.undoLast(),
+                                    null, null, "red"
+                                );
+                                if (this.actionQueue.length > 1) {
+                                    this.addActionButton(
+                                        "ood_actionbutton_undo_all",
+                                        _("Undo turn"),
+                                        () => this.undoAll(),
+                                        null, null, "red"
+                                    );
+                                }
+                            }
+                            // TODO: submit button - only if all 3 dice have been used
                             break;
                         }
                         case STATE_DIE_CHOSEN: {
                             const { dieChosen, cardNotDie } = this.clientStateArgs;
                             // add many buttons (eventually):
-                            // Want some way to visually show the chosen die - can't really do on a button
+                            // TODO: Want some way to visually show the chosen die - can't really do on a button
                             // as not interactive!
+                            // Some sort of visual of the die?
+                            // Particularly important with recoloring (which also applies to cards!), should indicate
+                            // in some sort of graphic both the "original piece" (die or card) and (if different) the
+                            // die it now represents! [but probably not if we're going to physically transform via a
+                            // pseudo-notification]
+
                             // Need (up to, some may not be accessible - deal with individually) one button
                             // for each of the 13 die actions.
                             // Plus (provided at least 1 favor possessed) a button to recolor.
-                            this.addActionButton(
-                                "ood_actionbutton_recolor",
-                                _("Recolor die"),
-                                () => {
-                                    this.setClientState(STATE_RECOLOR_DIE, {
-                                        descriptionmyturn: _("${you} must choose how to recolor this die")
-                                    });
-                                },
-                                null, null, "gray"
-                            );
+                            //this isn't working when just recoloring!!
+                            if (Number(this.currentGameData.players[this.player_id].favors) > 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_recolor",
+                                    _("Recolor"),
+                                    () => {
+                                        this.setClientState(STATE_RECOLOR_DIE, {
+                                            descriptionmyturn: _("${you} must choose how to recolor this die")
+                                        });
+                                    },
+                                    null, null, "gray"
+                                );
+                            }
 
                             this.addActionButton(
                                 "ood_actionbutton_draworacle",
@@ -651,7 +752,39 @@ define([
                             break;
                         }
                         case STATE_RECOLOR_DIE: {
-                            //TODO: use die color and number of favors to display the color options and costs
+                            const { dieChosen, cardNotDie } = this.clientStateArgs;
+                            const numFavors = Number(this.currentGameData.players[this.player_id].favors);
+                            const colorIndex = ALL_COLORS.indexOf(dieChosen);
+                            //TODO: this will change if one of various different ships is held.
+                            for (let i = 1; i <= Math.min(numFavors, 5); i++) {
+                                const newColor = ALL_COLORS[(colorIndex + i) % ALL_COLORS.length];
+                                const actionButtonContent = `${i} x <div class="ood_favor"></div> => <div class="ood_die_result ood_oracle_die ood_oracle_die_${newColor}"></div>`;
+                                this.addActionButton(
+                                    `ood_actionbutton_recolor_${i}`,
+                                    actionButtonContent,
+                                    () => {
+                                        // need to update client-state args
+                                        this.clientStateArgs.dieChosen = newColor;
+                                        this.clientStateArgs.cardNotDie = false;
+                                        // note that this must be before the setClientState call, as doAction sets
+                                        // off the client-side notification that updates the client gamestate, and
+                                        // that is read when moving to the new state to (eg) decide whether to show
+                                        // the button to recolor again
+                                        this.doAction({
+                                            type: RECOLOR_DIE,
+                                            original: dieChosen,
+                                            favorsSpent: i,
+                                            isCard: !!cardNotDie,
+                                            cannotUndo: false
+                                        });
+                                        this.setClientState(STATE_DIE_CHOSEN, {
+                                            descriptionmyturn: _("${you} must choose an action with this die")
+                                        });
+                                        //TODO: OTHER THINGS TO THINK ABOUT! -
+                                        //should probably remove option to recolor again?
+                                    }
+                                );
+                            }
                             break;
                         }
                         default:
@@ -704,7 +837,7 @@ define([
                 if (log && args && !args.processed) {
                     args.processed = true;
 
-                    const { token_used, card_gained } = args;
+                    const { token_used, card_gained, new_die } = args;
 
                     const getTokenElement = (tokenString) => {
                         const [color, type] = tokenString.split(" ");
@@ -718,12 +851,16 @@ define([
                         }
                     };
                     if (token_used) {
-                        args.token_used = getTokenElement(args.token_used);
+                        args.token_used = getTokenElement(token_used);
                     }
                     if (card_gained) {
-                        args.card_gained = getTokenElement(args.card_gained);
+                        args.card_gained = getTokenElement(card_gained);
+                    }
+                    if (new_die) {
+                        args.new_die = getTokenElement(new_die);
                     }
                 }
+
                 return this.inherited({callee: format_string_recursive}, arguments);
             },
 
@@ -748,7 +885,10 @@ define([
             submitActions: function () {
                 this.ajaxAction("submitActions",
                     { actions: JSON.stringify(this.actionQueue.map(({ action }) => action)) },
-                    () => this.clearActions()
+                    () => {
+                        this.clearActions();
+                        this.resetClientState();
+                    }
                 );
             },
 
@@ -762,38 +902,41 @@ define([
                     //without being aware of it
                     this.submitActions();
                 } else {
-                    this.saveActions();
                     this.playActionNotification(action);
                 }
             },
 
-            // shorthand function to update local storage with the latest value of the action queue
-            saveActions: function () {
-                localStorage.setItem(OOD_ACTION_QUEUE, JSON.stringify(this.actionQueue));
-            },
-
             clearActions: function () {
                 this.actionQueue = [];
-                this.saveActions();
+            },
+
+            undoToState: function(gameState) {
+                this.currentGameData = gameState;
+                this.undoSetup();
+                this.setup(gameState, true);
+                // reset state to basic "player turn" state to choose an action
+                // (this should usually be right, deal with any cases later where it may not be!)
+                this.resetClientState();
             },
 
             undoLast: function () {
                 const { gameState } = this.actionQueue.pop();
-                this.saveActions();
-                this.currentGameData = gameState;
+                this.undoToState(gameState);
             },
 
             undoAll: function () {
                 if (this.actionQueue.length) {
                     const { gameState } = this.actionQueue[0];
                     this.clearActions();
-                    this.currentGameData = gameState;
+                    this.undoToState(gameState);
                 }
             },
 
             playActionNotification: function(action) {
-                //TODO: determine which notification handler function to execute based on the action type. Should
-                //be a simple systemic way to do it (probably store notification args inside action?)
+                const { type, cannotUndo, ...otherArgs } = action;
+                const notifName = `notif_${type}`;
+                const notifArgs = { ...otherArgs, playerId: this.player_id };
+                this[notifName]({ args: notifArgs }, true);
             },
 
             // used after a player action is taken or cancelled, to reset the client state to the default one
@@ -1084,7 +1227,7 @@ define([
                 if (playerCards) {
                     let oracleCards = [...playerCards];
                     if (usedOracleCard) {
-                        const toRemove = oracleCards.findIndex(({ id }) => id === usedOracleCard);
+                        const toRemove = oracleCards.findIndex(({ id }) => id == usedOracleCard);
                         oracleCards = oracleCards.filter((card, index) => index !== toRemove);
                     }
                     oracleCards.forEach(({ id, card: color }, index) => {
@@ -1334,7 +1477,101 @@ define([
                 // 
                 //TODO - same pattern will likely be used for many different notifs, make a global list of
                 //the and repeat the same subscription logic
+                dojo.subscribe("recolor_die", this, "notif_recolor_die");
                 dojo.subscribe("draw_oracle", this, "notif_draw_oracle");
+
+                /*const clientOnlyActions = ["recolor_die"];
+
+                clientOnlyActions.forEach(action => {
+                    this.notifqueue.setIgnoreNotificationCheck(action, (notif) => (notif.args.playerId == this.player_id));
+                });*/
+            },
+
+            notif_recolor_die: function(notif, fromClient) {
+                const { favorsSpent, isCard, original, playerId, new_id } = notif.args;
+
+                // work out new color
+                const colorIndex = ALL_COLORS.indexOf(original);
+                const newColor = ALL_COLORS[(colorIndex + favorsSpent) % ALL_COLORS.length];
+
+                // must ensure we update any temporary die IDs before we do an early return, or things break!
+                if (new_id) {
+                    const tempDie = document.getElementById(`ood_dice_spot_${newColor}_${playerId}`).querySelector(`[id^="die_id_${TEMP_DIE_ID}_"]`);
+                    // for non-active players, the temp die doesn't actually exist yet (it's created below!)
+                    if (tempDie) {
+                        tempDie.id = `die_id_${new_id}`;
+                        // now do the same for the internal game data!
+                        // Again this doesn't work or happen for the non-active player, so it's in the same if
+                        // block.
+                        const previousDice = this.currentGameData.players[playerId].dice;
+                        const withTempId = previousDice.find(die => die.id.startsWith(TEMP_DIE_ID));
+                        withTempId.id = new_id;
+                    }
+                }
+
+                // client-only action, so don't do animation for the active player (it's already been done!).
+                // (Do this instead of setIgnoreNotifactionCheck so that the message still appears in the log.)
+                if (!fromClient && playerId == this.player_id) {
+                    return;
+                }
+
+                const favorDiv = document.querySelector(`#ood_playerboard_${playerId} .ood_favor`).parentElement;
+                const playerboardTargetId = `overall_player_board_${playerId}`;
+                for (let i = 0; i < favorsSpent; i++) {
+                    this.slideTemporaryObject('<div class="ood_favor"></div>', favorDiv, favorDiv, playerboardTargetId, 500, 500 * i);
+                }
+                // update counter on player board
+                this.counters.favors[playerId].incValue(-1 * favorsSpent);
+
+                let cardId;
+                let newDieId;
+
+                if (isCard) {
+                    // move card to used oracle position as it can't now be used again
+                    const card = this.currentGameData.cards.oracle.hands[playerId].find(({ card }) => card === original);
+                    if (!card) {
+                        console.error("couldn't find oracle card that we know the player has?");
+                    }
+                    cardId = Number(card.id);
+                    this.spend_card_animation(playerId, cardId);
+                    
+                    // add die to appropriate slot
+                    //TODO: make it "slide in" from somewhere, rather than simply appear
+                    //[leave for later, as this will need a complete change of approach!]
+                    // first need to temporarily remove all existing dice
+                    const oracleDice = document.querySelectorAll(`#ood_playerboard_${playerId} .ood_die_result.ood_oracle_die`);
+                    oracleDice.forEach(die => die.remove());
+                    // then restore them, with the "new" die
+                    const previousDice = this.currentGameData.players[playerId].dice;
+                    newDieId = new_id || `${TEMP_DIE_ID}_${cardId}`;
+                    const newDie = { color: newColor, used: false, id: newDieId };
+                    //TODO: this won't work well visually in the VERY rare case where a card is converted to a colour
+                    //where the player already has 3 dice. Very unlikely a player will actually want to do this, so
+                    //not a priority to fix, but should look at at some point
+                    this.placePlayerDice(playerId, [...previousDice, newDie]);
+                } else {
+                    //TODO: would be better to actually move the die with some sort of animation, also changing the color.
+                    //Tricky to do so leave till the game logic is mostly complete.
+                    const oracleDice = document.querySelectorAll(`#ood_playerboard_${playerId} .ood_die_result.ood_oracle_die`);
+                    oracleDice.forEach(die => die.remove());
+                    const newDice = this.currentGameData.players[playerId].dice;
+                    // find arbitrary die of the apprioriate color
+                    const toChange = newDice.find(({ color }) => color === original);
+                    // note: this mutates currentGameData - but that's what we want!
+                    toChange.color = newColor;
+                    this.placePlayerDice(playerId, newDice);
+                }
+
+                // update current game data:
+                this.currentGameData.players[playerId].favors =
+                    Number(this.currentGameData.players[playerId].favors) - favorsSpent;
+
+                if (isCard) {
+                    // - if card, mark card used and add new (non-used) die
+                    this.currentGameData.players[playerId].oracle_used = cardId;
+                    this.currentGameData.players[playerId].dice.push({ color: newColor, used: false, id: newDieId });
+                }
+                // no need to change currentGameData if it's a die we've changed - ot was already mutated above
             },
 
             spend_die_animation: function(player_id, die_id) {
@@ -1368,7 +1605,7 @@ define([
                     const dieClasses = dieElement.classList;
                     //not ideal as removeCountClass ends up calling getCountClass as well.
                     //it's not expensive as there won't be many classes, but still feels unsatisfactory.
-                    //Will no better how to fix once written the other class-updating code, below!
+                    //Will know better how to fix once written the other class-updating code, below!
                     const existingCountClass = this.getCountClass(dieClasses);
                     this.removeCountClass(dieElement);
                     const currentCount = existingCountClass
@@ -1385,8 +1622,8 @@ define([
                 // need to update count classes of any dice remaining in the starting spot
                 dojo.connect(anim, "onEnd", () => {
                     const { dice } = this.currentGameData.players[player_id];
-                    const movedDieColor = dice.find(({ id }) => id === die_id).color;
-                    const dieIdsLeft = dice.filter(({ id, color, used }) => !used && id !== die_id && color === movedDieColor)
+                    const movedDieColor = dice.find(({ id }) => id == die_id).color;
+                    const dieIdsLeft = dice.filter(({ id, color, used }) => !used && id != die_id && color === movedDieColor)
                                             .map(({ id }) => id);
 
                     if (dieIdsLeft.length > 0) {
@@ -1405,7 +1642,7 @@ define([
                 anim.play();
 
                 // update data to mark die used
-                const dieInfo = this.currentGameData.players[player_id].dice.find(({ id }) => id === die_id);
+                const dieInfo = this.currentGameData.players[player_id].dice.find(({ id }) => id == die_id);
 
                 if (!dieInfo) {
                     console.error(`can't find die id ${die_id} belonging to player with id ${player_id}!`);
@@ -1418,7 +1655,7 @@ define([
                 const cardToMove = document.getElementById(`card_id_${card_id}`);
                 const targetId = `ood_oracle_used_section_${player_id}`;
                 const anim = this.slideToObject(cardToMove, targetId, 500);
-                // need to get this here to ensure currentGameData hasn't yet updated with the newly-draw oracle card,
+                // need to get this here to ensure currentGameData hasn't yet updated with any newly-draw oracle card,
                 // otherwise it appears twice!
                 const remainingOracles = this.currentGameData.cards.oracle.hands[player_id].filter
                     (({ id }) => Number(id) !== card_id);
@@ -1445,10 +1682,6 @@ define([
             notif_draw_oracle: function(notif) {
                 const { player_id, used_id, oracle_color, card_id, is_card } = notif.args;
 
-                //TODO** (not here!)
-                //implement format_string_recursive to put image in log - and use this to distinguish
-                //between card and die. (Note - also need "plain name" to make sense in replay logs, ideally
-                //in a way that reading this makes clear when it's a card and when a die!)
                 if (is_card) {
                     this.spend_card_animation(player_id, used_id);
                 } else {
@@ -1507,7 +1740,7 @@ define([
                 }
 
 
-                // adjust currentGameDatas with the new oracle card
+                // adjust currentGameData with the new oracle card
                 const cardData = this.currentGameData.cards.oracle;
                 cardData.deck_size = deck.getValue();
                 cardData.discard_size = discard.getValue();
@@ -1515,9 +1748,6 @@ define([
                     cardData.hands[player_id] = [];
                 }
                 cardData.hands[player_id].push({ card: oracle_color, id: card_id });
-
-                // finally reset the client state since an action is complete and a new one needs to be selected
-                this.resetClientState();
             }
         });
     });

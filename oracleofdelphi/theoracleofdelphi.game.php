@@ -72,6 +72,16 @@ class TheOracleOfDelphi extends Table
             MAP_COLOR_PINK
         ];
 
+        // ordered version of the above, needed for calculating die recoloring
+        $this->colorsOrdered = [
+            MAP_COLOR_RED,
+            MAP_COLOR_BLACK,
+            MAP_COLOR_PINK,
+            MAP_COLOR_BLUE,
+            MAP_COLOR_YELLOW,
+            MAP_COLOR_GREEN
+        ];
+
         // mapping of player colors (color hex code) with color strings ("red" etc)
         $this->colorMapping = [
             PLAYER_COLOR_RED => MAP_COLOR_RED,
@@ -734,18 +744,64 @@ class TheOracleOfDelphi extends Table
         (note: each method below must match an input method in theoracleofdelphi.action.php)
     */
 
+    // utility function to check it is legal for the player to use a given oracle die or card.
+    // Returns the ID of the die/card if it is found.
+    private function checkDie($playerId, $color, $isCard) {
+        if ($isCard) {
+            // check the player hasn't yet used an Oracle card this turn
+            $checkUsedOracleSql = "SELECT COUNT(*) FROM player WHERE player_id = $playerId AND ORACLE_USED IS NOT NULL";
+            $hasUsedOracle = self::getUniqueValueFromDb($checkUsedOracleSql);
+            if ($hasUsedOracle != 0) {
+                throw new BgaUserException("You have already used an Oracle card this turn!");
+            }
+            // make sure they actually have a card of that color
+            $oraclesOfColorInHand = $this->allCards->getCardsOfTypeInLocation(
+                CARD_TYPE_ORACLE, array_search($color, $this->allColors), "hand", $playerId
+            );
+            $oracleIds = array_keys($oraclesOfColorInHand);
+            if (count($oracleIds) == 0) {
+                throw new BgaUserException("You do not have an oracle card of that color!");
+            }
+            return $oracleIds[0];
+        } else {
+            // we only have to check that the player has an unused die of the specified color
+            $checkDieSql = "SELECT id FROM player_dice
+                            WHERE player_id = $playerId AND color = '$color' AND used=0
+                            LIMIT 1";
+            $dieIdArray = self::getObjectListFromDb($checkDieSql, true);
+            if (count($dieIdArray) === 0) {
+                throw new BgaUserException("You do not have an unused die of that color!");
+            }
+            return $dieIdArray[0];
+        }
+    }
+
     public function handleActions($actions) {
         self::checkAction("submitActions");
 
-        //TODO: may need adjustment/expansion - this may be discovered as individual actions are implemented!
-        //In particular I'm not yet sure if sending notifications for each action individually will work, or
-        //if we need to return those from the methods, build up an array of notifications, and send all at the
-        //end.
+        $notifs = [];
         foreach ($actions as $action) {
             $methodName = "handleAction_" . $action["type"];
-            $this->{$methodName}($action);
+            $notifs[] = $this->{$methodName}($action);
         }
-        //TODO: check game state and do appropriate transition
+
+        $specialTransition = null;
+
+        foreach ($notifs as $notif) {
+            ["notif_name" => $notifName, "notif_string" => $notifString, "notif_args" => $notifArgs] = $notif;
+            self::notifyAllPlayers($notifName, $notifString, $notifArgs);
+            if (isset($notif["special_transition"])) {
+                if ($specialTransition) {
+                    throw new feException("This shouldn't happen - two special transitions called for in one submitted set of actions!");
+                } else {
+                    $specialTransition = $notif["special_transition"];
+                }
+            }
+        }
+
+        if ($specialTransition) {
+            $this->gamestate->nextstate($specialTransition);
+        }
     }
 
     // individual action handling methods
@@ -758,32 +814,7 @@ class TheOracleOfDelphi extends Table
         $activePlayerId = self::getActivePlayerId();
 
         // check move is legal
-        //TODO: move this somewhere common - it will be used on basically every die/card action!
-        if ($isCard) {
-            // check the player hasn't yet used an Oracle card this turn
-            $checkUsedOracleSql = "SELECT COUNT(*) FROM player WHERE player_id = $activePlayerId AND ORACLE_USED IS NOT NULL";
-            $hasUsedOracle = self::getUniqueValueFromDb($checkUsedOracleSql);
-            if ($hasUsedOracle != 0) {
-                throw new BgaUserException("You have already used an Oracle card this turn!");
-            }
-            // make sure they actually have a card of that color
-            $oraclesOfColorInHand = $this->allCards->getCardsOfTypeInLocation(
-                CARD_TYPE_ORACLE, array_search($dieColor, $this->allColors), "hand", $activePlayerId
-            );
-            $oracleIds = array_keys($oraclesOfColorInHand);
-            if (count($oracleIds) == 0) {
-                throw new BgaUserException("You do not have an oracle card of that color!");
-            }
-        } else {
-            // we only have to check that the player has an unused die of the specified color
-            $checkDieSql = "SELECT id FROM player_dice
-                            WHERE player_id = $activePlayerId AND color = '$dieColor' AND used=0
-                            LIMIT 1";
-            $dieIdArray = self::getObjectListFromDb($checkDieSql, true);
-            if (count($dieIdArray) === 0) {
-                throw new BgaUserException("You do not have an unused die of that color!");
-            }
-        }
+        $usedId = $this->checkDie($activePlayerId, $dieColor, $isCard);
 
         // update database:
         // draw new oracle card from deck into player's hand
@@ -791,32 +822,91 @@ class TheOracleOfDelphi extends Table
 
         if ($isCard) {
             // mark that an oracle card has been used this turn
-            self::DbQuery("UPDATE player SET oracle_used={$oracleIds[0]} WHERE player_id=$activePlayerId");
+            self::DbQuery("UPDATE player SET oracle_used={$usedId} WHERE player_id=$activePlayerId");
         } else {
             // mark die as used
-            $idToUpdate = $dieIdArray[0];
-            self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$idToUpdate");
+            self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$usedId");
         }
 
         $isCardText = $isCard ? "card" : "die";
         $oracleColor = $this->allColors[$drawn["type_arg"]];
-        // send notification (die used and card color drawn)
-        self::notifyAllPlayers(
-            "draw_oracle",
-            //TODO - change message to distinguish between die and card used in log
-            clienttranslate('${player_name} uses ${token_used} to draw an Oracle card, and gets ${card_gained}'),
-            [
+
+        // return notification to send to client
+        return [
+            "notif_name" => "draw_oracle",
+            "notif_string" => clienttranslate('${player_name} uses ${token_used} to draw an Oracle card, and gets ${card_gained}'),
+            "notif_args" => [
                 "player_id" => $activePlayerId,
                 "player_name" => self::getActivePlayerName(),
                 "die_color" => $dieColor,
-                "used_id" => $isCard ? $oracleIds[0] : $dieIdArray[0],
+                "used_id" => $usedId,
                 "oracle_color" => $oracleColor,
                 "card_id" => $drawn["id"],
                 "is_card" => $isCard,
                 "token_used" => "$dieColor $isCardText",
                 "card_gained" => "$oracleColor card"
             ]
-        );
+        ];
+    }
+
+    private function handleAction_recolor_die($action) {
+        $original = $action["original"];
+        $favorsSpent = $action["favorsSpent"];
+        $isCard = $action["isCard"];
+        
+        // check move is legal
+
+        // check card/die is legal, and get ID if so
+        $activePlayerId = self::getActivePlayerId();
+
+        $usedId = $this->checkDie($activePlayerId, $original, $isCard);
+
+        // does player have the number of favors specified?
+        $favorsHeld = (int) self::getUniqueValueFromDb("SELECT favors FROM player WHERE player_id=$activePlayerId");
+        if ($favorsHeld < $favorsSpent) {
+            throw new BgaUserException("You do not have enough favors to recolor by this many steps");
+        }
+
+        // update database
+
+        $newColor = $this->colorsOrdered[
+            (array_search($original, $this->colorsOrdered) + $favorsSpent) % count($this->allColors)
+        ];
+
+        // remove favors
+        $favorsLeft = $favorsHeld - $favorsSpent;
+        self::DbQuery("UPDATE player SET favors = $favorsLeft WHERE player_id=$activePlayerId");
+        $newId = null;
+
+        if ($isCard) {
+            // if card, mark used, and add additional die of appropriate color
+            self::DbQuery("UPDATE player SET oracle_used=$usedId WHERE player_id=$activePlayerId");
+            // get the ID of the new entry and return it as part of the notification, so that the temp ID
+            // on the client side can be correctly updated
+            self::DbQuery("INSERT INTO player_dice (player_id, color, used) VALUES ($activePlayerId, '$newColor', 0)");
+            $newId = self::DbGetLastId();
+        } else {
+            // if die, change color of die
+            self::DbQuery("UPDATE player_dice SET color='$newColor' WHERE id=$usedId");
+        }
+
+        // return notification info
+        $isCardText = $isCard ? "card" : "die";
+
+        return [
+            "notif_name" => "recolor_die",
+            "notif_string" => clienttranslate('${player_name} spends ${favorsSpent} favor(s) to transform ${token_used} to ${new_die}'),
+            "notif_args" => [
+                "favorsSpent" => $favorsSpent,
+                "isCard" => $isCard,
+                "original" => $original,
+                "playerId" => $activePlayerId,
+                "player_name" => self::getActivePlayerName(),
+                "token_used" => "$original $isCardText",
+                "new_die" => "$newColor die",
+                "new_id" => $newId,
+            ]
+        ];
     }
     
 //////////////////////////////////////////////////////////////////////////////
