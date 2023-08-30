@@ -604,13 +604,13 @@ class TheOracleOfDelphi extends Table
                 : (int)$cardNum;
         };
         foreach([CARD_TYPE_ORACLE, CARD_TYPE_INJURY, CARD_TYPE_COMPANION, CARD_TYPE_EQUIPMENT] as $cardType) {
-            $cardInfo[$cardType]["deck_size"] = array_key_exists("${cardType}_deck", $deckDiscardCounts)
-                ? (int)$deckDiscardCounts["${cardType}_deck"]
+            $cardInfo[$cardType]["deck_size"] = array_key_exists("{$cardType}_deck", $deckDiscardCounts)
+                ? (int)$deckDiscardCounts["{$cardType}_deck"]
                 : 0;
-            $cardInfo[$cardType]["discard_size"] = array_key_exists("${cardType}_discard", $deckDiscardCounts)
-                ? (int)$deckDiscardCounts["${cardType}_discard"]
+            $cardInfo[$cardType]["discard_size"] = array_key_exists("{$cardType}_discard", $deckDiscardCounts)
+                ? (int)$deckDiscardCounts["{$cardType}_discard"]
                 : 0;
-            $topDiscard = $this->allCards->getCardOnTop("${cardType}_discard");
+            $topDiscard = $this->allCards->getCardOnTop("{$cardType}_discard");
             $cardInfo[$cardType]["top_discard"] = isset($topDiscard)
                 ? $getCardIdentifier($cardType, $topDiscard["type_arg"])
                 : null;
@@ -776,7 +776,7 @@ class TheOracleOfDelphi extends Table
         }
     }
 
-    public function handleActions($actions) {
+    public function handleActions($actions, $endOfTurn) {
         self::checkAction("submitActions");
 
         $notifs = [];
@@ -799,8 +799,34 @@ class TheOracleOfDelphi extends Table
             }
         }
 
+        // save this query here (without executing it yet), as we need it in a couple of different cases below
+        // we only have to check that the player has an unused die of the specified color
+        $playerId = self::getActivePlayerId();
+        $checkDieSql = "SELECT COUNT(*) FROM player_dice WHERE player_id = $playerId AND used=0 LIMIT 1";
+        $hasNoDie = self::getUniqueValueFromDb($checkDieSql) == 0;
+
         if ($specialTransition) {
-            $this->gamestate->nextstate($specialTransition);
+            $this->gamestate->nextState($specialTransition);
+        } elseif ($endOfTurn) {
+            // check player has no unused dice - if so, transition to end of turn (rolling dice)
+            if ($hasNoDie) {
+                $this->gamestate->nextState("endTurn");
+            } else {
+                throw new BgaUserException("You have unused dice remaining so shouldn't be able to end your turn!");
+            }
+        } else {
+            // check if player has run out of cards/dice - if so, proceed to end of turn anyway.
+            // (This is possible, if the player used their last card/die in an "un-undoable" action.
+            // Note that it's strictly possible to do with a direct request even without this, but there's no need
+            // to prevent it as such a "cheat" will simply pass actions the player could have taken, which can never
+            // be an advantage as the player can always eg advance a god or draw an oracle.)
+            if ($hasNoDie) {
+                $checkUsedOracleSql = "SELECT COUNT(*) FROM player WHERE player_id = $playerId AND ORACLE_USED IS NOT NULL";
+                $hasUsedOracle = (int)self::getUniqueValueFromDb($checkUsedOracleSql) > 0;
+                if ($hasUsedOracle) {
+                    $this->gamestate->nextState("endTurn");
+                }
+            }
         }
     }
 
@@ -943,15 +969,145 @@ class TheOracleOfDelphi extends Table
     */
 
     function stTurnEnd() {
+        // TODO: check for end of game!
+        $this->activeNextPlayer();
+        
+        $newActivePlayer = self::getActivePlayerId();
 
+        // check next player's injury cards
+        $injuryCards = $this->allCards->getCardsOfTypeInLocation(CARD_TYPE_INJURY, null, "hand", $newActivePlayer);
+
+        // arrange according to color
+        $injuriesByColor = [];
+        $hasBadColor = false;
+        foreach($injuryCards as ["type_arg" => $color]) {
+            if (isset($injuriesByColor[$color])) {
+                $injuriesByColor[$color] += 1;
+                if ($injuriesByColor[$color] > 2) {
+                    $hasBadColor = true;
+                }
+            } else {
+                $injuriesByColor[$color] = 1;
+            }
+        }
+
+        if (count($injuryCards) === 0) {
+            $this->gamestate->nextState("noInjuries");
+        } else if ($hasBadColor || (count($injuryCards) > 5)) {
+            $this->gamestate->nextState("recovery");
+        } else {
+            $this->gamestate->nextState("nextTurn");
+        }
     }
 
     function stConsultOracle() {
+        $playerId = self::getCurrentPlayerId();
 
+        // roll the player's 3 dice and update database with results.
+        // We also need to remove any "temporary" dice that the player has - the 3 to keep will always
+        // be those with the lowest IDs.
+        // There doesn't seem to be any nice way to do this in just one query, but with the very small DB multiple
+        // queries to get the IDs then update each individually hopefully won't be a problem!
+        $dieIds = self::getObjectListFromDb("SELECT id FROM player_dice WHERE player_id = $playerId ORDER BY id ASC", true);
+        $id1 = $dieIds[0];
+        $id2 = $dieIds[1];
+        $id3 = $dieIds[2];
+        $newColors = [];
+        $newWithRepeats = [];
+        if (count($dieIds) > 3) {
+            $toDelete = array_slice($dieIds, 3);
+            self::DbQuery("DELETE FROM player_dice WHERE id IN (" . implode(", ", $toDelete) . ")");
+        }
+        foreach([$id1, $id2, $id3] as $id) {
+            $dieRoll = bga_rand(0, 5);
+            $color = $this->allColors[$dieRoll];
+            $newWithRepeats[] = $color;
+            if (!in_array($color, $newColors)) {
+                $newColors[] = $color;
+            }
+            // we'll reset the used status to 0 at the same time
+            self::DbQuery("UPDATE player_dice SET color='$color', used=0 WHERE id=$id");
+        }
+
+        // check which other players have gods of one or more of the colours rolled that are not on top
+        $godsAvailable = array_map(function($color) {
+            return $this->godColors[$color];
+        }, $newColors);
+        $playerGodChoices = [];
+        $allPositions = self::getCollectionFromDb("SELECT player_id, " . implode(", ", $godsAvailable) . " FROM player WHERE player_id != $playerId");
+        foreach($allPositions as $otherPlayerId => $gods) {
+            $available = array_filter($gods, function($val, $key) {
+                return $key !== "player_id" && $val > 0 && $val < 6;
+            }, ARRAY_FILTER_USE_BOTH);
+            $playerGodChoices[(string)$otherPlayerId] = array_keys($available);
+        }
+
+        // If any players have one god only to move, move it automatically (update DB).
+        // Take note of those players with more tha none choice, they will become multiactive.
+        $multiActives = [];
+        $forced = [];
+        $noMove = [];
+        foreach($playerGodChoices as $strPlayerId => $godsAvailable) {
+            if (count($godsAvailable) > 1) {
+                $multiActives[] = (int)$strPlayerId;
+            } elseif (count($godsAvailable) == 1) {
+                $godToMove = $godsAvailable[0];
+                $forced[$strPlayerId] = $godToMove;
+                self::DbQuery("UPDATE player SET $godToMove = $godToMove + 1 WHERE player_id = $strPlayerId");
+            } elseif (count($godsAvailable) == 0) {
+                $noMove[] = (int)$strPlayerId;
+            }
+        }
+
+        // send notifications to:
+        // describe the die result
+        self::notifyAllPlayers(
+            "oracleConsulted",
+            clienttranslate('${player_name} ends their turn by consulting the Oracle. They rolled ${die_rolled_1}, ${die_rolled_2}, ${die_rolled_3}'),
+            [
+                "player_id" => $playerId,
+                "player_name" => self::getCurrentPlayerName(),
+                "die_rolled_1" => "{$newWithRepeats[0]} die",
+                "die_rolled_2" => "{$newWithRepeats[1]} die",
+                "die_rolled_3" => "{$newWithRepeats[2]} die",
+            ]
+        );
+
+        // say which players had either no god advance possible or had one forced
+        forEach($forced as $playerId => $god) {
+            self::notifyAllPlayers(
+                "oracleConsultedGodForced",
+                clienttranslate('${player_name} advances ${god} due to having no other choice'),
+                [
+                    "player_id" => $playerId,
+                    "player_name" => self::getPlayerNameById($playerId),
+                    "god" => $god,
+                ]
+            );
+        }
+
+        forEach($noMove as $playerId) {
+            self::notifyAllPlayers(
+                "oracleConsultedNoGodMove",
+                clienttranslate('${player_name} has no gods to advance'),
+                [
+                    "player_id" => $playerId,
+                    "player_name" => self::getPlayerNameById($playerId),
+                ]
+            );
+        }
+
+        // transition to multiactive state or end of turn, as appropriate
+        if (count($multiActives) === 0) {
+            $this->gamestate->nextState("noChoice");
+        } else {
+            $this->gamestate->nextState("otherPlayersChoice");
+            $this->gamestate->setPlayersMultiActive($multiActives, "allChosen");
+        }
     }
 
     function stOracleChooseGod() {
-
+        //TODO!
     }
 
     function stFightMonster() {

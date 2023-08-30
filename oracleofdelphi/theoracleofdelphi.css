@@ -1844,6 +1844,7 @@
 
 .ood_god_column .ood_god {
     position: absolute;
+    transition: bottom 0.5s;
 }
 
 .ood_god_column_poseidon {

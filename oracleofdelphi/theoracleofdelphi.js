@@ -540,7 +540,14 @@ define([
                                     );
                                 }
                             }
-                            // TODO: submit button - only if all 3 dice have been used
+                            // submit button - only if all 3 dice have been used
+                            if (unusedDice.length === 0) {
+                                this.addActionButton(
+                                    "ood_actionbutton_submit",
+                                    _("End turn and submit actions"),
+                                    () => this.submitActions(true)
+                                );
+                            }
                             break;
                         }
                         case STATE_DIE_CHOSEN: {
@@ -557,7 +564,6 @@ define([
                             // Need (up to, some may not be accessible - deal with individually) one button
                             // for each of the 13 die actions.
                             // Plus (provided at least 1 favor possessed) a button to recolor.
-                            //this isn't working when just recoloring!!
                             if (Number(this.currentGameData.players[this.player_id].favors) > 0) {
                                 this.addActionButton(
                                     "ood_actionbutton_recolor",
@@ -837,8 +843,6 @@ define([
                 if (log && args && !args.processed) {
                     args.processed = true;
 
-                    const { token_used, card_gained, new_die } = args;
-
                     const getTokenElement = (tokenString) => {
                         const [color, type] = tokenString.split(" ");
                         switch (type) {
@@ -850,14 +854,19 @@ define([
                                 console.error(`unexpected token type in notification message: ${type}`);
                         }
                     };
-                    if (token_used) {
-                        args.token_used = getTokenElement(token_used);
-                    }
-                    if (card_gained) {
-                        args.card_gained = getTokenElement(card_gained);
-                    }
-                    if (new_die) {
-                        args.new_die = getTokenElement(new_die);
+
+                    const argsToReplace = ["token_used", "card_gained", "new_die", "die_rolled_1", "die_rolled_2", "die_rolled_3"];
+                    argsToReplace.forEach(argName => {
+                        if (args[argName]) {
+                            // keep copy of original arg in case it's needed in a JS handler (it is for the die_rolled ones!)
+                            args[`${argName}_original`] = args[argName];
+                            args[argName] = getTokenElement(args[argName]);
+                        }
+                    });
+
+                    if (args.god) {
+                        args.god_original = args.god;
+                        args.god = `<div class="ood_log_entry_token ood_wooden_piece ood_god ood_god_${args.god}"></div>`;
                     }
                 }
 
@@ -882,9 +891,15 @@ define([
                 }
             },
 
-            submitActions: function () {
+            submitActions: function (endOfTurn = false) {
+                //TODO: confirmation/warning to ensure player doesn't submit actions to the server
+                //without being aware of it
+                const args = { actions: JSON.stringify(this.actionQueue.map(({ action }) => action)) };
+                if (endOfTurn) {
+                    args.endOfTurn = true;
+                }
                 this.ajaxAction("submitActions",
-                    { actions: JSON.stringify(this.actionQueue.map(({ action }) => action)) },
+                    args,
                     () => {
                         this.clearActions();
                         this.resetClientState();
@@ -898,8 +913,6 @@ define([
                 const { cannotUndo, ...restOfAction } = action;
                 this.actionQueue.push({ action: restOfAction, gameState: JSON.parse(JSON.stringify(this.currentGameData)) });
                 if (cannotUndo) {
-                    //TODO: confirmation/warning to ensure player doesn't submit actions to the server
-                    //without being aware of it
                     this.submitActions();
                 } else {
                     this.playActionNotification(action);
@@ -1479,6 +1492,8 @@ define([
                 //the and repeat the same subscription logic
                 dojo.subscribe("recolor_die", this, "notif_recolor_die");
                 dojo.subscribe("draw_oracle", this, "notif_draw_oracle");
+                dojo.subscribe("oracleConsulted", this, "notif_oracle_consulted");
+                dojo.subscribe("oracleConsultedGodForced", this, "notif_oracle_consulted_god_forced");
 
                 /*const clientOnlyActions = ["recolor_die"];
 
@@ -1748,6 +1763,40 @@ define([
                     cardData.hands[player_id] = [];
                 }
                 cardData.hands[player_id].push({ card: oracle_color, id: card_id });
-            }
+            },
+
+            notif_oracle_consulted: function(notif) {
+                const { player_id, die_rolled_1_original, die_rolled_2_original, die_rolled_3_original } = notif.args;
+                // remove dice from center and place with new faces in appropriate spots
+                const existingIds = [];
+                const oracleDice = document.querySelectorAll(`#ood_playerboard_${player_id} .ood_die_result.ood_oracle_die`);
+                oracleDice.forEach(die => {
+                    const htmlId = die.id;
+                    const numericDieId = Number(htmlId.split("_")[2]);
+                    existingIds.push(numericDieId);
+                    die.remove()
+                });
+
+                const newDice = [die_rolled_1_original, die_rolled_2_original, die_rolled_3_original].map(
+                    (color, index) => ({ color: color.split(" ")[0], id: existingIds[index], used: false })
+                );
+                this.placePlayerDice(player_id, newDice);
+                // TODO: replace/augment with nice die-rolling animation of some kind. Not a priority till game working!
+            },
+
+            moveGod: function(playerId, god) {
+                const godPiece = document.querySelector(`#ood_god_column_${god}_${playerId} .ood_god.ood_god_${god}`);
+                const godPositionClass = Array.from(godPiece.classList).find(className => className.startsWith("ood_god_position_"));
+                const currentPosition = Number(godPositionClass.slice("ood_god_position_".length));
+                const newClass = `ood_god_position_${currentPosition + 1}`;
+                godPiece.classList.remove(godPositionClass);
+                godPiece.classList.add(newClass);
+            },
+
+            notif_oracle_consulted_god_forced: function(notif) {
+                console.log(notif);
+                const { player_id, god_original } = notif.args;
+                this.moveGod(player_id, god_original);
+            },
         });
     });

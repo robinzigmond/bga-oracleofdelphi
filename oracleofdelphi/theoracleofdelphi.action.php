@@ -43,9 +43,10 @@
       self::setAjaxMode();
 
       $actions = self::getArg("actions", AT_json, true);
+      $endOfTurn = self::getArg("endOfTurn", AT_bool);
       //TODO: preliminary validation of actions (eg check "type" of each) here
 
-      $this->game->handleActions($actions);
+      $this->game->handleActions($actions, $endOfTurn);
 
       self::ajaxResponse();
     }
