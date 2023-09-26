@@ -776,6 +776,18 @@ class TheOracleOfDelphi extends Table
         }
     }
 
+    // a common utility to update the database to show that the player has used a card or die,
+    // since this happens with every action!
+    private function markDieOrCardUsed($playerId, $isCard, $cardOrDieId) {
+        if ($isCard) {
+            // mark that an oracle card has been used this turn
+            self::DbQuery("UPDATE player SET oracle_used={$cardOrDieId} WHERE player_id=$playerId");
+        } else {
+            // mark die as used
+            self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$cardOrDieId");
+        }
+    }
+
     public function handleActions($actions, $endOfTurn) {
         self::checkAction("submitActions");
 
@@ -846,13 +858,8 @@ class TheOracleOfDelphi extends Table
         // draw new oracle card from deck into player's hand
         $drawn = $this->allCards->pickCard(CARD_LOCATION_ORACLE_DECK, $activePlayerId);
 
-        if ($isCard) {
-            // mark that an oracle card has been used this turn
-            self::DbQuery("UPDATE player SET oracle_used={$usedId} WHERE player_id=$activePlayerId");
-        } else {
-            // mark die as used
-            self::DbQuery("UPDATE player_dice SET used=1 WHERE id=$usedId");
-        }
+        // ensure the card or die used is updated correctly in the database
+        $this->markDieOrCardUsed($activePlayerId, $isCard, $usedId);
 
         $isCardText = $isCard ? "card" : "die";
         $oracleColor = $this->allColors[$drawn["type_arg"]];
@@ -868,9 +875,43 @@ class TheOracleOfDelphi extends Table
                 "used_id" => $usedId,
                 "oracle_color" => $oracleColor,
                 "card_id" => $drawn["id"],
-                "is_card" => $isCard,
+                "isCard" => $isCard,
                 "token_used" => "$dieColor $isCardText",
                 "card_gained" => "$oracleColor card"
+            ]
+        ];
+    }
+
+    private function handleAction_take_favors($action) {
+        $activePlayerId = self::getActivePlayerId();
+
+        $dieColor = $action["die"];
+        $isCard = $action["isCard"];
+
+        // check move is legal (only need standard card/die check - get id as well)
+        $usedId = $this->checkDie($activePlayerId, $dieColor, $isCard);
+
+        // update database:
+        // add new favors
+        self::DbQuery("UPDATE player SET favors = favors + 2 WHERE player_id=$activePlayerId");
+
+        // ensure the card or die used is updated correctly in the database
+        $this->markDieOrCardUsed($activePlayerId, $isCard, $usedId);
+
+        // return notification
+        $isCardText = $isCard ? "card" : "die";
+
+        return [
+            "notif_name" => "take_favors",
+            "notif_string" => clienttranslate('${player_name} uses ${token_used} to take 2 ${favor_token}'),
+            "notif_args" => [
+                "player_id" => $activePlayerId,
+                "player_name" => self::getActivePlayerName(),
+                "die_color" => $dieColor,
+                "used_id" => $usedId,
+                "isCard" => $isCard,
+                "token_used" => "$dieColor $isCardText",
+                "favor_token" => "favor_token" // value doesn't matter, will be over-ridden on front end
             ]
         ];
     }
@@ -926,7 +967,7 @@ class TheOracleOfDelphi extends Table
                 "favorsSpent" => $favorsSpent,
                 "isCard" => $isCard,
                 "original" => $original,
-                "playerId" => $activePlayerId,
+                "player_id" => $activePlayerId,
                 "player_name" => self::getActivePlayerName(),
                 "token_used" => "$original $isCardText",
                 "new_die" => "$newColor die",
@@ -1059,6 +1100,13 @@ class TheOracleOfDelphi extends Table
             }
         }
 
+        // don't forget to discard any used oracle card that the player had
+        $usedOracle = self::getUniqueValueFromDb("SELECT oracle_used FROM player WHERE player_id=$playerId");
+        if (isset($usedOracle)) {
+            $this->allCards->moveCard((int)$usedOracle, CARD_LOCATION_ORACLE_DISCARD);
+            self::DbQuery("UPDATE player SET oracle_used = null WHERE player_id=$playerId");
+        }
+
         // send notifications to:
         // describe the die result
         self::notifyAllPlayers(
@@ -1070,6 +1118,7 @@ class TheOracleOfDelphi extends Table
                 "die_rolled_1" => "{$newWithRepeats[0]} die",
                 "die_rolled_2" => "{$newWithRepeats[1]} die",
                 "die_rolled_3" => "{$newWithRepeats[2]} die",
+                "used_oracle" => $usedOracle,
             ]
         );
 

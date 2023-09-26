@@ -95,6 +95,7 @@ const STATE_RECOLOR_DIE = "client_recolorDie";
 // action types
 const RECOLOR_DIE = "recolor_die";
 const DRAW_ORACLE = "draw_oracle";
+const TAKE_FAVORS = "take_favors";
 
 const MOVING_PIECE_CLASS = "ood_moving_piece";
 const DIE_CLASS_PREFIX = "ood_die_in_spot_";
@@ -593,7 +594,28 @@ define([
                             this.addActionButton(
                                 "ood_actionbutton_takefavors",
                                 `<div class="ood_action_graphic ood_action_graphic_favors"></div>`,
-                                () => { /*TODO*/ }
+                                () => {
+                                    //TODO: the player might have clicked on a physical die - would be good to note this
+                                    //and use it here for used_id if so
+                                    let used_id;
+                                    if (cardNotDie) {
+                                        // find card ID from color
+                                        const cardOfCorrectColor = this.currentGameData.cards.oracle.hands[this.player_id].find(({ card }) => card === dieChosen);
+                                        used_id = cardOfCorrectColor.id;
+                                    } else {
+                                        // find die ID from color
+                                        const dieOfCorrectColor = this.currentGameData.players[this.player_id].dice.find(({ color, used }) => !used && color === dieChosen);
+                                        used_id = dieOfCorrectColor.id;
+                                    }
+                                    this.doAction({
+                                        type: TAKE_FAVORS,
+                                        die: dieChosen,
+                                        isCard: !!cardNotDie,
+                                        used_id
+                                    });
+                                    // reset to choosing a die
+                                    this.resetClientState();
+                                }
                             );
 
                             // only possible if there is at least one face-down island tile
@@ -868,6 +890,10 @@ define([
                         args.god_original = args.god;
                         args.god = `<div class="ood_log_entry_token ood_wooden_piece ood_god ood_god_${args.god}"></div>`;
                     }
+
+                    if (args.favor_token) {
+                        args.favor_token = '<div class="ood_favor"></div>';
+                    }
                 }
 
                 return this.inherited({callee: format_string_recursive}, arguments);
@@ -948,7 +974,7 @@ define([
             playActionNotification: function(action) {
                 const { type, cannotUndo, ...otherArgs } = action;
                 const notifName = `notif_${type}`;
-                const notifArgs = { ...otherArgs, playerId: this.player_id };
+                const notifArgs = { ...otherArgs, player_id: this.player_id };
                 this[notifName]({ args: notifArgs }, true);
             },
 
@@ -1146,7 +1172,7 @@ define([
                 });
             },
 
-            placePlayerDice(playerId, diceInfo) {
+            placePlayerDice: function(playerId, diceInfo) {
                 for (const die of diceInfo) {
                     const { color, used, id } = die;
                     const dieDiv = this.placeElement(
@@ -1494,6 +1520,7 @@ define([
                 dojo.subscribe("draw_oracle", this, "notif_draw_oracle");
                 dojo.subscribe("oracleConsulted", this, "notif_oracle_consulted");
                 dojo.subscribe("oracleConsultedGodForced", this, "notif_oracle_consulted_god_forced");
+                dojo.subscribe("take_favors", this, "notif_take_favors");
 
                 /*const clientOnlyActions = ["recolor_die"];
 
@@ -1503,7 +1530,7 @@ define([
             },
 
             notif_recolor_die: function(notif, fromClient) {
-                const { favorsSpent, isCard, original, playerId, new_id } = notif.args;
+                const { favorsSpent, isCard, original, player_id, new_id } = notif.args;
 
                 // work out new color
                 const colorIndex = ALL_COLORS.indexOf(original);
@@ -1511,14 +1538,14 @@ define([
 
                 // must ensure we update any temporary die IDs before we do an early return, or things break!
                 if (new_id) {
-                    const tempDie = document.getElementById(`ood_dice_spot_${newColor}_${playerId}`).querySelector(`[id^="die_id_${TEMP_DIE_ID}_"]`);
+                    const tempDie = document.getElementById(`ood_dice_spot_${newColor}_${player_id}`).querySelector(`[id^="die_id_${TEMP_DIE_ID}_"]`);
                     // for non-active players, the temp die doesn't actually exist yet (it's created below!)
                     if (tempDie) {
                         tempDie.id = `die_id_${new_id}`;
                         // now do the same for the internal game data!
                         // Again this doesn't work or happen for the non-active player, so it's in the same if
                         // block.
-                        const previousDice = this.currentGameData.players[playerId].dice;
+                        const previousDice = this.currentGameData.players[player_id].dice;
                         const withTempId = previousDice.find(die => die.id.startsWith(TEMP_DIE_ID));
                         withTempId.id = new_id;
                     }
@@ -1526,67 +1553,67 @@ define([
 
                 // client-only action, so don't do animation for the active player (it's already been done!).
                 // (Do this instead of setIgnoreNotifactionCheck so that the message still appears in the log.)
-                if (!fromClient && playerId == this.player_id) {
+                if (!fromClient && player_id == this.player_id) {
                     return;
                 }
 
-                const favorDiv = document.querySelector(`#ood_playerboard_${playerId} .ood_favor`).parentElement;
-                const playerboardTargetId = `overall_player_board_${playerId}`;
+                const favorDiv = document.querySelector(`#ood_playerboard_${player_id} .ood_favor`).parentElement;
+                const playerboardTargetId = `overall_player_board_${player_id}`;
                 for (let i = 0; i < favorsSpent; i++) {
                     this.slideTemporaryObject('<div class="ood_favor"></div>', favorDiv, favorDiv, playerboardTargetId, 500, 500 * i);
                 }
                 // update counter on player board
-                this.counters.favors[playerId].incValue(-1 * favorsSpent);
+                this.counters.favors[player_id].incValue(-1 * favorsSpent);
 
                 let cardId;
                 let newDieId;
 
                 if (isCard) {
                     // move card to used oracle position as it can't now be used again
-                    const card = this.currentGameData.cards.oracle.hands[playerId].find(({ card }) => card === original);
+                    const card = this.currentGameData.cards.oracle.hands[player_id].find(({ card }) => card === original);
                     if (!card) {
                         console.error("couldn't find oracle card that we know the player has?");
                     }
                     cardId = Number(card.id);
-                    this.spend_card_animation(playerId, cardId);
+                    this.spend_card_animation(player_id, cardId);
                     
                     // add die to appropriate slot
                     //TODO: make it "slide in" from somewhere, rather than simply appear
                     //[leave for later, as this will need a complete change of approach!]
                     // first need to temporarily remove all existing dice
-                    const oracleDice = document.querySelectorAll(`#ood_playerboard_${playerId} .ood_die_result.ood_oracle_die`);
+                    const oracleDice = document.querySelectorAll(`#ood_playerboard_${player_id} .ood_die_result.ood_oracle_die`);
                     oracleDice.forEach(die => die.remove());
                     // then restore them, with the "new" die
-                    const previousDice = this.currentGameData.players[playerId].dice;
+                    const previousDice = this.currentGameData.players[player_id].dice;
                     newDieId = new_id || `${TEMP_DIE_ID}_${cardId}`;
                     const newDie = { color: newColor, used: false, id: newDieId };
                     //TODO: this won't work well visually in the VERY rare case where a card is converted to a colour
                     //where the player already has 3 dice. Very unlikely a player will actually want to do this, so
                     //not a priority to fix, but should look at at some point
-                    this.placePlayerDice(playerId, [...previousDice, newDie]);
+                    this.placePlayerDice(player_id, [...previousDice, newDie]);
                 } else {
                     //TODO: would be better to actually move the die with some sort of animation, also changing the color.
                     //Tricky to do so leave till the game logic is mostly complete.
-                    const oracleDice = document.querySelectorAll(`#ood_playerboard_${playerId} .ood_die_result.ood_oracle_die`);
+                    const oracleDice = document.querySelectorAll(`#ood_playerboard_${player_id} .ood_die_result.ood_oracle_die`);
                     oracleDice.forEach(die => die.remove());
-                    const newDice = this.currentGameData.players[playerId].dice;
+                    const newDice = this.currentGameData.players[player_id].dice;
                     // find arbitrary die of the apprioriate color
                     const toChange = newDice.find(({ color }) => color === original);
                     // note: this mutates currentGameData - but that's what we want!
                     toChange.color = newColor;
-                    this.placePlayerDice(playerId, newDice);
+                    this.placePlayerDice(player_id, newDice);
                 }
 
                 // update current game data:
-                this.currentGameData.players[playerId].favors =
-                    Number(this.currentGameData.players[playerId].favors) - favorsSpent;
+                this.currentGameData.players[player_id].favors =
+                    Number(this.currentGameData.players[player_id].favors) - favorsSpent;
 
                 if (isCard) {
                     // - if card, mark card used and add new (non-used) die
-                    this.currentGameData.players[playerId].oracle_used = cardId;
-                    this.currentGameData.players[playerId].dice.push({ color: newColor, used: false, id: newDieId });
+                    this.currentGameData.players[player_id].oracle_used = cardId;
+                    this.currentGameData.players[player_id].dice.push({ color: newColor, used: false, id: newDieId });
                 }
-                // no need to change currentGameData if it's a die we've changed - ot was already mutated above
+                // no need to change currentGameData if it's a die we've changed - it was already mutated above
             },
 
             spend_die_animation: function(player_id, die_id) {
@@ -1667,16 +1694,28 @@ define([
             },
 
             spend_card_animation: function(player_id, card_id) {
+                //TODO: weird thing seen with "overlapping" oracle cards, one in horizontal position
+                //[think it's a duplicate of the used one - saw duplicate id - but one in a strange position]
+                //need to try hard to replicate before investigating/fixing!
+                //Only seen once so far and can't reproduce - may be nothing.
                 const cardToMove = document.getElementById(`card_id_${card_id}`);
                 const targetId = `ood_oracle_used_section_${player_id}`;
                 const anim = this.slideToObject(cardToMove, targetId, 500);
                 // need to get this here to ensure currentGameData hasn't yet updated with any newly-draw oracle card,
                 // otherwise it appears twice!
                 const remainingOracles = this.currentGameData.cards.oracle.hands[player_id].filter
-                    (({ id }) => Number(id) !== card_id);
+                    (({ id }) => Number(id) !== Number(card_id));
                 dojo.connect(anim, "onEnd", () => {
                     // would be nice to create a transition for the rotation - but tricky (TODO)
                     this.attachToNewParent(cardToMove, targetId);
+                    // also need to remove the CSS styles added by the animation - they're not needed after it finishes,
+                    // and mess up the "discard" animation at the end of the turn. (We also need to give it position: relative
+                    // so that slideToObject later doesn't automatically give it position relative then!)
+                    cardToMove.style.top = "";
+                    cardToMove.style.bottom = "";
+                    cardToMove.style.left = "";
+                    cardToMove.style.right = "";
+                    cardToMove.style.position = "relative";
                     // also adjust positions of any remaining oracle cards. Let's just remove the existing
                     // cards and replace them using the existing function!
                     const currentOracleCards = remainingOracles.map(({ id }) => document.getElementById(`card_id_${id}`));
@@ -1695,9 +1734,9 @@ define([
             },
 
             notif_draw_oracle: function(notif) {
-                const { player_id, used_id, oracle_color, card_id, is_card } = notif.args;
+                const { player_id, used_id, oracle_color, card_id, isCard } = notif.args;
 
-                if (is_card) {
+                if (isCard) {
                     this.spend_card_animation(player_id, used_id);
                 } else {
                     this.spend_die_animation(player_id, used_id);
@@ -1766,7 +1805,7 @@ define([
             },
 
             notif_oracle_consulted: function(notif) {
-                const { player_id, die_rolled_1_original, die_rolled_2_original, die_rolled_3_original } = notif.args;
+                const { player_id, die_rolled_1_original, die_rolled_2_original, die_rolled_3_original, used_oracle } = notif.args;
                 // remove dice from center and place with new faces in appropriate spots
                 const existingIds = [];
                 const oracleDice = document.querySelectorAll(`#ood_playerboard_${player_id} .ood_die_result.ood_oracle_die`);
@@ -1782,6 +1821,31 @@ define([
                 );
                 this.placePlayerDice(player_id, newDice);
                 // TODO: replace/augment with nice die-rolling animation of some kind. Not a priority till game working!
+
+                // remove any used oracle from the active player (if there is one) by sliding to discard pile
+                if (used_oracle) {
+                    const usedOracleCard = document.getElementById(`card_id_${used_oracle}`);
+                    const targetId = "ood_oracle_discard";
+                    // need to remove "spacer card", if it exists
+                    //TODO: probably want to adjust timing to avoid "jumps" in the UI
+                    const spacer = document.querySelector(`#${targetId} > .ood_card_spacer`);
+                    if (spacer) {
+                        spacer.remove();
+                    }
+                    const anim = this.slideToObject(usedOracleCard, targetId, 500);
+                    dojo.connect(anim, "onEnd", () => {
+                        //TODO: fancy animations of angle/size (not a priority yet!)
+                        this.attachToNewParent(usedOracleCard, targetId);
+                        usedOracleCard.style.top = "";
+                        usedOracleCard.style.bottom = "";
+                        this.counters.oracle.discard.incValue(1);
+                    });
+                    anim.play();
+                }
+
+                // update currentGameData:
+                this.currentGameData.players[player_id].dice = newDice;
+                this.currentGameData.players[player_id].oracle_used = undefined;
             },
 
             moveGod: function(playerId, god) {
@@ -1791,12 +1855,42 @@ define([
                 const newClass = `ood_god_position_${currentPosition + 1}`;
                 godPiece.classList.remove(godPositionClass);
                 godPiece.classList.add(newClass);
+
+                // update currentGameData
+                this.currentGameData.players[playerId][god] = Number(this.currentGameData.players[playerId][god]) + 1;
             },
 
             notif_oracle_consulted_god_forced: function(notif) {
-                console.log(notif);
                 const { player_id, god_original } = notif.args;
                 this.moveGod(player_id, god_original);
             },
+
+            notif_take_favors: function(notif, fromClient) {
+                const { player_id, used_id, isCard } = notif.args;
+
+                if (!fromClient && player_id == this.player_id) {
+                    return;
+                }
+
+                if (isCard) {
+                    this.spend_card_animation(player_id, used_id);
+                } else {
+                    this.spend_die_animation(player_id, used_id);
+                }
+
+                // increase favor count
+                this.counters.favors[player_id].incValue(2);
+
+                // do animation of 2 favors arriving (with small delay between)
+                const favorDiv = document.querySelector(`#ood_playerboard_${player_id} .ood_favor`).parentElement;
+                const playerboardTargetId = `overall_player_board_${player_id}`;
+                for (let i = 0; i < 2; i++) {
+                    this.slideTemporaryObject('<div class="ood_favor"></div>', playerboardTargetId, playerboardTargetId, favorDiv, 500, 500 * i);
+                }
+
+                // update currentGameData
+                this.currentGameData.players[player_id].favors =
+                    Number(this.currentGameData.players[player_id].favors) + 2;
+            }
         });
     });

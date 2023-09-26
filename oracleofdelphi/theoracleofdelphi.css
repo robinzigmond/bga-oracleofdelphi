@@ -1923,6 +1923,7 @@
 
 .ood_card_deck_inner, .ood_card_discard_inner {
     height: calc(290px * var(--card-ratio));
+    position: relative;
 }
 
 #ood_equipment_cards {
